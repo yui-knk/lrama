@@ -37,3 +37,6 @@
 * Reporting
   * [ ] Bison style
 * Error Tolerance
+  * [x] Corchuelo et al. algorithm with N = 1 (this means the next token when error is raised)
+  * [ ] Add new decl for error token semantic value initialization
+  * [ ] Use YYMALLOC & YYFREE
