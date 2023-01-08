@@ -656,6 +656,10 @@ module Lrama
       @grammar.eof_symbol
     end
 
+    def undef_symbol
+      @grammar.undef_symbol
+    end
+
     def find_symbol_by_s_value!(s_value)
       @grammar.find_symbol_by_s_value!(s_value)
     end
