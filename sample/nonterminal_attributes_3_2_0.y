@@ -3084,7 +3084,7 @@ command_args	:   {
 			CMDARG_PUSH(1);
 			if (lookahead) CMDARG_PUSH(0);
 		    }
-		  call_args
+		  call_args(!DO_ALLOWED)
 		    {
 			/* call_args can be followed by tLBRACE_ARG (that does CMDARG_PUSH(0) in the lexer)
 			 * but the push must be done after CMDARG_POP() in the parser.
@@ -4179,7 +4179,7 @@ do_block	: k_do_block do_body k_end
 		    }
 		;
 
-block_call	: command(!DO_ALLOWED) do_block
+block_call	: command do_block
 		    {
 		    /*%%%*/
 			if (nd_type_p($1, NODE_YIELD)) {
@@ -4207,7 +4207,7 @@ block_call	: command(!DO_ALLOWED) do_block
 		    /*% %*/
 		    /*% ripper: opt_event(:method_add_block!, command_call!($1, $2, $3, $4), $5) %*/
 		    }
-		| block_call call_op2 operation2 command_args(!DO_ALLOWED) do_block
+		| block_call call_op2 operation2 command_args do_block
 		    {
 		    /*%%%*/
 			$$ = new_command_qcall(p, $2, $1, $3, $4, $5, &@3, &@$);
