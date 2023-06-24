@@ -1,3 +1,4 @@
+require "set"
 require "forwardable"
 require "lrama/lexer"
 
@@ -42,6 +43,7 @@ module Lrama
   #
   # TODO: Add validation for ASCII code range for Token::Char
   Symbol = Struct.new(:id, :alias_name, :number, :tag, :term, :token_id, :nullable, :precedence, :printer, :error_token, keyword_init: true) do
+    attr_accessor :first_set, :first_set_bitmap
     attr_writer :eof_symbol, :error_symbol, :undef_symbol, :accept_symbol
 
     def term?
@@ -356,7 +358,7 @@ module Lrama
 
       sym = Symbol.new(
         id: id, alias_name: alias_name, number: nil, tag: tag,
-        term: false, token_id: nil, nullable: nil,
+        term: false, token_id: nil, nullable: nil
       )
       @symbols << sym
       @nterms = nil
@@ -486,6 +488,41 @@ module Lrama
 
       nterms.select {|r| r.nullable.nil? }.each do |nterm|
         nterm.nullable = false
+      end
+    end
+
+    def compute_first_set
+      terms.each do |term|
+        term.first_set = Set.new([term]).freeze
+        term.first_set_bitmap = Lrama::Bitmap.from_array([term.number])
+      end
+
+      nterms.each do |nterm|
+        nterm.first_set = Set.new([]).freeze
+        nterm.first_set_bitmap = Lrama::Bitmap.from_array([])
+      end
+
+      while true do
+        changed = false
+
+        @rules.each do |rule|
+          rule.rhs.each do |r|
+            if rule.lhs.first_set_bitmap | r.first_set_bitmap != rule.lhs.first_set_bitmap
+              changed = true
+              rule.lhs.first_set_bitmap = rule.lhs.first_set_bitmap | r.first_set_bitmap
+            end
+
+            break unless r.nullable
+          end
+        end
+
+        break unless changed
+      end
+
+      nterms.each do |nterm|
+        nterm.first_set = Lrama::Bitmap.to_array(nterm.first_set_bitmap).map do |number|
+          find_symbol_by_number!(number)
+        end.to_set
       end
     end
 
