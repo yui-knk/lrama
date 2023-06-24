@@ -25,6 +25,7 @@ module Lrama
     def compute(conflict_state, conflict_reduce_item, conflict_term)
       # queue: is an array of [Triple, [[Triple, symbol]]]
       queue = []
+      visited = {}
       start_state = @states.states.first
       raise "BUG: Start state should be just one kernel." if start_state.kernels.count != 1
 
@@ -34,6 +35,9 @@ module Lrama
 
       while true
         triple, paths = queue.shift
+
+        next if visited[triple]
+        visited[triple] = true
 
         # Found
         if triple.state == conflict_state && triple.item == conflict_reduce_item && triple.l.include?(conflict_term) # && triple.item.end_of_rule?
