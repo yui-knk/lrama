@@ -28,6 +28,10 @@ module Lrama
         rule.rhs[position]
       end
 
+      def next_next_sym
+        rule.rhs[position + 1]
+      end
+
       def end_of_rule?
         rule.rhs.count == position
       end
@@ -49,6 +53,14 @@ module Lrama
       def display_rest
         r = rule.rhs[position..-1].map(&:display_name).join(" ")
         ". #{r}  (rule #{rule.id})"
+      end
+
+      def number_of_rest_symbols
+        rule.rhs.count - position
+      end
+
+      def lhs
+        rule.lhs
       end
     end
 

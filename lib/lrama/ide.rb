@@ -66,7 +66,7 @@ module Lrama
     end
 
     def look_ahead
-      @current_state.reduces.map(&:look_ahead).compact.map do |la|
+      @current_state.reduces.map(&:look_ahead).compact.flat_map do |la|
         la.map do |sym|
           sym.id.s_value
         end
@@ -96,6 +96,29 @@ module Lrama
       @current_state
     end
 
+    def examples(s_value)
+      unless look_ahead.include?(s_value)
+        raise "#{s_value} should be in look_ahead"
+      end
+
+      sym = find_symbol_by_s_value!(s_value)
+
+      counterexamples = Lrama::Counterexamples.new(@states)
+      items = @current_state.items.select(&:end_of_rule?)
+
+      if items.count > 1
+        # warning
+      end
+
+      triple, paths = counterexamples.compute(@current_state, items.first, sym)
+      p paths.map(&:last).compact.map(&:id).map(&:s_value)
+
+      @current_state
+    end
+
+    def detail
+    end
+
     def help
       puts <<~HELP
       =====================
@@ -106,6 +129,8 @@ module Lrama
       ide.term_transition_symbols: Display terminal symbols which make transition
       ide.look_ahead: Display look_ahead tokens of current state.
       ide.next: Make transition by default reduction rule if current_state has default reduction rule.
+      ide.examples(): 
+      ide.detail: 
       =====================
 
       HELP
