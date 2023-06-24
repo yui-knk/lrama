@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+
+$LOAD_PATH << File.join(__dir__, "../lib")
+require "lrama"
+require "lrama/ide"
+require "irb"
+
+IRB.start(__FILE__)

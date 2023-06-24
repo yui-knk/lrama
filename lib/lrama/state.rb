@@ -48,6 +48,10 @@ module Lrama
       @default_reduction_rule = nil
     end
 
+    def inspect
+      "#{self.class.name}(#{@id}) #{@kernels.map(&:display_name)}"
+    end
+
     def closure=(closure)
       @closure = closure
       @items = @kernels + @closure
