@@ -111,8 +111,9 @@ module Lrama
       end
 
       triple, paths = counterexamples.compute(@current_state, items.first, sym)
-      p paths.map(&:last).compact.map(&:id).map(&:s_value)
+      puts paths.formated_paths.join("\n")
 
+      # return triple, paths
       @current_state
     end
 

@@ -18,12 +18,98 @@ module Lrama
       alias :to_s :inspect
     end
 
+    class Path
+      attr_reader :triple
+
+      def initialize(triple)
+        @triple = triple
+      end
+
+      def item
+        @triple.item
+      end
+    end
+
+    class StartPath < Path
+    end
+
+    class TransitionPath < Path
+      def initialize(triple, next_sym)
+        super triple
+        @next_sym = next_sym
+      end
+    end
+
+    class ProductionPath < Path
+    end
+
+    class Paths
+      include Enumerable
+
+      attr_reader :paths
+
+      def initialize(paths)
+        @paths = paths
+      end
+
+      def each(&block)
+        block_given? or return enum_for(__method__) { @paths.size }
+        @paths.each(&block)
+        self
+      end
+
+      def formated_paths
+        compressed = []
+        current = :production
+
+        @paths.reverse.each do |path|
+          case current
+          when :production
+            case path
+            when StartPath
+              compressed << path
+              break
+            when TransitionPath
+              compressed << path
+              current = :transition
+            when ProductionPath
+              compressed << path
+            end
+          when :transition
+            case path
+            when StartPath
+              compressed << path
+              break
+            when TransitionPath
+              # ignore
+            when ProductionPath
+              # ignore
+              current = :production
+            end
+          else
+            raise "BUG: Unknown #{current}"
+          end
+        end
+
+        compressed.reverse!
+
+        len = 0
+        offsets = [0] + compressed.map do |path|
+          len += path.item.display_name.index("•") + 2
+        end
+
+        compressed.zip(offsets).map do |path, offset|
+          " " * offset + path.item.display_name
+        end
+      end
+    end
+
     def initialize(states)
       @states = states
     end
 
     def compute(conflict_state, conflict_reduce_item, conflict_term)
-      # queue: is an array of [Triple, [[Triple, symbol]]]
+      # queue: is an array of [Triple, [Path]]
       queue = []
       visited = {}
       start_state = @states.states.first
@@ -31,7 +117,7 @@ module Lrama
 
       start = Triple.new(start_state, start_state.kernels.first, Set.new([@states.eof_symbol]))
 
-      queue << [start, [[start, :start, nil]]]
+      queue << [start, [StartPath.new(start)]]
 
       while true
         triple, paths = queue.shift
@@ -41,7 +127,7 @@ module Lrama
 
         # Found
         if triple.state == conflict_state && triple.item == conflict_reduce_item && triple.l.include?(conflict_term) # && triple.item.end_of_rule?
-          return triple, paths
+          return triple, Paths.new(paths)
         end
 
         # transition
@@ -50,7 +136,7 @@ module Lrama
           next_state.kernels.each do |kernel|
             next if kernel.rule != triple.item.rule
             t = Triple.new(next_state, kernel, triple.l)
-            queue << [t, paths + [[t, :transition, shift.next_sym]]]
+            queue << [t, paths + [TransitionPath.new(t, shift.next_sym)]]
           end
         end
 
@@ -59,7 +145,7 @@ module Lrama
           next unless triple.item.next_sym && triple.item.next_sym == item.lhs
           l = follow_l(triple.item, triple.l)
           t = Triple.new(triple.state, item, l)
-          queue << [t, paths + [[t, :production, nil]]]
+          queue << [t, paths + [ProductionPath.new(t)]]
         end
 
         break if queue.empty?
