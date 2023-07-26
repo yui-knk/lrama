@@ -53,6 +53,51 @@ module Lrama
       @current_state
     end
 
+    def select_states
+      states.select do |state|
+        nterm_transition_symbols = state.nterm_transitions.map do |shift, _|
+          shift.next_sym.id.s_value
+        end
+
+        term_transition_symbols = state.term_transitions.map do |shift, _|
+          shift.next_sym.id.s_value
+        end
+
+        look_ahead = state.reduces.map(&:look_ahead).compact.flat_map do |la|
+          la.map do |sym|
+            sym.id.s_value
+          end
+        end
+
+        yield(state, nterm_transition_symbols, term_transition_symbols, look_ahead)
+      end
+    end
+
+    def show_transitions(s_value)
+      sym = find_symbol_by_s_value!(s_value)
+      a = []
+
+      @current_state.nterm_transitions.each do |shift, _|
+        if s_value == shift.next_sym.id.s_value
+          a << [:goto]
+        end
+      end
+
+      @current_state.term_transitions.each do |shift, _|
+        if s_value == shift.next_sym.id.s_value
+          a << [:shift]
+        end
+      end
+
+      look_ahead.each do |s_value_2|
+        if s_value == s_value_2
+          a << [:reduce]
+        end
+      end
+
+      return a
+    end
+
     def nterm_transition_symbols
       @current_state.nterm_transitions.map do |shift, _|
         shift.next_sym.id.s_value
@@ -125,6 +170,7 @@ module Lrama
       =====================
       ide.reset_state: Reset state to the first state.
       ide.transition(sym): Given sym, make transition.
+      ide.show_transitions(sym): Given sym, show transitions.
       ide.current_state: Return current_state.
       ide.nterm_transition_symbols: Display nonterminal symbols which make transition
       ide.term_transition_symbols: Display terminal symbols which make transition
