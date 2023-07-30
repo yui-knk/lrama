@@ -1,3 +1,4 @@
+require "set"
 require "lrama/state/reduce"
 require "lrama/state/shift"
 require "lrama/state/resolved_conflict"
@@ -9,6 +10,8 @@ module Lrama
     attr_reader :id, :accessing_symbol, :kernels, :conflicts, :resolved_conflicts,
                 :default_reduction_rule, :closure, :items
     attr_accessor :shifts, :reduces
+    # Set of bitmap of lex_state
+    attr_accessor :lex_states
 
     def initialize(id, accessing_symbol, kernels)
       @id = id
@@ -21,6 +24,7 @@ module Lrama
       @conflicts = []
       @resolved_conflicts = []
       @default_reduction_rule = nil
+      @lex_states = Set.new
     end
 
     def closure=(closure)
@@ -154,6 +158,11 @@ module Lrama
       @conflicts.select do |conflict|
         conflict.type == :reduce_reduce
       end
+    end
+
+    # https://www.gnu.org/software/bison/manual/html_node/Default-Reductions.html
+    def defaulted_state?
+      term_transitions.empty? && reduces.count == 1
     end
   end
 end

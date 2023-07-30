@@ -12,3 +12,5 @@ require "lrama/states"
 require "lrama/states_reporter"
 require "lrama/version"
 require "lrama/warning"
+
+require "lrama/lex_state"

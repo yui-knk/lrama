@@ -15,6 +15,10 @@ module Lrama
         @item.rule
       end
 
+      def code
+        @item.rule.code
+      end
+
       def look_ahead=(look_ahead)
         @look_ahead = look_ahead.freeze
       end
