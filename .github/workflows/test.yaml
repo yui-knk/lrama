@@ -37,6 +37,29 @@ jobs:
       - run: bundle install
       - run: bundle exec rbs collection install
       - run: bundle exec steep check
+  compiler:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - {}
+        entry:
+          - { name: gcc-13,    env: { default_cc: gcc-13 } }
+          - { name: clang-16,  env: { default_cc: clang-16 } }
+        ruby: ['head']
+    name: ${{ matrix.entry.name }}
+    container:
+      image: ghcr.io/ruby/ruby-ci-image:${{ matrix.entry.container || matrix.entry.env.default_cc || 'clang-16' }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle install
+      - run: bundle exec rspec
   test-ruby:
     runs-on: ubuntu-20.04
     strategy:
