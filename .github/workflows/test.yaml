@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        baseruby: ['3.0']
+        baseruby: ['2.5'] # minimal BASERUBY version
         ruby_branch: ['master']
     defaults:
       run:
