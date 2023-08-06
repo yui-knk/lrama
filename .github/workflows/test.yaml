@@ -55,10 +55,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt-get update
-      - run: sudo apt-get install ruby
-      # - run: git clone https://github.com/rbenv/ruby-build.git
-      # - run: sudo ./ruby-build/install.sh
-      # - run: ruby-build --definitions
+      - run: sudo apt-get install git
+      - run: git clone https://github.com/rbenv/ruby-build.git
+      - run: sudo ./ruby-build/install.sh
+      - run: ruby-build --definitions
       # - uses: ruby/setup-ruby@v1
       #   with:
       #     ruby-version: ${{ matrix.ruby }}
