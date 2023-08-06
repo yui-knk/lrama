@@ -12,8 +12,20 @@ module Lrama
         rule.id
       end
 
+      def number_of_rest_symbols
+        rule.rhs.count - position
+      end
+
+      def lhs
+        rule.lhs
+      end
+
       def next_sym
         rule.rhs[position]
+      end
+
+      def next_next_sym
+        rule.rhs[position + 1]
       end
 
       def end_of_rule?

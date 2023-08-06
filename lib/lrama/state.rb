@@ -100,6 +100,10 @@ module Lrama
       @term_transitions
     end
 
+    def transitions
+      term_transitions + nterm_transitions
+    end
+
     def selected_term_transitions
       term_transitions.select do |shift, next_state|
         !shift.not_selected
