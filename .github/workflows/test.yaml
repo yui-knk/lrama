@@ -47,22 +47,19 @@ jobs:
         entry:
           - { name: gcc-13,    env: { default_cc: gcc-13 } }
           - { name: clang-16,  env: { default_cc: clang-16 } }
-        ruby: ['3.0']
+        ruby: ['3.0.6']
     name: ${{ matrix.entry.name }}
     container:
       image: ghcr.io/ruby/ruby-ci-image:${{ matrix.entry.container || matrix.entry.env.default_cc || 'clang-16' }}
       options: --user root
     steps:
       - uses: actions/checkout@v3
-      - run: sudo apt-get update
-      - run: sudo apt-get install git
-      - run: git clone https://github.com/rbenv/ruby-build.git
-      - run: sudo ./ruby-build/install.sh
-      - run: ruby-build ${{ matrix.ruby }}
-      # - uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: ${{ matrix.ruby }}
-      #     bundler-cache: true
+      - run: |
+          sudo apt-get update
+          sudo apt-get install git
+          git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+          git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+          rbenv install ${{ matrix.ruby }}
       - run: bundle install
       - run: bundle exec rspec
   test-ruby:
