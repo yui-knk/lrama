@@ -54,10 +54,13 @@ jobs:
       options: --user root
     steps:
       - uses: actions/checkout@v3
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+      - run: git clone https://github.com/rbenv/ruby-build.git
+      - run: sudo ./ruby-build/install.sh
+      - run: ruby-build --definitions
+      # - uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: ${{ matrix.ruby }}
+      #     bundler-cache: true
       - run: bundle install
       - run: bundle exec rspec
   test-ruby:
