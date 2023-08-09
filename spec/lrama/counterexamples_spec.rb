@@ -62,12 +62,10 @@ num  : digiti
         #    ...
         #    keyword_else   reduce using rule 2 (stmt)
         state_17 = states.states[17]
-        keyword_else = states.find_symbol_by_s_value!("keyword_else")
-        conflict_reduce_items = state_17.items.select {|item| !item.next_sym}
-        expect(conflict_reduce_items.count).to eq 1
+        examples = counterexamples.compute(state_17)
+        paths = examples[0][1]
 
-        triple, paths = counterexamples.compute(state_17, conflict_reduce_items.first, keyword_else)
-
+        expect(examples.count).to eq 1
         expect(paths.map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",

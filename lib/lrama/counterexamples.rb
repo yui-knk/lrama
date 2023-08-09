@@ -12,7 +12,27 @@ module Lrama
       @states = states
     end
 
-    def compute(conflict_state, conflict_reduce_item, conflict_term)
+    def compute(conflict_state)
+      conflict_state.conflicts.map do |conflict|
+        case conflict.type
+        when :shift_reduce
+          examples_for_shift_reduce(conflict_state, conflict)
+        when :reduce_reduce
+          examples_reduce_reduce(conflict_state, conflict)
+        end
+      end
+    end
+
+    private
+
+    def examples_for_shift_reduce(conflict_state, conflict)
+      shortest_path(conflict_state, conflict.reduce.item, conflict.symbols.first)
+    end
+
+    def examples_for_reduce_reduce(conflict_state, conflict)
+    end
+
+    def shortest_path(conflict_state, conflict_reduce_item, conflict_term)
       # queue: is an array of [Triple, [Path]]
       queue = []
       visited = {}
@@ -57,8 +77,6 @@ module Lrama
 
       return nil
     end
-
-    private
 
     def follow_l(item, current_l)
       # 1. follow_L (A -> X1 ... Xn-1 • Xn) = L

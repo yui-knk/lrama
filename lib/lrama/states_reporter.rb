@@ -14,16 +14,16 @@ module Lrama
 
     private
 
-    def _report(io, grammar: false, states: false, itemsets: false, lookaheads: false, solved: false, verbose: false)
+    def _report(io, grammar: false, states: false, itemsets: false, lookaheads: false, solved: false, counterexamples: false, verbose: false)
       # TODO: Unused terms
       # TODO: Unused rules
 
-      report_conflicts(io)
+      report_conflicts(io, counterexamples)
       report_grammar(io) if grammar
       report_states(io, itemsets, lookaheads, solved, verbose)
     end
 
-    def report_conflicts(io)
+    def report_conflicts(io, counterexamples)
       has_conflict = false
 
       @states.states.each do |state|
