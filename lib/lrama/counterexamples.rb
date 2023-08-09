@@ -1,109 +1,13 @@
 require "set"
 
+require "lrama/counterexamples/path"
+require "lrama/counterexamples/paths"
+require "lrama/counterexamples/triple"
+
 module Lrama
   # See: https://www.cs.cornell.edu/andru/papers/cupex/cupex.pdf
   #      4. Constructing Nonunifying Counterexamples
   class Counterexamples
-    # s: state
-    # itm: item within s
-    # l: precise lookahead set
-    class Triple < Struct.new(:s, :itm, :l)
-      alias :state :s
-      alias :item :itm
-      alias :precise_lookahead_set :l
-
-      def inspect
-        "#{state.inspect}. #{item.display_name}. #{l.map(&:id).map(&:s_value)}"
-      end
-      alias :to_s :inspect
-    end
-
-    class Path
-      attr_reader :triple
-
-      def initialize(triple)
-        @triple = triple
-      end
-
-      def item
-        @triple.item
-      end
-    end
-
-    class StartPath < Path
-    end
-
-    class TransitionPath < Path
-      def initialize(triple, next_sym)
-        super triple
-        @next_sym = next_sym
-      end
-    end
-
-    class ProductionPath < Path
-    end
-
-    class Paths
-      include Enumerable
-
-      attr_reader :paths
-
-      def initialize(paths)
-        @paths = paths
-      end
-
-      def each(&block)
-        block_given? or return enum_for(__method__) { @paths.size }
-        @paths.each(&block)
-        self
-      end
-
-      def formated_paths
-        compressed = []
-        current = :production
-
-        @paths.reverse.each do |path|
-          case current
-          when :production
-            case path
-            when StartPath
-              compressed << path
-              break
-            when TransitionPath
-              compressed << path
-              current = :transition
-            when ProductionPath
-              compressed << path
-            end
-          when :transition
-            case path
-            when StartPath
-              compressed << path
-              break
-            when TransitionPath
-              # ignore
-            when ProductionPath
-              # ignore
-              current = :production
-            end
-          else
-            raise "BUG: Unknown #{current}"
-          end
-        end
-
-        compressed.reverse!
-
-        len = 0
-        offsets = [0] + compressed.map do |path|
-          len += path.item.display_name.index("•") + 2
-        end
-
-        compressed.zip(offsets).map do |path, offset|
-          " " * offset + path.item.display_name
-        end
-      end
-    end
-
     def initialize(states)
       @states = states
     end
