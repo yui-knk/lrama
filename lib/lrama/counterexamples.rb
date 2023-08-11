@@ -30,6 +30,10 @@ module Lrama
     end
 
     def examples_for_reduce_reduce(conflict_state, conflict)
+      # TODO
+      conflict.symbols.map do |symbol|
+        
+      end
     end
 
     def shortest_path(conflict_state, conflict_reduce_item, conflict_term)
