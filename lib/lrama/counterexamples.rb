@@ -1,7 +1,9 @@
 require "set"
 
+require "lrama/counterexamples/examples"
 require "lrama/counterexamples/path"
 require "lrama/counterexamples/paths"
+require "lrama/counterexamples/state_item"
 require "lrama/counterexamples/triple"
 
 module Lrama
@@ -10,23 +12,96 @@ module Lrama
   class Counterexamples
     def initialize(states)
       @states = states
+      setup_transitions
+      setup_productions
     end
 
     def compute(conflict_state)
-      conflict_state.conflicts.map do |conflict|
+      conflict_state.conflicts.flat_map do |conflict|
         case conflict.type
         when :shift_reduce
           examples_for_shift_reduce(conflict_state, conflict)
         when :reduce_reduce
           examples_reduce_reduce(conflict_state, conflict)
         end
-      end
+      end.compact
     end
 
     private
 
+    def setup_transitions
+      # Hash [StateItem, Symbol] => StateItem
+      @transitions = {}
+      # Hash [StateItem, Symbol] => Set(StateItem)
+      @reverse_transitions = {}
+
+      @states.states.each do |src_state|
+        trans = {}
+
+        src_state.transitions.each do |shift, next_state|
+          trans[shift.next_sym] = next_state
+        end
+
+        src_state.items.each do |src_item|
+          next if src_item.end_of_rule?
+          sym = src_item.next_sym
+          dest_state = trans[sym]
+
+          dest_state.kernels.each do |dest_item|
+            next unless (src_item.rule == dest_item.rule) && (src_item.position + 1 == dest_item.position)
+            src_state_item = StateItem.new(src_state, src_item)
+            dest_state_item = StateItem.new(dest_state, dest_item)
+
+            @transitions[[src_state_item, sym]] = dest_state_item
+
+            key = [dest_state_item, sym]
+            @reverse_transitions[key] ||= Set.new
+            @reverse_transitions[key] << src_state_item
+          end
+        end
+      end
+    end
+
+    def setup_productions
+      # Hash [StateItem] => Set(Item)
+      @productions = {}
+      # Hash [State, Symbol] => Set(Item). Symbol is nterm
+      @reverse_productions = {}
+
+      @states.states.each do |state|
+        # LHS => Set(Item)
+        h = {}
+
+        state.closure.each do |item|
+          sym = item.lhs
+
+          h[sym] ||= Set.new
+          h[sym] << item
+        end
+
+        state.items.each do |item|
+          next if item.end_of_rule?
+          next if item.next_sym.term?
+
+          sym = item.next_sym
+          state_item = StateItem.new(state, item)
+          key = [state, sym]
+
+          @productions[state_item] = h[sym]
+
+          @reverse_productions[key] ||= Set.new
+          @reverse_productions[key] << item
+        end
+      end
+    end
+
     def examples_for_shift_reduce(conflict_state, conflict)
-      shortest_path(conflict_state, conflict.reduce.item, conflict.symbols.first)
+      conflict_symbol = conflict.symbols.first
+      shift_conflict_item = conflict_state.items.find { |item| item.next_sym == conflict_symbol }
+      path2 = shortest_path(conflict_state, conflict.reduce.item, conflict_symbol)
+      path1 = find_shift_conflict_shortest_path_state_items(path2, conflict_state, shift_conflict_item)
+
+      Examples.new(path1, path2, conflict, conflict_symbol)
     end
 
     def examples_for_reduce_reduce(conflict_state, conflict)
@@ -34,6 +109,64 @@ module Lrama
       conflict.symbols.map do |symbol|
         
       end
+    end
+
+    def find_shift_conflict_shortest_path_state_items(reduce_path, conflict_state, conflict_item)
+      target_state_item = StateItem.new(conflict_state, conflict_item)
+      result = [target_state_item]
+      state_items = reduce_path.reject(&:production?).map(&:to).reverse!
+
+      state_items.zip(state_items[1..-1]).each do |state_item, prev_state_item|
+        if target_state_item == state_item || target_state_item.item.start_item?
+          # binding.irb
+          break
+        end
+
+        if target_state_item.item.beginning_of_rule?
+          queue = []
+          queue << [target_state_item]
+
+          # Find reverse production
+          while (sis = queue.shift)
+            si = sis.first
+
+            # Reach to start state
+            if si.item.start_item?
+              binding.irb
+              break
+            end
+
+            if !si.item.beginning_of_rule?
+              key = [si, si.item.previous_sym]
+              @reverse_transitions[key].each do |prev_target_state_item|
+                next if prev_target_state_item.state != prev_state_item.state
+                # TODO
+                result = sis + result
+                target_state_item = prev_target_state_item
+                queue.clear
+                break
+              end
+            else
+              key = [si.state, si.item.lhs]
+              @reverse_productions[key].each do |item|
+                state_item = StateItem.new(si.state, item)
+                queue << [state_item] + sis
+              end
+            end
+          end
+        else
+          # Find reverse transition
+          key = [target_state_item, target_state_item.item.previous_sym]
+          @reverse_transitions[key].each do |prev_target_state_item|
+            next if prev_target_state_item.state != prev_state_item.state
+            result << prev_target_state_item
+            target_state_item = prev_target_state_item
+            break
+          end
+        end
+      end
+
+      result.reverse
     end
 
     def shortest_path(conflict_state, conflict_reduce_item, conflict_term)
@@ -45,7 +178,7 @@ module Lrama
 
       start = Triple.new(start_state, start_state.kernels.first, Set.new([@states.eof_symbol]))
 
-      queue << [start, [StartPath.new(start)]]
+      queue << [start, [StartPath.new(start.state_item)]]
 
       while true
         triple, paths = queue.shift
@@ -54,8 +187,8 @@ module Lrama
         visited[triple] = true
 
         # Found
-        if triple.state == conflict_state && triple.item == conflict_reduce_item && triple.l.include?(conflict_term) # && triple.item.end_of_rule?
-          return triple, Paths.new(paths)
+        if triple.state == conflict_state && triple.item == conflict_reduce_item && triple.l.include?(conflict_term)
+          return Paths.new(paths)
         end
 
         # transition
@@ -64,7 +197,7 @@ module Lrama
           next_state.kernels.each do |kernel|
             next if kernel.rule != triple.item.rule
             t = Triple.new(next_state, kernel, triple.l)
-            queue << [t, paths + [TransitionPath.new(t, shift.next_sym)]]
+            queue << [t, paths + [TransitionPath.new(triple.state_item, t.state_item, shift.next_sym)]]
           end
         end
 
@@ -73,7 +206,7 @@ module Lrama
           next unless triple.item.next_sym && triple.item.next_sym == item.lhs
           l = follow_l(triple.item, triple.l)
           t = Triple.new(triple.state, item, l)
-          queue << [t, paths + [ProductionPath.new(t)]]
+          queue << [t, paths + [ProductionPath.new(triple.state_item, t.state_item)]]
         end
 
         break if queue.empty?

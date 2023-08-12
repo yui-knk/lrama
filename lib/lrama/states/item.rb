@@ -28,16 +28,28 @@ module Lrama
         rule.rhs[position + 1]
       end
 
+      def previous_sym
+        rule.rhs[position - 1]
+      end
+
       def end_of_rule?
         rule.rhs.count == position
+      end
+
+      def beginning_of_rule?
+        position == 0
+      end
+
+      def start_item?
+        rule.id == 0 && position == 0
       end
 
       def new_by_next_position
         Item.new(rule: rule, position: position + 1)
       end
 
-      def previous_sym
-        rule.rhs[position - 1]
+      def to_s
+        "#{lhs.id.s_value}: #{display_name}"
       end
 
       def display_name

@@ -8,6 +8,10 @@ module Lrama
       alias :item :itm
       alias :precise_lookahead_set :l
 
+      def state_item
+        StateItem.new(state, item)
+      end
+
       def inspect
         "#{state.inspect}. #{item.display_name}. #{l.map(&:id).map(&:s_value)}"
       end

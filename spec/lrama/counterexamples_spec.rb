@@ -64,10 +64,11 @@ num  : digit
         #     digit         reduce using rule 5 (expr)
         state_6 = states.states[6]
         examples = counterexamples.compute(state_6)
-        paths = examples[0][1]
-
         expect(examples.count).to eq 1
-        expect(paths.map(&:item).map(&:display_name)).to eq([
+        example = examples[0]
+
+        expect(example.type).to eq :shift_reduce
+        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
           "expr • '?' stmt stmt  (rule 3)",
@@ -81,7 +82,7 @@ num  : digit
           "• num  (rule 5)",
           "num •  (rule 5)"
         ])
-        expect(paths.formated_paths).to eq([
+        expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "  expr '?' • stmt stmt  (rule 3)",
           "             arr '[' expr ']' \":=\" • expr  (rule 4)",
@@ -98,10 +99,11 @@ num  : digit
         #     '+'            reduce using rule 6 (expr)
         state_16 = states.states[16]
         examples = counterexamples.compute(state_16)
-        paths = examples[0][1]
-
         expect(examples.count).to eq 1
-        expect(paths.map(&:item).map(&:display_name)).to eq([
+        example = examples[0]
+
+        expect(example.type).to eq :shift_reduce
+        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
           "• expr '+' expr  (rule 6)",
@@ -110,7 +112,7 @@ num  : digit
           "expr '+' • expr  (rule 6)",
           "expr '+' expr •  (rule 6)"
         ])
-        expect(paths.formated_paths).to eq([
+        expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "  • expr '?' stmt stmt  (rule 3)",
           "    • expr '+' expr  (rule 6)",
@@ -127,10 +129,20 @@ num  : digit
         #    keyword_else   reduce using rule 2 (stmt)
         state_17 = states.states[17]
         examples = counterexamples.compute(state_17)
-        paths = examples[0][1]
-
         expect(examples.count).to eq 1
-        expect(paths.map(&:item).map(&:display_name)).to eq([
+        example = examples[0]
+
+        expect(example.type).to eq :shift_reduce
+        expect(example.path1.map(&:item).map(&:display_name)).to eq([
+          "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
+          "keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
+          "keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)",
+          "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)"
+        ])
+        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
           "keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
@@ -142,7 +154,7 @@ num  : digit
           "keyword_if expr keyword_then • stmt  (rule 2)",
           "keyword_if expr keyword_then stmt •  (rule 2)"
         ])
-        expect(paths.formated_paths).to eq([
+        expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "  keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
           "                                 keyword_if expr keyword_then stmt •  (rule 2)"

@@ -52,11 +52,11 @@ module Lrama
 
         len = 0
         offsets = [0] + compressed.map do |path|
-          len += path.item.display_name.index("•") + 2
+          len += path.to.item.display_name.index("•") + 2
         end
 
         compressed.zip(offsets).map do |path, offset|
-          " " * offset + path.item.display_name
+          " " * offset + path.to.item.display_name
         end
       end
     end
