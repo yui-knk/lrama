@@ -13,11 +13,20 @@ module Lrama
       def to
         @to_state_item
       end
+
+      def to_s
+        "#<Path(#{type})>"
+      end
+      alias :inspect :to_s
     end
 
     class StartPath < Path
       def initialize(to_state_item)
         super nil, to_state_item
+      end
+
+      def type
+        :start
       end
 
       def transition?
@@ -35,6 +44,10 @@ module Lrama
         @next_sym = next_sym
       end
 
+      def type
+        :transition
+      end
+
       def transition?
         true
       end
@@ -45,6 +58,10 @@ module Lrama
     end
 
     class ProductionPath < Path
+      def type
+        :production
+      end
+
       def transition?
         false
       end

@@ -68,6 +68,21 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
+        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr '?' stmt stmt  (rule 3)",
+          "stmt: expr • '?' stmt stmt  (rule 3)",
+          "stmt: expr '?' • stmt stmt  (rule 3)",
+          "stmt: • arr '[' expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr • '[' expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' • expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr • ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr ']' • \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr ']' \":=\" • expr  (rule 4)",
+          "expr: • num  (rule 5)",
+          "num: • num digit  (rule 8)",
+          "num: num • digit  (rule 8)"
+        ])
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
@@ -103,6 +118,16 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
+        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr '?' stmt stmt  (rule 3)",
+          "expr: • expr '+' expr  (rule 6)",
+          "expr: • expr '+' expr  (rule 6)",
+          "expr: expr • '+' expr  (rule 6)",
+          "expr: expr '+' • expr  (rule 6)",
+          "expr: • expr '+' expr  (rule 6)",
+          "expr: expr • '+' expr  (rule 6)"
+        ])
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
@@ -133,14 +158,17 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
-        expect(example.path1.map(&:item).map(&:display_name)).to eq([
-          "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)",
-          "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)"
+        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
+          "stmt: • keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
         ])
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",

@@ -16,6 +16,12 @@ module Lrama
       setup_productions
     end
 
+    def to_s
+      "#<Counterexamples>"
+      self.class.name
+    end
+    alias :inspect :to_s
+
     def compute(conflict_state)
       conflict_state.conflicts.flat_map do |conflict|
         case conflict.type
@@ -114,11 +120,28 @@ module Lrama
     def find_shift_conflict_shortest_path_state_items(reduce_path, conflict_state, conflict_item)
       target_state_item = StateItem.new(conflict_state, conflict_item)
       result = [target_state_item]
-      state_items = reduce_path.reject(&:production?).map(&:to).reverse!
+      reversed_reduce_path = reduce_path.to_a.reverse
+      # Index for state_item
+      i = 0
 
-      state_items.zip(state_items[1..-1]).each do |state_item, prev_state_item|
+      while (path = reversed_reduce_path[i])
+        # Index for prev_state_item
+        j = i + 1
+        _j = j
+
+        while (prev_path = reversed_reduce_path[j])
+          if prev_path.production?
+            j += 1
+          else
+            break
+          end
+        end
+
+        state_item = path.to
+        prev_state_item = prev_path.to
+
         if target_state_item == state_item || target_state_item.item.start_item?
-          # binding.irb
+          result.concat(reversed_reduce_path[_j..-1].map(&:to))
           break
         end
 
@@ -128,11 +151,11 @@ module Lrama
 
           # Find reverse production
           while (sis = queue.shift)
-            si = sis.first
+            si = sis.last
 
             # Reach to start state
             if si.item.start_item?
-              binding.irb
+              # TODO
               break
             end
 
@@ -140,9 +163,11 @@ module Lrama
               key = [si, si.item.previous_sym]
               @reverse_transitions[key].each do |prev_target_state_item|
                 next if prev_target_state_item.state != prev_state_item.state
-                # TODO
-                result = sis + result
+                sis.shift
+                result.concat(sis)
+                result << prev_target_state_item
                 target_state_item = prev_target_state_item
+                i = j
                 queue.clear
                 break
               end
@@ -150,7 +175,7 @@ module Lrama
               key = [si.state, si.item.lhs]
               @reverse_productions[key].each do |item|
                 state_item = StateItem.new(si.state, item)
-                queue << [state_item] + sis
+                queue << (sis + [state_item])
               end
             end
           end
@@ -161,6 +186,7 @@ module Lrama
             next if prev_target_state_item.state != prev_state_item.state
             result << prev_target_state_item
             target_state_item = prev_target_state_item
+            i = j
             break
           end
         end
