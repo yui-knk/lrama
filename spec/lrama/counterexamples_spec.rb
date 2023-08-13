@@ -68,7 +68,8 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
-        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+        # Shift Conflict
+        expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
           "stmt: • expr '?' stmt stmt  (rule 3)",
           "stmt: expr • '?' stmt stmt  (rule 3)",
@@ -83,6 +84,7 @@ num  : digit
           "num: • num digit  (rule 8)",
           "num: num • digit  (rule 8)"
         ])
+        # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
@@ -118,7 +120,8 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
-        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+        # Shift Conflict
+        expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
           "stmt: • expr '?' stmt stmt  (rule 3)",
           "expr: • expr '+' expr  (rule 6)",
@@ -128,6 +131,7 @@ num  : digit
           "expr: • expr '+' expr  (rule 6)",
           "expr: expr • '+' expr  (rule 6)"
         ])
+        # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• expr '?' stmt stmt  (rule 3)",
@@ -158,7 +162,8 @@ num  : digit
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
-        expect(example.path1.map(&:item).map(&:to_s)).to eq([
+        # Shift Conflict
+        expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
           "stmt: • keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
           "stmt: keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
@@ -170,6 +175,7 @@ num  : digit
           "stmt: keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
           "stmt: keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
         ])
+        # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
           "• stmt \"end of file\"  (rule 0)",
           "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",

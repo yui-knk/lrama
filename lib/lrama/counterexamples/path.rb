@@ -39,11 +39,6 @@ module Lrama
     end
 
     class TransitionPath < Path
-      def initialize(from_state_item, to_state_item, next_sym)
-        super from_state_item, to_state_item
-        @next_sym = next_sym
-      end
-
       def type
         :transition
       end

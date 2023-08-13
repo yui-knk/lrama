@@ -18,7 +18,6 @@ module Lrama
 
     def to_s
       "#<Counterexamples>"
-      self.class.name
     end
     alias :inspect :to_s
 
@@ -105,7 +104,7 @@ module Lrama
       conflict_symbol = conflict.symbols.first
       shift_conflict_item = conflict_state.items.find { |item| item.next_sym == conflict_symbol }
       path2 = shortest_path(conflict_state, conflict.reduce.item, conflict_symbol)
-      path1 = find_shift_conflict_shortest_path_state_items(path2, conflict_state, shift_conflict_item)
+      path1 = find_shift_conflict_shortest_path(path2, conflict_state, shift_conflict_item)
 
       Examples.new(path1, path2, conflict, conflict_symbol)
     end
@@ -117,7 +116,12 @@ module Lrama
       end
     end
 
-    def find_shift_conflict_shortest_path_state_items(reduce_path, conflict_state, conflict_item)
+    def find_shift_conflict_shortest_path(reduce_path, conflict_state, conflict_item)
+      state_items = find_shift_conflict_shortest_state_items(reduce_path, conflict_state, conflict_item)
+      build_paths_from_state_items(state_items)
+    end
+
+    def find_shift_conflict_shortest_state_items(reduce_path, conflict_state, conflict_item)
       target_state_item = StateItem.new(conflict_state, conflict_item)
       result = [target_state_item]
       reversed_reduce_path = reduce_path.to_a.reverse
@@ -195,6 +199,21 @@ module Lrama
       result.reverse
     end
 
+    def build_paths_from_state_items(state_items)
+      paths = state_items.zip([nil] + state_items).map do |si, prev_si|
+        case
+        when prev_si.nil?
+          StartPath.new(si)
+        when si.item.beginning_of_rule?
+          ProductionPath.new(prev_si, si)
+        else
+          TransitionPath.new(prev_si, si)
+        end
+      end
+
+      Paths.new(paths)
+    end
+
     def shortest_path(conflict_state, conflict_reduce_item, conflict_term)
       # queue: is an array of [Triple, [Path]]
       queue = []
@@ -223,7 +242,7 @@ module Lrama
           next_state.kernels.each do |kernel|
             next if kernel.rule != triple.item.rule
             t = Triple.new(next_state, kernel, triple.l)
-            queue << [t, paths + [TransitionPath.new(triple.state_item, t.state_item, shift.next_sym)]]
+            queue << [t, paths + [TransitionPath.new(triple.state_item, t.state_item)]]
           end
         end
 
