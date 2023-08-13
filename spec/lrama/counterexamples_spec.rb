@@ -85,19 +85,19 @@ num  : digit
           "num: num • digit  (rule 8)"
         ])
         # Reduce Conflict
-        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "• expr '?' stmt stmt  (rule 3)",
-          "expr • '?' stmt stmt  (rule 3)",
-          "expr '?' • stmt stmt  (rule 3)",
-          "• arr '[' expr ']' \":=\" expr  (rule 4)",
-          "arr • '[' expr ']' \":=\" expr  (rule 4)",
-          "arr '[' • expr ']' \":=\" expr  (rule 4)",
-          "arr '[' expr • ']' \":=\" expr  (rule 4)",
-          "arr '[' expr ']' • \":=\" expr  (rule 4)",
-          "arr '[' expr ']' \":=\" • expr  (rule 4)",
-          "• num  (rule 5)",
-          "num •  (rule 5)"
+        expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr '?' stmt stmt  (rule 3)",
+          "stmt: expr • '?' stmt stmt  (rule 3)",
+          "stmt: expr '?' • stmt stmt  (rule 3)",
+          "stmt: • arr '[' expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr • '[' expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' • expr ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr • ']' \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr ']' • \":=\" expr  (rule 4)",
+          "stmt: arr '[' expr ']' \":=\" • expr  (rule 4)",
+          "expr: • num  (rule 5)",
+          "expr: num •  (rule 5)"
         ])
         expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
@@ -132,14 +132,14 @@ num  : digit
           "expr: expr • '+' expr  (rule 6)"
         ])
         # Reduce Conflict
-        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "• expr '?' stmt stmt  (rule 3)",
-          "• expr '+' expr  (rule 6)",
-          "• expr '+' expr  (rule 6)",
-          "expr • '+' expr  (rule 6)",
-          "expr '+' • expr  (rule 6)",
-          "expr '+' expr •  (rule 6)"
+        expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr '?' stmt stmt  (rule 3)",
+          "expr: • expr '+' expr  (rule 6)",
+          "expr: • expr '+' expr  (rule 6)",
+          "expr: expr • '+' expr  (rule 6)",
+          "expr: expr '+' • expr  (rule 6)",
+          "expr: expr '+' expr •  (rule 6)"
         ])
         expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
@@ -176,17 +176,17 @@ num  : digit
           "stmt: keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
         ])
         # Reduce Conflict
-        expect(example.path2.map(&:to).map(&:item).map(&:display_name)).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "• keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
-          "keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
-          "• keyword_if expr keyword_then stmt  (rule 2)",
-          "keyword_if • expr keyword_then stmt  (rule 2)",
-          "keyword_if expr • keyword_then stmt  (rule 2)",
-          "keyword_if expr keyword_then • stmt  (rule 2)",
-          "keyword_if expr keyword_then stmt •  (rule 2)"
+        expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • keyword_if expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if • expr keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr • keyword_then stmt keyword_else stmt  (rule 1)",
+          "stmt: keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
+          "stmt: • keyword_if expr keyword_then stmt  (rule 2)",
+          "stmt: keyword_if • expr keyword_then stmt  (rule 2)",
+          "stmt: keyword_if expr • keyword_then stmt  (rule 2)",
+          "stmt: keyword_if expr keyword_then • stmt  (rule 2)",
+          "stmt: keyword_if expr keyword_then stmt •  (rule 2)"
         ])
         expect(example.path2.formated_paths).to eq([
           "• stmt \"end of file\"  (rule 0)",
