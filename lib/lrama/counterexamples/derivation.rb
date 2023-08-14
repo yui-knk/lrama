@@ -40,8 +40,8 @@ module Lrama
           # I want String#ljust!
           str << " " * (length - str.length)
         else
-# binding.irb
           str << " • #{item.symbols_after_dot.map(&:display_name).join(" ")} "
+          return str.length
         end
 
         if derivation.right&.left

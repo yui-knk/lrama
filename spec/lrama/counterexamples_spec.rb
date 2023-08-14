@@ -140,11 +140,11 @@ num  : digit
           "expr: expr • '+' expr  (rule 6)"
         ])
         expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
-          0:  stmt                                                                "end of file"
-              3:  expr                                              '?' stmt stmt
-                  6:  expr                                 '+' expr
+          0:  stmt                                                           "end of file"
+              3:  expr                                         '?' stmt stmt
+                  6:  expr                            '+' expr
                       6: expr '+' expr
-                                  6: expr  • '+' expr expr
+                                  6: expr  • '+' expr
         STR
         # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
@@ -191,9 +191,9 @@ num  : digit
           "stmt: keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
         ])
         expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
-          0:  stmt                                                                                                             "end of file"
-              1: keyword_if expr keyword_then stmt                                                           keyword_else stmt
-                                              1: keyword_if expr keyword_then stmt  • keyword_else stmt stmt
+          0:  stmt                                                                                                        "end of file"
+              1: keyword_if expr keyword_then stmt                                                      keyword_else stmt
+                                              1: keyword_if expr keyword_then stmt  • keyword_else stmt
         STR
         # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
