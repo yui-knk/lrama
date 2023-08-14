@@ -1,6 +1,6 @@
 require "set"
 
-require "lrama/counterexamples/examples"
+require "lrama/counterexamples/example"
 require "lrama/counterexamples/path"
 require "lrama/counterexamples/paths"
 require "lrama/counterexamples/state_item"
@@ -106,7 +106,7 @@ module Lrama
       path2 = shortest_path(conflict_state, conflict.reduce.item, conflict_symbol)
       path1 = find_shift_conflict_shortest_path(path2, conflict_state, shift_conflict_item)
 
-      Examples.new(path1, path2, conflict, conflict_symbol)
+      Example.new(path1, path2, conflict, conflict_symbol)
     end
 
     def examples_for_reduce_reduce(conflict_state, conflict)
