@@ -5,7 +5,7 @@ RSpec.describe Lrama::Counterexamples do
   describe "#compute" do
     # Example comes from https://www.cs.cornell.edu/andru/papers/cupex/cupex.pdf
     # "4. Constructing Nonunifying Counterexamples"
-    describe "" do
+    describe "Example of 'Finding Counterexamples from Parsing Conflicts'" do
       let(:y) do
         <<~STR
 %{
@@ -84,13 +84,13 @@ num  : digit
           "num: • num digit  (rule 8)",
           "num: num • digit  (rule 8)"
         ])
-        expect(example.path1.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  expr '?' • stmt stmt  (rule 3)",
-          "             arr '[' expr ']' \":=\" • expr  (rule 4)",
-          "                                     • num  (rule 5)",
-          "                                       num • digit  (rule 8)"
-        ])
+        expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                                          "end of file"
+              3: expr '?' stmt                                         stmt
+                          4: arr '[' expr ']' ":=" expr
+                                                   5:  num
+                                                       8: num  • digit
+        STR
         # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
@@ -106,12 +106,13 @@ num  : digit
           "expr: • num  (rule 5)",
           "expr: num •  (rule 5)"
         ])
-        expect(example.path2.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  expr '?' • stmt stmt  (rule 3)",
-          "             arr '[' expr ']' \":=\" • expr  (rule 4)",
-          "                                     num •  (rule 5)"
-        ])
+        expect(example.derivations2.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                                "end of file"
+              3: expr '?' stmt                                stmt
+                          4: arr '[' expr ']' ":=" expr       3:  expr             '?' stmt stmt
+                                                   5: num  •      5:  num
+                                                                      7:   • digit
+        STR
 
 
         # State 16
@@ -138,13 +139,13 @@ num  : digit
           "expr: • expr '+' expr  (rule 6)",
           "expr: expr • '+' expr  (rule 6)"
         ])
-        expect(example.path1.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  • expr '?' stmt stmt  (rule 3)",
-          "    • expr '+' expr  (rule 6)",
-          "      expr '+' • expr  (rule 6)",
-          "                 expr • '+' expr  (rule 6)"
-        ])
+        expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                                                "end of file"
+              3:  expr                                              '?' stmt stmt
+                  6:  expr                                 '+' expr
+                      6: expr '+' expr
+                                  6: expr  • '+' expr expr
+        STR
         # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
@@ -155,12 +156,12 @@ num  : digit
           "expr: expr '+' • expr  (rule 6)",
           "expr: expr '+' expr •  (rule 6)"
         ])
-        expect(example.path2.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  • expr '?' stmt stmt  (rule 3)",
-          "    • expr '+' expr  (rule 6)",
-          "      expr '+' expr •  (rule 6)"
-        ])
+        expect(example.derivations2.render_for_report).to eq(<<~STR.chomp)
+        0:  stmt                                                "end of file"
+            3:  expr                              '?' stmt stmt
+                6:  expr                 '+' expr
+                    6: expr '+' expr  •
+        STR
 
 
         # State 17
@@ -189,11 +190,11 @@ num  : digit
           "stmt: keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
           "stmt: keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
         ])
-        expect(example.path1.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
-          "                                 keyword_if expr keyword_then stmt • keyword_else stmt  (rule 1)"
-        ])
+        expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                                                                                             "end of file"
+              1: keyword_if expr keyword_then stmt                                                           keyword_else stmt
+                                              1: keyword_if expr keyword_then stmt  • keyword_else stmt stmt
+        STR
         # Reduce Conflict
         expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
@@ -207,11 +208,11 @@ num  : digit
           "stmt: keyword_if expr keyword_then • stmt  (rule 2)",
           "stmt: keyword_if expr keyword_then stmt •  (rule 2)"
         ])
-        expect(example.path2.formated_paths).to eq([
-          "• stmt \"end of file\"  (rule 0)",
-          "  keyword_if expr keyword_then • stmt keyword_else stmt  (rule 1)",
-          "                                 keyword_if expr keyword_then stmt •  (rule 2)"
-        ])
+        expect(example.derivations2.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                                                                       "end of file"
+              1: keyword_if expr keyword_then stmt                                     keyword_else stmt
+                                              2: keyword_if expr keyword_then stmt  •
+        STR
       end
     end
   end

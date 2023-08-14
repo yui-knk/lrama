@@ -1,8 +1,8 @@
 require "set"
 
+require "lrama/counterexamples/derivation"
 require "lrama/counterexamples/example"
 require "lrama/counterexamples/path"
-require "lrama/counterexamples/paths"
 require "lrama/counterexamples/state_item"
 require "lrama/counterexamples/triple"
 
@@ -10,6 +10,8 @@ module Lrama
   # See: https://www.cs.cornell.edu/andru/papers/cupex/cupex.pdf
   #      4. Constructing Nonunifying Counterexamples
   class Counterexamples
+    attr_reader :transitions, :productions
+
     def initialize(states)
       @states = states
       setup_transitions
@@ -25,9 +27,9 @@ module Lrama
       conflict_state.conflicts.flat_map do |conflict|
         case conflict.type
         when :shift_reduce
-          examples_for_shift_reduce(conflict_state, conflict)
+          shift_reduce_example(conflict_state, conflict)
         when :reduce_reduce
-          examples_reduce_reduce(conflict_state, conflict)
+          reduce_reduce_examples(conflict_state, conflict)
         end
       end.compact
     end
@@ -100,20 +102,19 @@ module Lrama
       end
     end
 
-    def examples_for_shift_reduce(conflict_state, conflict)
+    def shift_reduce_example(conflict_state, conflict)
       conflict_symbol = conflict.symbols.first
       shift_conflict_item = conflict_state.items.find { |item| item.next_sym == conflict_symbol }
       path2 = shortest_path(conflict_state, conflict.reduce.item, conflict_symbol)
       path1 = find_shift_conflict_shortest_path(path2, conflict_state, shift_conflict_item)
 
-      Example.new(path1, path2, conflict, conflict_symbol)
+      Example.new(path1, path2, conflict, conflict_symbol, self)
     end
 
-    def examples_for_reduce_reduce(conflict_state, conflict)
+    def reduce_reduce_examples(conflict_state, conflict)
       # TODO
-      conflict.symbols.map do |symbol|
-        
-      end
+      # conflict.symbols.map do |symbol|
+      # end
     end
 
     def find_shift_conflict_shortest_path(reduce_path, conflict_state, conflict_item)
@@ -211,7 +212,7 @@ module Lrama
         end
       end
 
-      Paths.new(paths)
+      paths
     end
 
     def shortest_path(conflict_state, conflict_reduce_item, conflict_term)
@@ -233,7 +234,7 @@ module Lrama
 
         # Found
         if triple.state == conflict_state && triple.item == conflict_reduce_item && triple.l.include?(conflict_term)
-          return Paths.new(paths)
+          return paths
         end
 
         # transition

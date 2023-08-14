@@ -48,6 +48,14 @@ module Lrama
         Item.new(rule: rule, position: position + 1)
       end
 
+      def symbols_before_dot
+        rule.rhs[0...position]
+      end
+
+      def symbols_after_dot
+        rule.rhs[position..-1]
+      end
+
       def to_s
         "#{lhs.id.s_value}: #{display_name}"
       end
