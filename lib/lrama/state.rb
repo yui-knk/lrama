@@ -1,7 +1,8 @@
-require "lrama/state/conflict"
 require "lrama/state/reduce"
+require "lrama/state/reduce_reduce_conflict"
 require "lrama/state/resolved_conflict"
 require "lrama/state/shift"
+require "lrama/state/shift_reduce_conflict"
 
 module Lrama
   class State

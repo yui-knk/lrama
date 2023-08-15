@@ -49,7 +49,7 @@ num  : digit
         STR
       end
 
-      it "" do
+      it "build counterexamples of S/R conflicts" do
         grammar = Lrama::Parser.new(y).parse
         states = Lrama::States.new(grammar, warning)
         states.compute
@@ -212,6 +212,90 @@ num  : digit
           0:  stmt                                                                                       "end of file"
               1: keyword_if expr keyword_then stmt                                     keyword_else stmt
                                               2: keyword_if expr keyword_then stmt  •
+        STR
+      end
+    end
+
+    describe "R/R conflicts" do
+      let(:y) do
+        <<~STR
+%{
+// Prologue
+%}
+
+%union {
+    int i;
+}
+
+%token <i> digit
+
+%type <i> stmt
+%type <i> expr1
+%type <i> expr2
+
+%%
+
+stmt : expr1
+     | expr2
+     ;
+
+expr1 : digit '+' digit
+      ;
+
+expr2 : digit '+' digit
+      ;
+
+%%
+
+        STR
+      end
+
+      it "build counterexamples of R/R conflicts" do
+        grammar = Lrama::Parser.new(y).parse
+        states = Lrama::States.new(grammar, warning)
+        states.compute
+        counterexamples = Lrama::Counterexamples.new(states)
+
+        # State 7
+        #
+        #     3 expr1: digit '+' digit •  ["end of file"]
+        #     4 expr2: digit '+' digit •  ["end of file"]
+        #
+        #     "end of file"  reduce using rule 3 (expr1)
+        #     "end of file"  reduce using rule 4 (expr2)
+        state_7 = states.states[7]
+        examples = counterexamples.compute(state_7)
+        expect(examples.count).to eq 1
+        example = examples[0]
+
+        expect(example.type).to eq :reduce_reduce
+        # Reduce Conflict
+        expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr1  (rule 1)",
+          "expr1: • digit '+' digit  (rule 3)",
+          "expr1: digit • '+' digit  (rule 3)",
+          "expr1: digit '+' • digit  (rule 3)",
+          "expr1: digit '+' digit •  (rule 3)"
+        ])
+        expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                       "end of file"
+              1:  expr1
+                  3: digit '+' digit  •
+        STR
+        # Reduce Conflict
+        expect(example.path2.map(&:to).map(&:item).map(&:to_s)).to eq([
+          "$accept: • stmt \"end of file\"  (rule 0)",
+          "stmt: • expr2  (rule 2)",
+          "expr2: • digit '+' digit  (rule 4)",
+          "expr2: digit • '+' digit  (rule 4)",
+          "expr2: digit '+' • digit  (rule 4)",
+          "expr2: digit '+' digit •  (rule 4)"
+        ])
+        expect(example.derivations2.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                       "end of file"
+              2:  expr2
+                  4: digit '+' digit  •
         STR
       end
     end

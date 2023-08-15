@@ -112,9 +112,11 @@ module Lrama
     end
 
     def reduce_reduce_examples(conflict_state, conflict)
-      # TODO
-      # conflict.symbols.map do |symbol|
-      # end
+      conflict_symbol = conflict.symbols.first
+      path1 = shortest_path(conflict_state, conflict.reduce1.item, conflict_symbol)
+      path2 = shortest_path(conflict_state, conflict.reduce2.item, conflict_symbol)
+
+      Example.new(path1, path2, conflict, conflict_symbol, self)
     end
 
     def find_shift_conflict_shortest_path(reduce_path, conflict_state, conflict_item)
