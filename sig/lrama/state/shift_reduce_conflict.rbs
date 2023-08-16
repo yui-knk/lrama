@@ -1,0 +1,7 @@
+module Lrama
+  class State
+    class ShiftReduceConflict
+      def type: () -> Symbol
+    end
+  end
+end

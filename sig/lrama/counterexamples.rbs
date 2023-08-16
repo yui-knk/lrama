@@ -1,0 +1,6 @@
+module Lrama
+  class Counterexamples
+    attr_reader transitions: Hash[[StateItem, Grammar::Symbol], StateItem]
+    attr_reader productions: Hash[StateItem, Set[States::Item]]
+  end
+end

@@ -60,6 +60,10 @@ module Lrama
         rule.rhs[position..-1]
       end
 
+      def symbols_next_after_dot
+        symbols_after_dot[1..-1]
+      end
+
       def to_s
         "#{lhs.id.s_value}: #{display_name}"
       end

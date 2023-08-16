@@ -1,0 +1,15 @@
+module Lrama
+  class States
+    class Item
+      def rule_id: () -> Integer
+      def empty_rule?: () -> bool
+      def symbols_before_dot: () -> Array[Grammar::Symbol]
+      def symbols_after_dot: () -> Array[Grammar::Symbol]
+      def symbols_next_after_dot: () -> Array[Grammar::Symbol]
+      def next_sym: () -> Grammar::Symbol
+      def next_next_sym: () -> Grammar::Symbol
+      def end_of_rule?: () -> bool
+      def display_name: () -> String
+    end
+  end
+end

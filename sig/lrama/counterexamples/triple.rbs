@@ -1,0 +1,14 @@
+module Lrama
+  class Counterexamples
+    class Triple
+      attr_reader s: State
+      attr_reader itm: States::Item
+      attr_reader l: Set[Grammar::Symbol]
+      alias state s
+      alias item itm
+      alias precise_lookahead_set l
+
+      def initialize: (State s, States::Item itm, Set[Grammar::Symbol] l) -> void
+    end
+  end
+end

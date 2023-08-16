@@ -48,12 +48,12 @@ module Lrama
           return str.length
         end
 
-        if derivation.right&.left
+        if derivation.right && derivation.right.left
           length = _render_for_report(derivation.right.left, str.length, strings, index + 1)
-          str << "#{item.symbols_after_dot[1..-1].map(&:display_name).join(" ")} "
+          str << "#{item.symbols_next_after_dot.map(&:display_name).join(" ")} "
           str << " " * (length - str.length) if length > str.length
         elsif item.next_next_sym
-          str << "#{item.symbols_after_dot[1..-1].map(&:display_name).join(" ")} "
+          str << "#{item.symbols_next_after_dot.map(&:display_name).join(" ")} "
         end
 
         return str.length

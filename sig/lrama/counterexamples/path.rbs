@@ -1,0 +1,26 @@
+module Lrama
+  class Counterexamples
+    class Path
+      @from_state_item: StateItem?
+      @to_state_item: StateItem
+
+      def initialize: (StateItem? from_state_item, StateItem to_state_item) -> void
+
+      def from: () -> StateItem?
+      def to: () -> StateItem
+      def type: () -> Symbol
+      def transition?: () -> bool
+      def production?: () -> bool
+    end
+
+    class StartPath < Path
+      def initialize: (StateItem to_state_item) -> void
+    end
+
+    class TransitionPath < Path
+    end
+
+    class ProductionPath < Path
+    end
+  end
+end

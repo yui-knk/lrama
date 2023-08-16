@@ -1,0 +1,26 @@
+module Lrama
+  class Counterexamples
+    class Example
+      type conflict = State::ShiftReduceConflict | State::ReduceReduceConflict
+      type paths = Array[Path]
+      type derivations = Array[Derivation]
+
+      attr_reader path1: paths
+      attr_reader path2: paths
+      attr_reader conflict: conflict
+
+      @path1: paths
+      @path2: paths
+      @conflict_symbol: Grammar::Symbol
+      @counterexamples: Counterexamples
+
+      @derivations1: derivations
+      @derivations2: derivations
+
+      def initialize: (paths path1, paths path2, conflict conflict, Grammar::Symbol conflict_symbol, Counterexamples counterexamples) -> void
+
+      def _derivations: (paths) -> derivations
+      def find_derivation_for_symbol: (StateItem, Grammar::Symbol) -> Derivation
+    end
+  end
+end

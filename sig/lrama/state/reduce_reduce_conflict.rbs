@@ -1,0 +1,7 @@
+module Lrama
+  class State
+    class ReduceReduceConflict
+      def type: () -> Symbol
+    end
+  end
+end

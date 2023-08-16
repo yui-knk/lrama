@@ -18,11 +18,11 @@ module Lrama
       end
 
       def path1_item
-        @path1.last.to.item
+        @path1.fetch(-1).to.item
       end
 
       def path2_item
-        @path2.last.to.item
+        @path2.fetch(-1).to.item
       end
 
       def derivations1
@@ -38,7 +38,7 @@ module Lrama
       def _derivations(paths)
         derivation = nil
         current = :production
-        lookahead_sym = paths.last.to.item.end_of_rule? ? @conflict_symbol : nil
+        lookahead_sym = paths.fetch(-1).to.item.end_of_rule? ? @conflict_symbol : nil
 
         paths.reverse.each do |path|
           item = path.to.item
@@ -118,6 +118,8 @@ module Lrama
             end
           end
         end
+
+        raise "Unreachable"
       end
     end
   end

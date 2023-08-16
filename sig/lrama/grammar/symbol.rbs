@@ -1,0 +1,10 @@
+module Lrama
+  class Grammar
+    class Symbol
+      # attr_reader id:
+      attr_reader first_set: Set[Grammar::Symbol]
+
+      def display_name: () -> String
+    end
+  end
+end

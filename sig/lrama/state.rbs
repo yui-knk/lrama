@@ -1,0 +1,4 @@
+module Lrama
+  class State
+  end
+end

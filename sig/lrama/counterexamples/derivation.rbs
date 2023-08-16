@@ -1,0 +1,14 @@
+module Lrama
+  class Counterexamples
+    class Derivation
+      attr_reader item: States::Item
+      attr_reader left: Derivation?
+      attr_reader right: Derivation?
+
+      def initialize: (States::Item item, Derivation? left, ?Derivation? right) -> void
+
+      def render_strings_for_report: () -> Array[String]
+      def _render_for_report: (Derivation, Integer, Array[String], Integer) -> Integer
+    end
+  end
+end
