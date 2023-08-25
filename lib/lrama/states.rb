@@ -85,6 +85,10 @@ module Lrama
       report_duration(:compute_follow_sets) { compute_follow_sets }
       report_duration(:compute_look_ahead_sets) { compute_look_ahead_sets }
 
+      # IELR
+      report_duration(:compute_auxiliary_tables) { compute_auxiliary_tables }
+      report_duration(:compute_annotations) { compute_annotations }
+
       # Conflicts
       report_duration(:compute_conflicts) { compute_conflicts }
 
@@ -546,6 +550,24 @@ module Lrama
           @warning.warn("reduce/reduce conflicts: #{rr_count} found")
         end
       end
+    end
+
+    def compute_auxiliary_tables
+      compute_follow_kernel_items
+      compute_always_follows
+      compute_predecessors
+    end
+
+    def compute_follow_kernel_items
+    end
+
+    def compute_always_follows
+    end
+
+    def compute_predecessors
+    end
+
+    def compute_annotations
     end
   end
 end

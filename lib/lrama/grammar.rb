@@ -24,6 +24,7 @@ module Lrama
                   :sym_to_rules
 
     def initialize
+      @parser_type = :lalr
       @printers = []
       @error_tokens = []
       @symbols = []
@@ -39,6 +40,13 @@ module Lrama
       @aux = Auxiliary.new
 
       append_special_symbols
+    end
+
+    # %define lr.type ielr
+    def define_lr_type(type, lineno:)
+      raise "Unknown lr.type #{type}" unless ["lalr", "ielr"].include?(type)
+
+      @parser_type = type.to_sym
     end
 
     def add_printer(ident_or_tags:, code:, lineno:)

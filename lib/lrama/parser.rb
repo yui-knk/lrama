@@ -51,8 +51,15 @@ module Lrama
           grammar.expect = ts.consume!(T::Number).s_value
         when T::P_define
           ts.next
-          # Ignore
-          ts.consume_multi(T::Ident)
+
+          if ts.current_token.s_value == "lr.type" && ts.next_token&.type == T::Ident
+            ts.consume!(T::Ident)
+            type = ts.consume!(T::Ident)
+            grammar.define_lr_type(type.s_value, lineno: type.line)
+          else
+            # Ignore
+            ts.consume_multi(T::Ident)
+          end
         when T::P_printer
           lineno = ts.current_token.line
           ts.next

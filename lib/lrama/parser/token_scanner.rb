@@ -18,6 +18,10 @@ module Lrama
         @tokens[@index - 1]
       end
 
+      def next_token
+        @tokens[@index + 1]
+      end
+
       def next
         token = current_token
         @index += 1
