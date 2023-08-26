@@ -74,6 +74,11 @@ module Lrama
       @la = {}
     end
 
+    def to_s
+      "#<States>"
+    end
+    alias :inspect :to_s
+
     def compute
       # Look Ahead Sets
       report_duration(:compute_lr0_states) { compute_lr0_states }
@@ -552,12 +557,14 @@ module Lrama
       end
     end
 
+    # Phase 1: Compute auxiliary tables
     def compute_auxiliary_tables
       compute_follow_kernel_items
       compute_always_follows
       compute_predecessors
     end
 
+    # 3.3.2. Goto follows from kernel items
     def compute_follow_kernel_items
     end
 

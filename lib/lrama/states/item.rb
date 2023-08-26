@@ -60,6 +60,10 @@ module Lrama
         rule.rhs[position..-1]
       end
 
+      def symbols_after_dot_are_nullable?
+        symbols_after_dot.all(&:nullable)
+      end
+
       def to_s
         "#{lhs.id.s_value}: #{display_name}"
       end
