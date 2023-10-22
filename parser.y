@@ -348,6 +348,10 @@ rule
            @prec_seen = true
          }
 
+  modifier: '?' {  }
+          | '+' {  }
+          | '*' {  }
+
   named_ref_opt: # empty
                | '[' IDENTIFIER ']' { result = val[1].s_value }
 

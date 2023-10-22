@@ -153,6 +153,7 @@ module Lrama
 
     def prepare
       normalize_rules
+      expand_parameterize_rules
       collect_symbols
       replace_token_with_symbol
       fill_symbol_number
@@ -634,6 +635,9 @@ module Lrama
           add_nterm(id: new_token)
         end
       end
+    end
+
+    def expand_parameterize_rules
     end
 
     # Collect symbols from rules

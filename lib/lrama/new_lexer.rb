@@ -8,7 +8,7 @@ module Lrama
     # FIXME: Remove this when renaming this class to Lrama::Lexer
     Token = Lrama::Lexer::Token
 
-    SYMBOLS = %w(%{ %} %% { } \[ \] : \| ;)
+    SYMBOLS = %w(%{ %} %% { } \[ \] : \| ; ? + *)
     PERCENT_TOKENS = %w(
       %union
       %token
