@@ -115,6 +115,12 @@ module Lrama
               @parameterizing_rules << r
             end
             @replaced_rhs << parameterizing.build_token
+          when Lrama::Lexer::Token::ParserStatePop
+            process_parser_state_token(token, "parser_state_pop_", "YYPOP_STATE_#{token.s_value.upcase}();", i)
+          when Lrama::Lexer::Token::ParserStatePush
+            process_parser_state_token(token, "parser_state_push_", "YYPUSH_STATE_#{token.s_value.upcase}(#{token.state.s_value});", i)
+          when Lrama::Lexer::Token::ParserStateSet
+            process_parser_state_token(token, "parser_state_set_", "YYSET_STATE_#{token.s_value.upcase}(#{token.state.s_value});", i)
           when Lrama::Lexer::Token::UserCode
             prefix = token.referred ? "@" : "$@"
             new_token = Lrama::Lexer::Token::Ident.new(s_value: prefix + @midrule_action_counter.increment.to_s)
@@ -131,6 +137,20 @@ module Lrama
             raise "Unexpected token. #{token}"
           end
         end
+      end
+
+      def process_parser_state_token(token, prefix, code, position_in_original_rule_rhs)
+        new_token = Lrama::Lexer::Token::Ident.new(s_value: prefix + token.s_value + @midrule_action_counter.increment.to_s)
+        user_code = Lrama::Lexer::Token::UserCode.new(s_value: code, location: token.location)
+
+        @replaced_rhs << new_token
+        rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, position_in_original_rule_rhs, skip_preprocess_references: true)
+        rule_builder.lhs = new_token
+        rule_builder.user_code = user_code
+        rule_builder.complete_input
+        rule_builder.setup_rules
+
+        @rule_builders_for_derived_rules << rule_builder
       end
 
       def numberize_references

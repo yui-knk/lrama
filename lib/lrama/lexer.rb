@@ -28,6 +28,10 @@ module Lrama
       %error-token
       %empty
       %code
+      %parser-state-push
+      %parser-state-pop
+      %parser-state-set
+      %parser-state
     )
 
     def initialize(text)
