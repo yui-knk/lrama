@@ -114,13 +114,13 @@ module Lrama
         when @scanner.scan(/}/)
           if nested == 0 && @end_symbol == '}'
             @scanner.unscan
-            return [:C_DECLARATION, build_token(type: Token::User_code, s_value: code, references: [])]
+            return [:C_DECLARATION, build_token(type: Token::User_code, s_value: code)]
           else
             code += @scanner.matched
             nested -= 1
           end
         when @scanner.check(/#{@end_symbol}/)
-          return [:C_DECLARATION, build_token(type: Token::User_code, s_value: code, references: [])]
+          return [:C_DECLARATION, build_token(type: Token::User_code, s_value: code)]
         when @scanner.scan(/\n/)
           code += @scanner.matched
           newline

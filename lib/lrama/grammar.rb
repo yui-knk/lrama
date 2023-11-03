@@ -131,7 +131,7 @@ module Lrama
     end
 
     def build_code(type, token_code)
-      Code.new(type: type, token_code: token_code)
+      Code.new(type: type, token_code: token_code, references: [])
     end
 
     def prologue_first_lineno=(prologue_first_lineno)
@@ -351,7 +351,7 @@ module Lrama
           end
         end
 
-        initial_action.token_code.references = references
+        initial_action.references = references
         build_references(initial_action.token_code)
       end
 
@@ -367,7 +367,7 @@ module Lrama
           end
         end
 
-        printer.code.token_code.references = references
+        printer.code.references = references
         build_references(printer.code.token_code)
       end
 
@@ -383,7 +383,7 @@ module Lrama
           end
         end
 
-        error_token.code.token_code.references = references
+        error_token.code.references = references
         build_references(error_token.code.token_code)
       end
 
@@ -545,10 +545,11 @@ module Lrama
         # Extract actions in the middle of RHS
         # into new rules.
         a.each do |new_token, code|
-          @rules << Rule.new(id: @rules.count, lhs: new_token, rhs: [], code: Code.new(type: :user_code, token_code: code), lineno: code.line)
+          c = Code.new(type: :user_code, token_code: code, references: [])
+          @rules << Rule.new(id: @rules.count, lhs: new_token, rhs: [], code: c, lineno: code.line)
         end
 
-        c = code ? Code.new(type: :user_code, token_code: code) : nil
+        c = code ? Code.new(type: :user_code, token_code: code, references: []) : nil
         @rules << Rule.new(id: @rules.count, lhs: lhs, rhs: rhs2, code: c, precedence_sym: precedence_sym, lineno: lineno)
 
         add_nterm(id: lhs)
