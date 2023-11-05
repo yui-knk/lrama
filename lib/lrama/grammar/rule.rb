@@ -41,6 +41,14 @@ module Lrama
 
         Code::RuleAction.new(type: :rule_action, token_code: token_code).translated_code
       end
+
+      # TODO: Need to skip Token::Char?
+      # TODO: Add test
+      def named_references
+        @named_references ||= @tokens.map do |token|
+          [token.s_value, token.alias_name].compact
+        end
+      end
     end
   end
 end
