@@ -1,7 +1,7 @@
 module Lrama
   class Grammar
-    class Rule < Struct.new(:id, :lhs, :rhs, :token_code, :nullable, :precedence_sym, :lineno, keyword_init: true)
-      def initialize(id: nil, lhs: nil, rhs: nil, token_code: nil, nullable: nil, precedence_sym: nil, lineno: nil)
+    class Rule < Struct.new(:id, :lhs, :rhs, :token_code, :nullable, :precedence_sym, :lineno, :original_rule, keyword_init: true)
+      def initialize(id: nil, lhs: nil, rhs: nil, token_code: nil, nullable: nil, precedence_sym: nil, lineno: nil, original_rule: nil)
         super
         @tokens = [lhs] + rhs
       end
