@@ -399,7 +399,7 @@ module Lrama
       accept = find_symbol_by_s_value!("$accept")
       eof = find_symbol_by_number!(0)
       lineno = @_rules.first ? @_rules.first[2] : 0
-      @rules << Rule.new(id: @rules.count, lhs: accept, rhs: [@_rules.first[0], eof], token_code: nil, lineno: lineno)
+      @rules << Rule.new(id: @rules.count, lhs: accept.id, rhs: [@_rules.first[0], eof.id], token_code: nil, lineno: lineno)
 
       extracted_action_number = 1 # @n as nterm
 
