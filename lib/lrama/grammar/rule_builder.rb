@@ -54,7 +54,7 @@ module Lrama
           prefix = code.referred ? "@" : "$@"
           new_token = Lrama::Lexer::Token::Ident.new(s_value: prefix + @midrule_action_counter.increment.to_s)
           @code_to_new_token[code] = new_token
-          Rule.new(id: @rule_counter.increment, lhs: new_token, rhs: [], token_code: code, lineno: code.line)
+          Rule.new(id: @rule_counter.increment, lhs_token: new_token, rhs_tokens: [], token_code: code, lineno: code.line)
         end
       end
 
@@ -71,7 +71,7 @@ module Lrama
         if tokens.any? {|r| r.is_a?(Lrama::Lexer::Token::Parameterizing) }
           expand_parameterizing_rules
         else
-          [Rule.new(id: @rule_counter.increment, lhs: lhs, rhs: tokens, token_code: user_code, precedence_sym: precedence_sym, lineno: line)]
+          [Rule.new(id: @rule_counter.increment, lhs_token: lhs, rhs_tokens: tokens, token_code: user_code, precedence_sym: precedence_sym, lineno: line)]
         end
       end
 
@@ -84,19 +84,19 @@ module Lrama
 
         if rhs.any? {|r| r.is_a?(Lrama::Lexer::Token::Parameterizing) && r.option? }
           option_token = Lrama::Lexer::Token::Ident.new(s_value: "option_#{rhs[0].s_value}")
-          rules << Rule.new(id: @rule_counter.increment, lhs: lhs, rhs: [option_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: option_token, rhs: [], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: option_token, rhs: [token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: lhs, rhs_tokens: [option_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: option_token, rhs_tokens: [], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: option_token, rhs_tokens: [token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
         elsif rhs.any? {|r| r.is_a?(Lrama::Lexer::Token::Parameterizing) && r.nonempty_list? }
           nonempty_list_token = Lrama::Lexer::Token::Ident.new(s_value: "nonempty_list_#{rhs[0].s_value}")
-          rules << Rule.new(id: @rule_counter.increment, lhs: lhs, rhs: [nonempty_list_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: nonempty_list_token, rhs: [token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: nonempty_list_token, rhs: [nonempty_list_token, token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: lhs, rhs_tokens: [nonempty_list_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: nonempty_list_token, rhs_tokens: [token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: nonempty_list_token, rhs_tokens: [nonempty_list_token, token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
         elsif rhs.any? {|r| r.is_a?(Lrama::Lexer::Token::Parameterizing) && r.list? }
           list_token = Lrama::Lexer::Token::Ident.new(s_value: "list_#{rhs[0].s_value}")
-          rules << Rule.new(id: @rule_counter.increment, lhs: lhs, rhs: [list_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: list_token, rhs: [], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
-          rules << Rule.new(id: @rule_counter.increment, lhs: list_token, rhs: [list_token, token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: lhs, rhs_tokens: [list_token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: list_token, rhs_tokens: [], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
+          rules << Rule.new(id: @rule_counter.increment, lhs_token: list_token, rhs_tokens: [list_token, token], token_code: user_code, precedence_sym: precedence_sym, lineno: line)
         end
 
         rules

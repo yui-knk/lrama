@@ -212,6 +212,11 @@ RSpec.describe Lrama::Parser do
       expect(grammar.rules).to eq([
         Rule.new(
           id: 0,
+          lhs_token: T::Ident.new(s_value: "$accept"),
+          rhs_tokens: [
+            T::Ident.new(s_value: "program"),
+            T::Ident.new(s_value: "EOI")
+          ],
           lhs: grammar.find_symbol_by_s_value!("$accept"),
           rhs: [
             grammar.find_symbol_by_s_value!("program"),
@@ -224,6 +229,10 @@ RSpec.describe Lrama::Parser do
         ),
         Rule.new(
           id: 1,
+          lhs_token: T::Ident.new(s_value: "program"),
+          rhs_tokens: [
+            T::Ident.new(s_value: "class")
+          ],
           lhs: grammar.find_symbol_by_s_value!("program"),
           rhs: [
             grammar.find_symbol_by_s_value!("class"),

@@ -2,7 +2,8 @@ module Lrama
   class Grammar
     class Rule
       def initialize: (
-        ?id: untyped, ?lhs: untyped, ?rhs: untyped,
+        ?id: untyped, ?lhs_token: untyped, ?rhs_tokens: untyped,
+        ?lhs: untyped, ?rhs: untyped,
         ?token_code: untyped, ?nullable: untyped,
         ?precedence_sym: untyped, ?lineno: untyped
       ) -> void

@@ -1,6 +1,6 @@
 module Lrama
   class Grammar
-    class Rule < Struct.new(:id, :lhs, :rhs, :token_code, :nullable, :precedence_sym, :lineno, keyword_init: true)
+    class Rule < Struct.new(:id, :lhs_token, :rhs_tokens, :token_code, :lhs, :rhs, :nullable, :precedence_sym, :lineno, keyword_init: true)
       # TODO: Change this to display_name
       def to_s
         l = lhs.id.s_value

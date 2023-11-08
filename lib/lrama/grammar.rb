@@ -325,7 +325,8 @@ module Lrama
       # @empty_symbol = term
 
       # YYEOF
-      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYEOF"), alias_name: "\"end of file\"", token_id: 0)
+      @eof_token = Lrama::Lexer::Token::Ident.new(s_value: "YYEOF")
+      term = add_term(id: @eof_token, alias_name: "\"end of file\"", token_id: 0)
       term.number = 0
       term.eof_symbol = true
       @eof_symbol = term
@@ -343,7 +344,8 @@ module Lrama
       @undef_symbol = term
 
       # $accept
-      term = add_nterm(id: Lrama::Lexer::Token::Ident.new(s_value: "$accept"))
+      @accept_token = Lrama::Lexer::Token::Ident.new(s_value: "$accept")
+      term = add_nterm(id: @accept_token)
       term.accept_symbol = true
       @accept_symbol = term
     end
@@ -371,10 +373,8 @@ module Lrama
     #
     def normalize_rules
       # 1. Add $accept rule to the top of rules
-      accept = find_symbol_by_s_value!("$accept")
-      eof = find_symbol_by_number!(0)
       lineno = @rule_builders.first ? @rule_builders.first.line : 0
-      @rules << Rule.new(id: @rule_counter.increment, lhs: accept, rhs: [@rule_builders.first.lhs, eof], token_code: nil, lineno: lineno)
+      @rules << Rule.new(id: @rule_counter.increment, lhs_token: @accept_token, rhs_tokens: [@rule_builders.first.lhs, @eof_token], token_code: nil, lineno: lineno)
 
       @rule_builders.each do |builder|
         # Extract actions in the middle of RHS into new rules.
@@ -383,19 +383,19 @@ module Lrama
         end
 
         builder.build_rules.each do |rule|
-          add_nterm(id: rule.lhs)
+          add_nterm(id: rule.lhs_token)
           @rules << rule
         end
 
         builder.midrule_action_rules.each do |rule|
-          add_nterm(id: rule.lhs)
+          add_nterm(id: rule.lhs_token)
         end
       end
     end
 
     # Collect symbols from rules
     def collect_symbols
-      @rules.flat_map(&:rhs).each do |s|
+      @rules.flat_map(&:rhs_tokens).each do |s|
         case s
         when Lrama::Lexer::Token::Char
           add_term(id: s)
@@ -484,9 +484,9 @@ module Lrama
 
     def replace_token_with_symbol
       @rules.each do |rule|
-        rule.lhs = token_to_symbol(rule.lhs)
+        rule.lhs = token_to_symbol(rule.lhs_token)
 
-        rule.rhs.map! do |t|
+        rule.rhs = rule.rhs_tokens.map do |t|
           token_to_symbol(t)
         end
 
