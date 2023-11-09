@@ -61,7 +61,8 @@ module Lrama
     def add_term(id:, alias_name: nil, tag: nil, token_id: nil, replace: false)
       if token_id && (sym = @symbols.find {|s| s.token_id == token_id })
         if replace
-          sym.id = id
+          sym.name = id.s_value
+          sym.char_p = id.is_a?(Lrama::Lexer::Token::Char)
           sym.alias_name = alias_name
           sym.tag = tag
         end
@@ -69,12 +70,13 @@ module Lrama
         return sym
       end
 
-      if sym = @symbols.find {|s| s.id == id }
+      if sym = @symbols.find {|s| s.name == id.s_value }
         return sym
       end
 
       sym = Symbol.new(
-        id: id, alias_name: alias_name, number: nil, tag: tag,
+        name: id.s_value, char_p: id.is_a?(Lrama::Lexer::Token::Char),
+        alias_name: alias_name, number: nil, tag: tag,
         term: true, token_id: token_id, nullable: false
       )
       @symbols << sym
@@ -84,10 +86,11 @@ module Lrama
     end
 
     def add_nterm(id:, alias_name: nil, tag: nil)
-      return if @symbols.find {|s| s.id == id }
+      return if @symbols.find {|s| s.name == id.s_value }
 
       sym = Symbol.new(
-        id: id, alias_name: alias_name, number: nil, tag: tag,
+        name: id.s_value, char_p: id.is_a?(Lrama::Lexer::Token::Char),
+        alias_name: alias_name, number: nil, tag: tag,
         term: false, token_id: nil, nullable: nil,
       )
       @symbols << sym
@@ -253,7 +256,7 @@ module Lrama
 
     def find_symbol_by_s_value(s_value)
       @symbols.find do |sym|
-        sym.id.s_value == s_value
+        sym.name == s_value
       end
     end
 
@@ -263,7 +266,7 @@ module Lrama
 
     def find_symbol_by_id(id)
       @symbols.find do |sym|
-        sym.id == id || sym.alias_name == id.s_value
+        sym.name == id.s_value || sym.alias_name == id.s_value
       end
     end
 
@@ -314,7 +317,7 @@ module Lrama
 
     def find_nterm_by_id!(id)
       nterms.find do |nterm|
-        nterm.id == id
+        nterm.name == id.s_value
       end || (raise "Nterm not found: #{id}")
     end
 
@@ -441,9 +444,9 @@ module Lrama
 
         # If id is Token::Char, it uses ASCII code
         if sym.term? && sym.token_id.nil?
-          if sym.id.is_a?(Lrama::Lexer::Token::Char)
+          if sym.char?
             # Ignore ' on the both sides
-            case sym.id.s_value[1..-2]
+            case sym.name[1..-2]
             when "\\b"
               sym.token_id = 8
             when "\\f"
@@ -552,7 +555,7 @@ module Lrama
           printer.ident_or_tags.each do |ident_or_tag|
             case ident_or_tag
             when Lrama::Lexer::Token::Ident
-              sym.printer = printer if sym.id == ident_or_tag
+              sym.printer = printer if sym.name == ident_or_tag.s_value
             when Lrama::Lexer::Token::Tag
               sym.printer = printer if sym.tag == ident_or_tag
             else
@@ -569,7 +572,7 @@ module Lrama
           error_token.ident_or_tags.each do |ident_or_tag|
             case ident_or_tag
             when Lrama::Lexer::Token::Ident
-              sym.error_token = error_token if sym.id == ident_or_tag
+              sym.error_token = error_token if sym.name == ident_or_tag.s_value
             when Lrama::Lexer::Token::Tag
               sym.error_token = error_token if sym.tag == ident_or_tag
             else
@@ -609,7 +612,7 @@ module Lrama
         rule.token_code.references.select do |ref|
           ref.type == :dollar && !ref.tag
         end.each do |ref|
-          errors << "$#{ref.value} of '#{rule.lhs.id.s_value}' has no declared type"
+          errors << "$#{ref.value} of '#{rule.lhs.name}' has no declared type"
         end
       end
 

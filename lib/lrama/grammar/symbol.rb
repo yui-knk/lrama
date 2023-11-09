@@ -6,9 +6,13 @@
 
 module Lrama
   class Grammar
-    class Symbol < Struct.new(:id, :alias_name, :number, :tag, :term, :token_id, :nullable, :precedence, :printer, :error_token, keyword_init: true)
+    class Symbol < Struct.new(:name, :char_p, :alias_name, :number, :tag, :term, :token_id, :nullable, :precedence, :printer, :error_token, keyword_init: true)
       attr_accessor :first_set, :first_set_bitmap
       attr_writer :eof_symbol, :error_symbol, :undef_symbol, :accept_symbol
+
+      def char?
+        char_p
+      end
 
       def term?
         term
@@ -35,7 +39,7 @@ module Lrama
       end
 
       def display_name
-        alias_name || id.s_value
+        alias_name || self.name
       end
 
       # name for yysymbol_kind_t
@@ -47,14 +51,14 @@ module Lrama
           name = "YYACCEPT"
         when eof_symbol?
           name = "YYEOF"
-        when term? && id.is_a?(Lrama::Lexer::Token::Char)
+        when term? && char?
           name = number.to_s + display_name
-        when term? && id.is_a?(Lrama::Lexer::Token::Ident)
-          name = id.s_value
-        when nterm? && (id.s_value.include?("$") || id.s_value.include?("@"))
-          name = number.to_s + id.s_value
+        when term? && !char?
+          name = self.name
+        when nterm? && (self.name.include?("$") || self.name.include?("@"))
+          name = number.to_s + self.name
         when nterm?
-          name = id.s_value
+          name = self.name
         else
           raise "Unexpected #{self}"
         end
@@ -67,19 +71,19 @@ module Lrama
         case
         when accept_symbol?
           # YYSYMBOL_YYACCEPT
-          id.s_value
+          self.name
         when eof_symbol?
           # YYEOF
           alias_name
         when (term? && 0 < token_id && token_id < 128)
           # YYSYMBOL_3_backslash_, YYSYMBOL_14_
-          alias_name || id.s_value
-        when id.s_value.include?("$") || id.s_value.include?("@")
+          alias_name || self.name
+        when self.name.include?("$") || self.name.include?("@")
           # YYSYMBOL_21_1
-          id.s_value
+          self.name
         else
           # YYSYMBOL_keyword_class, YYSYMBOL_strings_1
-          alias_name || id.s_value
+          alias_name || self.name
         end
       end
     end

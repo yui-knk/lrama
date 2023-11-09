@@ -26,7 +26,7 @@ module Lrama
       @states.terms.reject do |term|
         0 < term.token_id && term.token_id < 128
       end.map do |term|
-        [term.id.s_value, term.token_id, term.display_name]
+        [term.name, term.token_id, term.display_name]
       end.unshift(["YYEMPTY", -2, nil])
     end
 
@@ -41,7 +41,7 @@ module Lrama
     def yyfinal
       @states.states.find do |state|
         state.items.find do |item|
-          item.rule.lhs.id.s_value == "$accept" && item.end_of_rule?
+          item.rule.lhs.name == "$accept" && item.end_of_rule?
         end
       end.id
     end
