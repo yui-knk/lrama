@@ -411,7 +411,7 @@ rule
   generic_symlist_item: symbol
                       | TAG
 
-  string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0]) }
+  string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0], location: @lexer.location) }
 end
 
 ---- inner

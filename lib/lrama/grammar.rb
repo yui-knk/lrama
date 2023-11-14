@@ -324,26 +324,28 @@ module Lrama
       # term.number = -2
       # @empty_symbol = term
 
+      location = Lrama::Lexer::Location.new(first_line: 0, first_column: 0, last_line: 0, last_column: 0)
+
       # YYEOF
-      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYEOF"), alias_name: "\"end of file\"", token_id: 0)
+      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYEOF", location: location), alias_name: "\"end of file\"", token_id: 0)
       term.number = 0
       term.eof_symbol = true
       @eof_symbol = term
 
       # YYerror
-      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYerror"), alias_name: "error")
+      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYerror", location: location), alias_name: "error")
       term.number = 1
       term.error_symbol = true
       @error_symbol = term
 
       # YYUNDEF
-      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYUNDEF"), alias_name: "\"invalid token\"")
+      term = add_term(id: Lrama::Lexer::Token::Ident.new(s_value: "YYUNDEF", location: location), alias_name: "\"invalid token\"")
       term.number = 2
       term.undef_symbol = true
       @undef_symbol = term
 
       # $accept
-      term = add_nterm(id: Lrama::Lexer::Token::Ident.new(s_value: "$accept"))
+      term = add_nterm(id: Lrama::Lexer::Token::Ident.new(s_value: "$accept", location: location))
       term.accept_symbol = true
       @accept_symbol = term
     end

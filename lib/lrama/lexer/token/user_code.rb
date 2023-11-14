@@ -34,16 +34,16 @@ module Lrama
           # $ references
           # It need to wrap an identifier with brackets to use ".-" for identifiers
           when scanner.scan(/\$(<[a-zA-Z0-9_]+>)?\$/) # $$, $<long>$
-            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1]) : nil
+            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1], location: location) : nil
             return Lrama::Grammar::Reference.new(type: :dollar, name: "$", ex_tag: tag, first_column: start, last_column: scanner.pos - 1)
           when scanner.scan(/\$(<[a-zA-Z0-9_]+>)?(\d+)/) # $1, $2, $<long>1
-            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1]) : nil
+            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1], location: location) : nil
             return Lrama::Grammar::Reference.new(type: :dollar, index: Integer(scanner[2]), ex_tag: tag, first_column: start, last_column: scanner.pos - 1)
           when scanner.scan(/\$(<[a-zA-Z0-9_]+>)?([a-zA-Z_][a-zA-Z0-9_]*)/) # $foo, $expr, $<long>program (named reference without brackets)
-            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1]) : nil
+            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1], location: location) : nil
             return Lrama::Grammar::Reference.new(type: :dollar, name: scanner[2], ex_tag: tag, first_column: start, last_column: scanner.pos - 1)
           when scanner.scan(/\$(<[a-zA-Z0-9_]+>)?\[([a-zA-Z_.][-a-zA-Z0-9_.]*)\]/) # $expr.right, $expr-right, $<long>program (named reference with brackets)
-            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1]) : nil
+            tag = scanner[1] ? Lrama::Lexer::Token::Tag.new(s_value: scanner[1], location: location) : nil
             return Lrama::Grammar::Reference.new(type: :dollar, name: scanner[2], ex_tag: tag, first_column: start, last_column: scanner.pos - 1)
 
           # @ references

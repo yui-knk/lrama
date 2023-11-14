@@ -2,10 +2,11 @@
 
 RSpec.describe Lrama::Grammar::Code do
   let(:token_class) { Lrama::Lexer::Token }
-  let(:user_code_dollar_dollar) { token_class::UserCode.new(s_value: 'print($$);') }
-  let(:user_code_at_dollar) { token_class::UserCode.new(s_value: 'print(@$);') }
-  let(:user_code_dollar_n) { token_class::UserCode.new(s_value: 'print($n);') }
-  let(:user_code_at_n) { token_class::UserCode.new(s_value: 'print(@n);') }
+  let(:user_code_location) { Lrama::Lexer::Location.new(first_line: 1, first_column: 0, last_line: 1, last_column: 9) }
+  let(:user_code_dollar_dollar) { token_class::UserCode.new(s_value: 'print($$);', location: user_code_location) }
+  let(:user_code_at_dollar) { token_class::UserCode.new(s_value: 'print(@$);', location: user_code_location) }
+  let(:user_code_dollar_n) { token_class::UserCode.new(s_value: 'print($n);', location: user_code_location) }
+  let(:user_code_at_n) { token_class::UserCode.new(s_value: 'print(@n);', location: user_code_location) }
 
   describe Lrama::Grammar::Code::InitialActionCode do
     describe "#translated_code" do
@@ -57,7 +58,8 @@ RSpec.describe Lrama::Grammar::Code do
 
   describe Lrama::Grammar::Code::PrinterCode do
     describe "#translated_code" do
-      let(:tag) { token_class::Tag.new(s_value: '<val>') }
+      let(:tag_location) { Lrama::Lexer::Location.new(first_line: 1, first_column: 0, last_line: 1, last_column: 5) }
+      let(:tag) { token_class::Tag.new(s_value: '<val>', location: tag_location) }
 
       it "translats '$$' to '((*yyvaluep).val)'" do
         code = described_class.new(type: :printer, token_code: user_code_dollar_dollar, tag: tag)

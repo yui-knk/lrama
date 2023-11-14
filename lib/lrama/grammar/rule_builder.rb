@@ -119,7 +119,7 @@ module Lrama
             @replaced_rhs << token
           when Lrama::Lexer::Token::UserCode
             prefix = token.referred ? "@" : "$@"
-            new_token = Lrama::Lexer::Token::Ident.new(s_value: prefix + @midrule_action_counter.increment.to_s)
+            new_token = Lrama::Lexer::Token::Ident.new(s_value: prefix + @midrule_action_counter.increment.to_s, location: token.location)
             @replaced_rhs << new_token
 
             rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, i, skip_preprocess_references: true)

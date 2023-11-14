@@ -90,9 +90,10 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
   describe "#precedence_sym=" do
     describe "@user_code" do
-      let(:location) { Lrama::Lexer::Location.new(first_line: 1, first_column: 0, last_line: 1, last_column: 4) }
-      let(:token_1) { Lrama::Lexer::Token::UserCode.new(s_value: "code 1", location: location) }
-      let(:sym) { Lrama::Grammar::Symbol.new(id: Lrama::Lexer::Token::Ident.new(s_value: "tPLUS")) }
+      let(:user_code_location) { Lrama::Lexer::Location.new(first_line: 1, first_column: 0, last_line: 1, last_column: 6) }
+      let(:token_1) { Lrama::Lexer::Token::UserCode.new(s_value: "code 1", location: user_code_location) }
+      let(:ident_location) { Lrama::Lexer::Location.new(first_line: 2, first_column: 0, last_line: 2, last_column: 5) }
+      let(:sym) { Lrama::Grammar::Symbol.new(id: Lrama::Lexer::Token::Ident.new(s_value: "tPLUS", location: ident_location)) }
 
       context "@user_code is not nil" do
         it "sets @user_code to be nil and add previous user_code to rhs" do
