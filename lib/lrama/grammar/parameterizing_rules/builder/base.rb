@@ -15,6 +15,10 @@ module Lrama
             @expected_argument_num = 1
           end
 
+          def build
+            raise NotImplementedError
+          end
+
           private
 
           def validate_argument_number!
