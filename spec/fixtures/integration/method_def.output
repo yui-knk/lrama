@@ -1,0 +1,150 @@
+Grammar
+
+    0 $accept: program "end of file"
+
+    1 program: class_def
+
+    2 class_def: "class" "A" body "end"
+
+    3 body: method_def
+    4     | singleton_method_def
+
+    5 method_def: "def" "m" "end"
+
+    6 singleton_method_def: "def" "self" '.' "m" "end"
+
+
+State 0
+
+    0 $accept: • program "end of file"
+    1 program: • class_def
+    2 class_def: • "class" "A" body "end"
+
+    "class"  shift, and go to state 1
+
+    program    go to state 2
+    class_def  go to state 3
+
+
+State 1
+
+    2 class_def: "class" • "A" body "end"
+
+    "A"  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: program • "end of file"
+
+    "end of file"  shift, and go to state 5
+
+
+State 3
+
+    1 program: class_def •
+
+    $default  reduce using rule 1 (program)
+
+
+State 4
+
+    2 class_def: "class" "A" • body "end"
+    3 body: • method_def
+    4     | • singleton_method_def
+    5 method_def: • "def" "m" "end"
+    6 singleton_method_def: • "def" "self" '.' "m" "end"
+
+    "def"  shift, and go to state 6
+
+    body                  go to state 7
+    method_def            go to state 8
+    singleton_method_def  go to state 9
+
+
+State 5
+
+    0 $accept: program "end of file" •
+
+    $default  accept
+
+
+State 6
+
+    5 method_def: "def" • "m" "end"
+    6 singleton_method_def: "def" • "self" '.' "m" "end"
+
+    "self"  shift, and go to state 10
+    "m"     shift, and go to state 11
+
+
+State 7
+
+    2 class_def: "class" "A" body • "end"
+
+    "end"  shift, and go to state 12
+
+
+State 8
+
+    3 body: method_def •
+
+    $default  reduce using rule 3 (body)
+
+
+State 9
+
+    4 body: singleton_method_def •
+
+    $default  reduce using rule 4 (body)
+
+
+State 10
+
+    6 singleton_method_def: "def" "self" • '.' "m" "end"
+
+    '.'  shift, and go to state 13
+
+
+State 11
+
+    5 method_def: "def" "m" • "end"
+
+    "end"  shift, and go to state 14
+
+
+State 12
+
+    2 class_def: "class" "A" body "end" •
+
+    $default  reduce using rule 2 (class_def)
+
+
+State 13
+
+    6 singleton_method_def: "def" "self" '.' • "m" "end"
+
+    "m"  shift, and go to state 15
+
+
+State 14
+
+    5 method_def: "def" "m" "end" •
+
+    $default  reduce using rule 5 (method_def)
+
+
+State 15
+
+    6 singleton_method_def: "def" "self" '.' "m" • "end"
+
+    "end"  shift, and go to state 16
+
+
+State 16
+
+    6 singleton_method_def: "def" "self" '.' "m" "end" •
+
+    $default  reduce using rule 6 (singleton_method_def)
+
+

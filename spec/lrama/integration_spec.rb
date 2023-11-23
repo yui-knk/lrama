@@ -76,6 +76,21 @@ RSpec.describe "integration" do
     end
   end
 
+  describe "class def" do
+    it "returns 3 for '1 2 +" do
+      input = <<~INPUT
+        class A
+          class A
+            class A
+              CONST = 1
+            end
+          end
+        end
+      INPUT
+      test_parser("class_def", input, "", debug: 1)
+    end
+  end
+
   describe "%printer" do
     it "prints messages" do
       expected = <<~STR.chomp
