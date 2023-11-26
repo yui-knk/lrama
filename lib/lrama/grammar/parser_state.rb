@@ -115,14 +115,12 @@ module Lrama
       end
 
       def enum_body
-        state_list.map do |state|
-          state.s_value
-        end.join(",\n  ")
+        enum_numbers.join(",\n  ")
       end
 
       def int_to_name
         state_list.map do |state|
-           "\"#{state.s_value}\""
+          "\"#{state.s_value}\""
         end << "YY_NULLPTR"
       end
 
@@ -132,6 +130,14 @@ module Lrama
 
       def stack_prefix
         "yyparser_state_#{state_name}"
+      end
+
+      private
+
+      def enum_numbers
+        state_list.map do |state|
+          "yyparser_state_#{state.s_value}"
+        end
       end
     end
   end

@@ -16,10 +16,10 @@ RSpec.describe Lrama::Grammar::ParserState do
       expect(parser_state.enum_definition).to eq <<~ENUM
         enum yyparser_state_in_rescue
         {
-          before_rescue,
-          after_rescue,
-          after_else,
-          after_ensure
+          yyparser_state_before_rescue,
+          yyparser_state_after_rescue,
+          yyparser_state_after_else,
+          yyparser_state_after_ensure
         };
         typedef enum yyparser_state_in_rescue yyparser_state_in_rescue_t;
 
@@ -143,10 +143,10 @@ RSpec.describe Lrama::Grammar::ParserState do
   describe "#enum_body" do
     it "returns enum body" do
       expect(parser_state.enum_body).to eq <<~BODY.chomp
-        before_rescue,
-          after_rescue,
-          after_else,
-          after_ensure
+        yyparser_state_before_rescue,
+          yyparser_state_after_rescue,
+          yyparser_state_after_else,
+          yyparser_state_after_ensure
       BODY
     end
   end
