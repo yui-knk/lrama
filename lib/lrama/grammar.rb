@@ -9,9 +9,9 @@ require "lrama/grammar/reference"
 require "lrama/grammar/rule"
 require "lrama/grammar/rule_builder"
 require "lrama/grammar/symbol"
+require "lrama/grammar/type"
 require "lrama/grammar/union"
 require "lrama/lexer"
-require "lrama/type"
 
 module Lrama
   # Grammar is the result of parsing an input grammar file
@@ -387,6 +387,11 @@ module Lrama
         end
 
         builder.rules.each do |rule|
+          add_nterm(id: rule._lhs)
+          @rules << rule
+        end
+
+        builder.parameterizing_rules.each do |rule|
           add_nterm(id: rule._lhs)
           @rules << rule
         end
