@@ -12,9 +12,11 @@ module Lrama
         @precedence_sym: Lexer::Token?
         @line: Integer?
 
-        def initialize: (Lexer::Token::Parameterizing token, Counter rule_counter, Lexer::Token lhs, Lexer::Token::UserCode? user_code, Lexer::Token? precedence_sym, Integer? line) -> void
+        def initialize: (Lexer::Token token, Counter rule_counter, Lexer::Token::UserCode? user_code, Lexer::Token? precedence_sym, Integer? line) -> void
         def build: () -> Array[Rule]
         def build_token: () -> Lrama::Lexer::Token
+        def create_builder: () -> void
+        def validate_key!: () -> void
       end
     end
   end
