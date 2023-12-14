@@ -29,6 +29,7 @@ module Lrama
       %empty
       %code
       %rule
+      %inline
     )
 
     def initialize(text)

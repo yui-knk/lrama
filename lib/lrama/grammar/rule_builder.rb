@@ -3,7 +3,7 @@ require 'lrama/grammar/parameterizing_rules/builder'
 module Lrama
   class Grammar
     class RuleBuilder
-      attr_accessor :lhs, :lhs_tag, :line
+      attr_accessor :lhs, :lhs_tag, :inline, :line
       attr_reader :rhs, :user_code, :precedence_sym
 
       def initialize(rule_counter, midrule_action_counter, position_in_original_rule_rhs = nil, skip_preprocess_references: false)

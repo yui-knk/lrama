@@ -3,6 +3,7 @@ module Lrama
     class RuleBuilder
       attr_accessor lhs: Lexer::Token
       attr_accessor lhs_tag: untyped
+      attr_accessor inline: bool
       attr_accessor line: Integer?
       attr_reader rhs: Array[Lexer::Token]
       attr_reader user_code: Lexer::Token::UserCode?

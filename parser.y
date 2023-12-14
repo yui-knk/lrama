@@ -347,12 +347,14 @@ rule
   rules_or_grammar_declaration: rules
                               | grammar_declaration ";"
 
-  rules: id_colon named_ref_opt ":" rhs_list
+  rules: inline_opt id_colon named_ref_opt ":" rhs_list
            {
-             lhs = val[0]
-             lhs.alias_name = val[1]
-             val[3].each do |builder|
+             inline = val[0]
+             lhs = val[1]
+             lhs.alias_name = val[2]
+             val[4].each do |builder|
                builder.lhs = lhs
+               builder.inline = true if inline
                builder.complete_input
                @grammar.add_rule_builder(builder)
              end
@@ -447,6 +449,9 @@ rule
 
   parameterizing_args: symbol { result = [val[0]] }
                      | parameterizing_args ',' symbol { result = val[0].append(val[2]) }
+
+  inline_opt: # empty
+            | "%inline" { result = true }
 
   named_ref_opt: # empty
                | '[' IDENTIFIER ']' { result = val[1].s_value }
