@@ -3,38 +3,23 @@ module Lrama
     class Token
       class InstantiateRule < Token
         class Arguments
-          attr_reader :values, :count
+          attr_reader :actual_args, :count
 
-          def initialize(values)
-            @values = values
-            @count = values.count
+          def initialize(parameters, actual_args)
+            @parameters = parameters
+            @actual_args = actual_args
+            @count = parameters.count
+            @parameter_to_arg = parameters.zip(actual_args).map do |param, arg|
+              [param.s_value, arg]
+            end.to_h
           end
 
           def to_s
-            values.map(&:s_value).join('_')
+            actual_args.map(&:s_value).join('_')
           end
 
-          def [](index)
-            values[index]
-          end
-
-          def first
-            values.first
-          end
-
-          def actual_values(actual_args, parameters)
-            actual = values.map do |v|
-              i = parameters.index { |param| param.s_value == v.s_value }
-              i.nil? ? v : actual_args[i]
-            end
-            Arguments.new(actual)
-          end
-
-          def replace_token(parameters, token, replaced)
-            values.map do |v|
-              i = parameters.index { |param| param.s_value == v.s_value }
-              i.nil? ? token : replaced
-            end
+          def resolve_symbol(symbol)
+            @parameter_to_arg[symbol.s_value] || symbol
           end
         end
       end

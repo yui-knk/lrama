@@ -11,10 +11,11 @@ module Lrama
       end
 
       def build_rules(token, actual_args, rule_counter, lhs_tag, line, rule_builders)
+        arguments = Lrama::Lexer::Token::InstantiateRule::Arguments.new(parameters, actual_args)
         validate_argument_number!(token)
-        lhs = lhs(actual_args)
+        lhs = lhs(arguments)
         @rhs.map do |rhs|
-          rhs.build_rules(token, actual_args, parameters, rule_counter, lhs, lhs_tag, line, rule_builders)
+          rhs.build_rules(token, arguments, rule_counter, lhs, lhs_tag, line, rule_builders)
         end.flatten
       end
 
@@ -26,8 +27,8 @@ module Lrama
         end
       end
 
-      def lhs(actual_args)
-        Lrama::Lexer::Token::Ident.new(s_value: "#{name}_#{actual_args.to_s}")
+      def lhs(arguments)
+        Lrama::Lexer::Token::Ident.new(s_value: "#{name}_#{arguments.to_s}")
       end
     end
   end
