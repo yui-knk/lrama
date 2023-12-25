@@ -66,7 +66,7 @@ module Lrama
     def add_term(id:, alias_name: nil, tag: nil, token_id: nil, replace: false)
       if token_id && (sym = @symbols.find {|s| s.token_id == token_id })
         if replace
-          sym.id = id
+          sym.name = id.s_value
           sym.alias_name = alias_name
           sym.tag = tag
         end
@@ -74,12 +74,12 @@ module Lrama
         return sym
       end
 
-      if (sym = @symbols.find {|s| s.id == id })
+      if (sym = @symbols.find {|s| s.name == id.s_value })
         return sym
       end
 
       sym = Symbol.new(
-        id: id, alias_name: alias_name, number: nil, tag: tag,
+        name: id.s_value, type: nil, alias_name: alias_name, number: nil, tag: tag,
         term: true, token_id: token_id, nullable: false
       )
       @symbols << sym
@@ -89,10 +89,10 @@ module Lrama
     end
 
     def add_nterm(id:, alias_name: nil, tag: nil)
-      return if @symbols.find {|s| s.id == id }
+      return if @symbols.find {|s| s.name == id.s_value }
 
       sym = Symbol.new(
-        id: id, alias_name: alias_name, number: nil, tag: tag,
+        name: id.s_value, type: nil, alias_name: alias_name, number: nil, tag: tag,
         term: false, token_id: nil, nullable: nil,
       )
       @symbols << sym
@@ -180,7 +180,7 @@ module Lrama
 
     def find_symbol_by_s_value(s_value)
       @symbols.find do |sym|
-        sym.id.s_value == s_value
+        sym.name == s_value
       end
     end
 
@@ -424,7 +424,7 @@ module Lrama
         if sym.term? && sym.token_id.nil?
           if sym.id.is_a?(Lrama::Lexer::Token::Char)
             # Ignore ' on the both sides
-            case sym.id.s_value[1..-2]
+            case sym.name[1..-2]
             when "\\b"
               sym.token_id = 8
             when "\\f"

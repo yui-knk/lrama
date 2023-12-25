@@ -61,7 +61,7 @@ module Lrama
       end
 
       def to_s
-        "#{lhs.id.s_value}: #{display_name}"
+        "#{lhs.name}: #{display_name}"
       end
 
       def display_name

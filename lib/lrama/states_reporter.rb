@@ -92,9 +92,9 @@ module Lrama
             r = rule.rhs.map(&:display_name).insert(position, "•").join(" ")
           end
           if rule.lhs == last_lhs
-            l = " " * rule.lhs.id.s_value.length + "|"
+            l = " " * rule.lhs.name.length + "|"
           else
-            l = rule.lhs.id.s_value + ":"
+            l = rule.lhs.name + ":"
           end
           la = ""
           if lookaheads && item.end_of_rule?
@@ -174,14 +174,14 @@ module Lrama
         state.nterm_transitions.each do |shift, next_state|
           nterm = shift.next_sym
           tmp << [nterm, next_state.id]
-          max_len = [max_len, nterm.id.s_value.length].max
+          max_len = [max_len, nterm.name.length].max
         end
         tmp.uniq!
         tmp.sort_by! do |nterm, state_id|
           nterm.number
         end
         tmp.each do |nterm, state_id|
-          io << "    #{nterm.id.s_value.ljust(max_len)}  go to state #{state_id}\n"
+          io << "    #{nterm.name.ljust(max_len)}  go to state #{state_id}\n"
         end
         io << "\n" if !tmp.empty?
 
@@ -201,7 +201,7 @@ module Lrama
             label1 = example.type == :shift_reduce ? "Shift derivation"  : "First Reduce derivation"
             label2 = example.type == :shift_reduce ? "Reduce derivation" : "Second Reduce derivation"
 
-            io << "    #{label0} conflict on token #{example.conflict_symbol.id.s_value}:\n"
+            io << "    #{label0} conflict on token #{example.conflict_symbol.name}:\n"
             io << "        #{example.path1_item}\n"
             io << "        #{example.path2_item}\n"
             io << "      #{label1}\n"
@@ -224,8 +224,8 @@ module Lrama
             next if !terms
             next if terms.empty?
 
-            str = terms.map {|sym| sym.id.s_value }.join(", ")
-            io << "    read #{nterm.id.s_value}  shift #{str}\n"
+            str = terms.map {|sym| sym.name }.join(", ")
+            io << "    read #{nterm.name}  shift #{str}\n"
           end
           io << "\n"
 
@@ -237,7 +237,7 @@ module Lrama
 
             a.each do |state_id2, nterm_id2|
               n = @states.nterms.find {|n| n.token_id == nterm_id2 }
-              io << "    (State #{state_id2}, #{n.id.s_value})\n"
+              io << "    (State #{state_id2}, #{n.name})\n"
             end
           end
           io << "\n"
@@ -251,7 +251,7 @@ module Lrama
             next if terms.empty?
 
             terms.each do |sym|
-              io << "    #{sym.id.s_value}\n"
+              io << "    #{sym.name}\n"
             end
           end
           io << "\n"
@@ -264,7 +264,7 @@ module Lrama
 
             a.each do |state_id2, nterm_id2|
               n = @states.nterms.find {|n| n.token_id == nterm_id2 }
-              io << "    (State #{state.id}, #{nterm.id.s_value}) -> (State #{state_id2}, #{n.id.s_value})\n"
+              io << "    (State #{state.id}, #{nterm.name}) -> (State #{state_id2}, #{n.name})\n"
             end
           end
           io << "\n"
@@ -277,7 +277,7 @@ module Lrama
 
             a.each do |state_id2, nterm_id2|
               n = @states.nterms.find {|n| n.token_id == nterm_id2 }
-              io << "    (Rule: #{rule}) -> (State #{state_id2}, #{n.id.s_value})\n"
+              io << "    (Rule: #{rule}) -> (State #{state_id2}, #{n.name})\n"
             end
           end
           io << "\n"
@@ -291,7 +291,7 @@ module Lrama
             next if !terms
 
             terms.each do |sym|
-              io << "    #{nterm.id.s_value} -> #{sym.id.s_value}\n"
+              io << "    #{nterm.name} -> #{sym.name}\n"
             end
           end
           io << "\n"
@@ -305,11 +305,11 @@ module Lrama
             next if !syms
 
             tmp << [rule, syms]
-            max_len = ([max_len] + syms.map {|s| s.id.s_value.length }).max
+            max_len = ([max_len] + syms.map {|s| s.name.length }).max
           end
           tmp.each do |rule, syms|
             syms.each do |sym|
-              io << "    #{sym.id.s_value.ljust(max_len)}  reduce using rule #{rule.id} (#{rule.lhs.id.s_value})\n"
+              io << "    #{sym.name.ljust(max_len)}  reduce using rule #{rule.id} (#{rule.lhs.name})\n"
             end
           end
           io << "\n" if !tmp.empty?

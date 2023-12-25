@@ -430,7 +430,7 @@ opt_nl : /* none */
         example = examples[0]
 
         expect(example.type).to eq :shift_reduce
-        expect(example.conflict_symbol.id.s_value).to eq "'\\n'"
+        expect(example.conflict_symbol.name).to eq "'\\n'"
         # Shift Conflict
         expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",
@@ -473,7 +473,7 @@ opt_nl : /* none */
         example = examples[1]
 
         expect(example.type).to eq :reduce_reduce
-        expect(example.conflict_symbol.id.s_value).to eq "'+'"
+        expect(example.conflict_symbol.name).to eq "'+'"
         # Reduce Conflict
         expect(example.path1.map(&:to).map(&:item).map(&:to_s)).to eq([
           "$accept: • stmt \"end of file\"  (rule 0)",

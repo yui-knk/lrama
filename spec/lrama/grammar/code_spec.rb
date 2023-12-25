@@ -153,37 +153,37 @@ rule8: expr { $$ = $1 } '+' expr { $2; }
 
     describe "#translated_code" do
       it "translats '$$' to '(yyval)' with member" do
-        code = grammar.rules.find {|r| r.lhs.id.s_value == "rule1" }
+        code = grammar.rules.find {|r| r.lhs.name == "rule1" }
         expect(code.translated_code).to eq(" (yyval.rule1) = 0; ")
       end
 
       it "translats '@$' to '(yyloc)'" do
-        code = grammar.rules.find {|r| r.lhs.id.s_value == "rule2" }
+        code = grammar.rules.find {|r| r.lhs.name == "rule2" }
         expect(code.translated_code).to eq(" (yyloc) = 0; ")
       end
 
       it "translats '$n' to '(yyvsp)' with index and member" do
-        code = grammar.rules.find {|r| r.lhs.id.s_value == "rule3" }
+        code = grammar.rules.find {|r| r.lhs.name == "rule3" }
         expect(code.translated_code).to eq(" (yyvsp[-2].expr) + (yyvsp[0].expr); ")
       end
 
       it "translats '@n' to '(yylsp)' with index" do
-        code = grammar.rules.find {|r| r.lhs.id.s_value == "rule4" }
+        code = grammar.rules.find {|r| r.lhs.name == "rule4" }
         expect(code.translated_code).to eq(" (yylsp[-2]) + (yylsp[0]); (yylsp[-3]); ")
       end
 
       it "respects explicit tag in a rule" do
-        code = grammar.rules.find {|r| r.lhs.id.s_value == "rule5" }
+        code = grammar.rules.find {|r| r.lhs.name == "rule5" }
         expect(code.translated_code).to eq(" (yyvsp[-2].expr) + (yyvsp[0].integer); ")
       end
 
       context "midrule action exists" do
         it "uses index on the original rule (-1)" do
           # midrule action in rule6
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "$@1" }
+          code = grammar.rules.find {|r| r.lhs.name == "$@1" }
           expect(code.translated_code).to eq(" (yyval.integer) = (yyvsp[-1].expr); (yyloc) = (yylsp[-1]); ")
 
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "rule6" }
+          code = grammar.rules.find {|r| r.lhs.name == "rule6" }
           expect(code.translated_code).to eq(" (yyvsp[-3].expr) + (yyvsp[0].integer); ")
         end
       end
@@ -192,18 +192,18 @@ rule8: expr { $$ = $1 } '+' expr { $2; }
         it "raises error" do
           # midrule action in rule7
           # rule7 has tag
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "@2" }
+          code = grammar.rules.find {|r| r.lhs.name == "@2" }
           expect { code.translated_code }.to raise_error("Tag is not specified for '$$' in '@2 -> ε'")
 
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "rule7" }
+          code = grammar.rules.find {|r| r.lhs.name == "rule7" }
           expect { code.translated_code }.to raise_error("Tag is not specified for '$2' in 'rule7 -> expr, @2, '+', expr'")
 
           # midrule action in rule8
           # rule8 has no tag
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "@3" }
+          code = grammar.rules.find {|r| r.lhs.name == "@3" }
           expect { code.translated_code }.to raise_error("Tag is not specified for '$$' in '@3 -> ε'")
 
-          code = grammar.rules.find {|r| r.lhs.id.s_value == "rule8" }
+          code = grammar.rules.find {|r| r.lhs.name == "rule8" }
           expect { code.translated_code }.to raise_error("Tag is not specified for '$2' in 'rule8 -> expr, @3, '+', expr'")
         end
       end

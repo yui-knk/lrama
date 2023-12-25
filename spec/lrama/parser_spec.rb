@@ -2494,7 +2494,7 @@ class : keyword_class tSTRING keyword_end ;
       INPUT
       grammar = Lrama::Parser.new(y, "parse.y").parse
       terms = grammar.terms.sort_by(&:number).map do |term|
-        [term.id.s_value, term.token_id]
+        [term.name, term.token_id]
       end
 
       expect(terms).to eq([
