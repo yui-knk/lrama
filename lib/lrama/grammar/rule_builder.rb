@@ -119,8 +119,12 @@ module Lrama
                   resolved.s_value
                 end
               end
-              new_token = Lrama::Lexer::Token::Ident.new(s_value: "#{token.rule_name}_#{actual_args.join('_')}")
+              new_token_name = "#{token.rule_name}_#{actual_args.join('_')}"
+              new_token = Lrama::Lexer::Token::Ident.new(s_value: new_token_name)
               @replaced_rhs << new_token
+
+              next if parameterizing_rule_resolver.cached?(new_token_name)
+              parameterizing_rule_resolver.add_cache(new_token_name)
 
               parameterizing_rule.rhs_list.each do |r|
                 rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, i, lhs_tag: token.lhs_tag, skip_preprocess_references: true)

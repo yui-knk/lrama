@@ -4,6 +4,7 @@ module Lrama
       class Resolver
         def initialize
           @rules = []
+          @cache = {}
         end
 
         def add_parameterizing_rule(rule)
@@ -16,6 +17,14 @@ module Lrama
 
         def find(token)
           select_rules(token).last
+        end
+
+        def add_cache(str)
+          @cache[str] = true
+        end
+
+        def cached?(str)
+          !!@cache[str]
         end
 
         private
