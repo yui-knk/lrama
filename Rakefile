@@ -16,6 +16,7 @@ task :spec => "build:parser"
 desc "steep check"
 task :steep do
   sh "bundle exec steep check"
+  sh "bundle exec steep stats"
 end
 
 task default: %i[spec steep]
