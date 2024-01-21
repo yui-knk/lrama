@@ -120,9 +120,15 @@ jobs:
       fail-fast: false
       matrix:
         # '3.0' is the oldest living ruby version
-        # '2.7' is for BASERUBY
-        baseruby: ['head', '3.0', '2.7']
-        ruby_branch: ['master']
+        # '2.7' is for ruby/ruby master branch BASERUBY
+        # '2.5' is for ruby/ruby ruby_3_3 branch BASERUBY
+        baseruby: ['head', '3.0', '2.7', '2.5']
+        ruby_branch: ['master', 'ruby_3_3']
+        exclude:
+          - baseruby: '2.5'
+            ruby_branch: 'master'
+          - baseruby: '2.7'
+            ruby_branch: 'ruby_3_3'
     defaults:
       run:
         working-directory: ../ruby/build
