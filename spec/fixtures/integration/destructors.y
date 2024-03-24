@@ -14,6 +14,7 @@ static int yyerror(YYLTYPE *loc, const char *str);
     int val1;
     int val2;
     int val3;
+    int val4;
 }
 
 %token <val1> NUM
@@ -29,6 +30,10 @@ static int yyerror(YYLTYPE *loc, const char *str);
 %destructor {
     printf("destructor for val2: %d\n", $$);
 } <val2>
+
+%destructor {
+    printf("destructor for val4: %d\n", $$);
+} <val4>
 
 %destructor {
     printf("destructor for expr: %d\n", $$);
@@ -47,7 +52,7 @@ expr2: '+' NUM { $$ = $2; }
 expr : NUM
      | expr '+' expr { $$ = $1 + $3; }
      | expr '-' expr { $$ = $1 - $3; }
-     | expr '*' expr { $$ = $1 * $3; }
+     | expr '*' { $<val4>$ = 0; } expr { $$ = $1 * $4; }
      | expr '/' expr { $$ = $1 / $3; }
      | '(' expr ')'  { $$ = $2; }
      ;
