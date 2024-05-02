@@ -1622,7 +1622,6 @@ RSpec.describe Lrama::Parser do
                 Sym.new(id: T::Ident.new(s_value: "pair_number_string"), alias_name: nil, number: 7, tag: nil, term: false, token_id: 1, nullable: false),
                 Sym.new(id: T::Ident.new(s_value: "program"), alias_name: nil, number: 8, tag: nil, term: false, token_id: 2, nullable: false),
               ])
-
               expect(grammar.rules).to eq([
                 Rule.new(
                   id: 0,
@@ -1645,7 +1644,7 @@ RSpec.describe Lrama::Parser do
                     grammar.find_symbol_by_s_value!("string")
                   ],
                   lhs_tag: nil,
-                  token_code: T::UserCode.new(s_value: " printf(\"(%d, %d)\\n\", $number, $2); "),
+                  token_code: T::UserCode.new(s_value: " printf(\"(%d, %d)\\n\", $X, $2); "),
                   nullable: false,
                   precedence_sym: grammar.find_symbol_by_s_value!("string"),
                   lineno: 24,
