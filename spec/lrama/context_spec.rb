@@ -150,6 +150,19 @@ RSpec.describe Lrama::Context do
     end
   end
 
+  describe "compressed tables" do
+    it '' do
+      path = "context/basic.y"
+      y = File.read(fixture_path(path))
+      grammar = Lrama::Parser.new(y, path).parse
+      grammar.prepare
+      grammar.validate!
+      states = Lrama::States.new(grammar)
+      states.compute
+      context = Lrama::Context.new(states)
+    end
+  end
+
   describe "compute_yydefact" do
     describe "S/R conflicts are resolved to reduce" do
       it "does not include shift into actions" do
