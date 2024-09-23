@@ -64,8 +64,8 @@ yytokname(int yyc)
 {
     static char x[16];
 
-    if(yyc > 0 && yyc <= sizeof(yytoknames)/sizeof(yytoknames[0]))
-    if(yytoknames[yyc-1])
+    if (yyc > 0 && yyc <= sizeof(yytoknames) / sizeof(yytoknames[0]))
+    if (yytoknames[yyc-1])
         return yytoknames[yyc-1];
     sprint(x, "<%d>", yyc);
     return x;
@@ -76,8 +76,8 @@ yystatname(int yys)
 {
     static char x[16];
 
-    if(yys >= 0 && yys < sizeof(yystates)/sizeof(yystates[0]))
-    if(yystates[yys])
+    if (yys >= 0 && yys < sizeof(yystates) / sizeof(yystates[0]))
+    if (yystates[yys])
         return yystates[yys];
     sprint(x, "<%d>\n", yys);
     return x;
@@ -91,34 +91,34 @@ yylex1(void)
     int c;
 
     yychar = yylex();
-    if(yychar <= 0) {
+    if (yychar <= 0) {
         c = yytok1[0];
         goto out;
     }
-    if(yychar < sizeof(yytok1)/sizeof(yytok1[0])) {
+    if (yychar < sizeof(yytok1) / sizeof(yytok1[0])) {
         c = yytok1[yychar];
         goto out;
     }
-    if(yychar >= YYPRIVATE)
-        if(yychar < YYPRIVATE+sizeof(yytok2)/sizeof(yytok2[0])) {
+    if (yychar >= YYPRIVATE)
+        if (yychar < YYPRIVATE + sizeof(yytok2) / sizeof(yytok2[0])) {
             c = yytok2[yychar-YYPRIVATE];
             goto out;
         }
-    for(t3p=yytok3;; t3p+=2) {
+    for (t3p = yytok3;; t3p+=2) {
         c = t3p[0];
-        if(c == yychar) {
+        if (c == yychar) {
             c = t3p[1];
             goto out;
         }
-        if(c == 0)
+        if (c == 0)
             break;
     }
     c = 0;
 
 out:
-    if(c == 0)
+    if (c == 0)
         c = yytok2[1];  /* unknown char */
-    if(yydebug >= 3)
+    if (yydebug >= 3)
         fprint(2, "lex %.4lux %s\n", yychar, yytokname(c));
     return c;
 }
@@ -166,11 +166,11 @@ ret:
 
 yystack:
     /* put a state and value onto the stack */
-    if(yydebug >= 4)
+    if (yydebug >= 4)
         fprint(2, "char %s in %s", yytokname(yychar), yystatname(yystate));
 
     yyp++;
-    if(yyp >= &yys[YYMAXDEPTH]) {
+    if (yyp >= &yys[YYMAXDEPTH]) {
         yyerror("yacc stack overflow");
         goto ret1;
     }
@@ -179,19 +179,19 @@ yystack:
 
 yynewstate:
     yyn = yypact[yystate];
-    if(yyn <= YYFLAG)
+    if (yyn <= YYFLAG)
         goto yydefault; /* simple state */
-    if(yychar < 0)
+    if (yychar < 0)
         yychar = yylex1();
     yyn += yychar;
-    if(yyn < 0 || yyn >= YYLAST)
+    if (yyn < 0 || yyn >= YYLAST)
         goto yydefault;
     yyn = yyact[yyn];
-    if(yychk[yyn] == yychar) { /* valid shift */
+    if (yychk[yyn] == yychar) { /* valid shift */
         yychar = -1;
         yyval = yylval;
         yystate = yyn;
-        if(yyerrflag > 0)
+        if (yyerrflag > 0)
             yyerrflag--;
         goto yystack;
     }
@@ -199,49 +199,49 @@ yynewstate:
 yydefault:
     /* default state action */
     yyn = yydef[yystate];
-    if(yyn == -2) {
-        if(yychar < 0)
+    if (yyn == -2) {
+        if (yychar < 0)
             yychar = yylex1();
 
         /* look through exception table */
-        for(yyxi=yyexca;; yyxi+=2)
-            if(yyxi[0] == -1 && yyxi[1] == yystate)
+        for (yyxi = yyexca;; yyxi+=2)
+            if (yyxi[0] == -1 && yyxi[1] == yystate)
                 break;
-        for(yyxi += 2;; yyxi += 2) {
+        for (yyxi += 2;; yyxi += 2) {
             yyn = yyxi[0];
-            if(yyn < 0 || yyn == yychar)
+            if (yyn < 0 || yyn == yychar)
                 break;
         }
         yyn = yyxi[1];
-        if(yyn < 0)
+        if (yyn < 0)
             goto ret0;
     }
-    if(yyn == 0) {
+    if (yyn == 0) {
         /* error ... attempt to resume parsing */
-        switch(yyerrflag) {
-        case 0:   /* brand new error */
+        switch (yyerrflag) {
+          case 0:   /* brand new error */
             yyerror("syntax error");
             yynerrs++;
-            if(yydebug >= 1) {
+            if (yydebug >= 1) {
                 fprint(2, "%s", yystatname(yystate));
                 fprint(2, "saw %s\n", yytokname(yychar));
             }
 
-        case 1:
-        case 2: /* incompletely recovered error ... try again */
+          case 1:
+          case 2: /* incompletely recovered error ... try again */
             yyerrflag = 3;
 
             /* find a state where "error" is a legal shift action */
-            while(yyp >= yys) {
+            while (yyp >= yys) {
                 yyn = yypact[yyp->yys] + YYERRCODE;
-                if(yyn >= 0 && yyn < YYLAST) {
+                if (yyn >= 0 && yyn < YYLAST) {
                     yystate = yyact[yyn];  /* simulate a shift of "error" */
-                    if(yychk[yystate] == YYERRCODE)
+                    if (yychk[yystate] == YYERRCODE)
                         goto yystack;
                 }
 
                 /* the current yyp has no shift onn "error", pop stack */
-                if(yydebug >= 2)
+                if (yydebug >= 2)
                     fprint(2, "error recovery pops state %d, uncovers %d\n",
                         yyp->yys, (yyp-1)->yys );
                 yyp--;
@@ -249,10 +249,10 @@ yydefault:
             /* there is no state on the stack with an error shift ... abort */
             goto ret1;
 
-        case 3:  /* no shift yet; clobber input char */
-            if(yydebug >= 2)
+          case 3:  /* no shift yet; clobber input char */
+            if (yydebug >= 2)
                 fprint(2, "error recovery discards %s\n", yytokname(yychar));
-            if(yychar == YYEOFCODE)
+            if (yychar == YYEOFCODE)
                 goto ret1;
             yychar = -1;
             goto yynewstate;   /* try again in the same state */
@@ -260,7 +260,7 @@ yydefault:
     }
 
     /* reduction by production yyn */
-    if(yydebug >= 2)
+    if (yydebug >= 2)
         fprint(2, "reduce %d in:\n\t%s", yyn, yystatname(yystate));
 
     yypt = yyp;
@@ -273,9 +273,9 @@ yydefault:
     yyg = yypgo[yyn];
     yyj = yyg + yyp->yys + 1;
 
-    if(yyj >= YYLAST || yychk[yystate=yyact[yyj]] != -yyn)
+    if (yyj >= YYLAST || yychk[yystate=yyact[yyj]] != -yyn)
         yystate = yyact[yyg];
-    switch(yym) {
+    switch (yym) {
         $A
     }
     goto yystack;  /* stack new state and value */
