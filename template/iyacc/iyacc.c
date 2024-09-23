@@ -83,46 +83,6 @@ yystatname(int yys)
     return x;
 }
 
-long
-yylex1(void)
-{
-    long yychar;
-    long *t3p;
-    int c;
-
-    yychar = yylex();
-    if (yychar <= 0) {
-        c = yytok1[0];
-        goto out;
-    }
-    if (yychar < sizeof(yytok1) / sizeof(yytok1[0])) {
-        c = yytok1[yychar];
-        goto out;
-    }
-    if (yychar >= YYPRIVATE)
-        if (yychar < YYPRIVATE + sizeof(yytok2) / sizeof(yytok2[0])) {
-            c = yytok2[yychar-YYPRIVATE];
-            goto out;
-        }
-    for (t3p = yytok3;; t3p+=2) {
-        c = t3p[0];
-        if (c == yychar) {
-            c = t3p[1];
-            goto out;
-        }
-        if (c == 0)
-            break;
-    }
-    c = 0;
-
-out:
-    if (c == 0)
-        c = yytok2[1];  /* unknown char */
-    if (yydebug >= 3)
-        fprint(2, "lex %.4lux %s\n", yychar, yytokname(c));
-    return c;
-}
-
 int
 yyparse(void)
 {
@@ -182,7 +142,7 @@ yynewstate:
     if (yyn <= YYFLAG)
         goto yydefault; /* simple state */
     if (yychar < 0)
-        yychar = yylex1();
+        yychar = yylex();
     yyn += yychar;
     if (yyn < 0 || yyn >= YYLAST)
         goto yydefault;
@@ -201,7 +161,7 @@ yydefault:
     yyn = yydef[yystate];
     if (yyn == -2) {
         if (yychar < 0)
-            yychar = yylex1();
+            yychar = yylex();
 
         /* look through exception table */
         for (yyxi = yyexca;; yyxi+=2)
