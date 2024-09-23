@@ -2,6 +2,25 @@
 
 The first milestone is to create new template and enable CI for new template parser.
 
+## The strucute of "iyacc.c" template file
+
+```c
+// (1) Few macros are defined
+
+// (2) prologue
+
+// (3) Include or embed parser header file
+
+// (4) Many macros and types are defined
+
+// (5) Functions are defined
+
+// (6)`yyparse` function is defined
+
+// (7) epilogue
+```
+
+
 # 001: Copy iyacc file
 
 Create "template/iyacc" folder.
@@ -40,7 +59,7 @@ These are variables to manage state of the parser:
 * `int yystate` is the current state. `yystack` pushes `yystate` to the parser stack. `yynewstate` (shift) and `yydefault` (recude) don't push new state to the parser stack directly, they update `yystate` instead.
 * `long yychar` is the current token. Minus value means no token is set then need to call `yylex`.
 * `YYSTYPE yylval` is semantic value updated by `yylex`. This is global variable in iyacc.
-* `YYSTYPE yyval` is semantic value set by each action. `$$` is expanded into `yyval`.
+* `YYSTYPE yyval` is semantic value of LHS set by each action. `$$` is expanded into `yyval`.
 * `int yyn` is a general purpose variable.
 * `int yym` is a rule id used for reduce.
 * `int yyg` is an offset of compressed GOTO table.
@@ -98,7 +117,18 @@ yydefault:
 }
 ```
 
-# 002: Formatting
+# 002: Setup test environment
+
+Setup test environment for iyacc based parser.
+To reuse existing test cases, update "spec/lrama/integration_spec.rb".
+
+* Extend `#test_parser` method to accept `template:` keyword argument, its default value is nil.
+* Append `-S` option to `lrama_command_args` if `template` is specified.
+* Add an assertion to "calculator" test case.
+
+The goal of milestone 1 is to pass "calculator" test case.
+
+# 003: Formatting
 
 * Replace tab in "iyacc.c" with 4 spaces
 * Add a space between keywords (`if`, `for`, `switch` and `while`) and `(`
@@ -118,7 +148,9 @@ switch (var) {
 }
 ```
 
-# 003: Add codes defined by "iyacc/yacc.c"
+* Replace `<%` in `sprint` arguments with `<%%`. Because "iyacc.c" template is evaluated as ERB template, `<%` is needed to be escaped with `<%%`.
+
+# 004: Add missed variables and macros to the template
 
 Because some codes are rendered by "iyacc/yacc.c", we need to add these codes to "iyacc.c" template.
 
@@ -133,32 +165,109 @@ This will be separated into `YYINITDEPTH` and `YYMAXDEPTH` later.
 
 ## `YYSTYPE`
 
+`YYSTYPE` is a type for semantic value data structure.
+`STYPE` might stand for Semantic TYEP.
 
+Define `YYSTYPE` and `YYSTYPE_IS_DECLARED` if `YYSTYPE` is not defined and `YYSTYPE_IS_DECLARED` is not defined.
+`YYSTYPE` is an union whose content is `output.grammar.union.braces_less_code`.
+Also declare `YYSTYPE` as a new type by `typedef`.
+
+For easy debug of generated parser, change file name and line number just before `output.grammar.union.braces_less_code` is rendered and restore original file name and line number once rendering is completed. `#line` directive is enough for both cases. `[@ofile@]` and `[@oline@]` are replaced to original file name and line number by `Lrama::Output#replace_special_variables`.
+
+Code example is like this:
+
+```ruby
+puts <<~CODE
+#line #{output.grammar.union.lineno} "#{output.grammar_file_path}"
+#{output.grammar.union.braces_less_code}
+#line [@oline@] [@ofile@]
+CODE
+```
+
+## `YYLTYPE`
+
+`YYLTYPE` is a type for location data structure.
+`LTYPE` might stand for Location TYEP.
+
+Define `YYLTYPE` and `YYLTYPE_IS_DECLARED` if `YYLTYPE` is not defined and `YYLTYPE_IS_DECLARED` is not defined.
+`YYLTYPE` is a struct whose content is `first_line`, `first_column`, `last_line` and `last_column`, all of them are `int`.
+Also declare `YYLTYPE` as a new type by `typedef`.
+
+No grammar file declarations affect the dafault structure of `YYLTYPE` then no need to templatize `YYLTYPE`.
 
 ## `yylval`
 
+`yylval` is semantic value updated by `yylex`, whose type is `YYSTYPE`.
+This is not defined in orignal iyacc template then define `yylval` as local variable in `yyparse` function.
 
+`lval` might stand for Lexer semantic VALue.
 
 ## `yyval`
 
+`yyval` is semantic value of LHS set by each action, whose type is `YYSTYPE`.
+This is not defined in orignal iyacc template then define `yyval` as local variable in `yyparse` function.
+
+## `yylloc`
+
+`yylloc` is location information updated by `yylex`, whose type is `YYLTYPE`.
+This is not defined in orignal iyacc template then define `yylloc` as local variable in `yyparse` function.
+
+`lloc` might stand for Lexer LOCation.
+
+## `yyloc`
+
+`yyloc` is location information of LHS set by each action, whose type is `YYLTYPE`.
+This is not defined in orignal iyacc template then define `yyloc` as local variable in `yyparse` function.
+
+# 005: Fix `yylex` function
+
+## Remove `yylex1` function
+
+We expect users to provide `yylex` fuction then:
+
+* Remove `yylex1` function definition from the template
+* Rename `yylex1` function call to `yylex` function call
+
+## Support prologue
+
+Lexer header, e.g. "calculator-lexer.h", is included into grammar file by prologue section.
+Therefore need to support prologue to run the test case .
+
+The content of prologue is contained in `output.aux.prologue`. If prologue is not defined, no need to render anything about prologue, so check `output.aux.prologue` before try to render it.
+
+For easy debug of generated parser, change file name and line number just before `output.aux.prologue` is rendered and restore original file name and line number once rendering is completed. `#line` directive is enough for both cases. `[@ofile@]` and `[@oline@]` are replaced to original file name and line number by `Lrama::Output#replace_special_variables`.
+
+Code example is like this:
+
+```ruby
+if output.aux.prologue
+puts <<~CODE
+#line #{output.aux.prologue_first_lineno} "#{output.grammar_file_path}"
+#{output.aux.prologue}
+#line [@oline@] [@ofile@]
+CODE
+end
+```
+
+## Fix arguments of `yylex` function call
+
+Arguments passed to `yylex` changes depending on `%locations`, `%lex-param` and `%param` directive are specified in the grammar file.
+Then need to change `yylex` arguments to be `output.yylex_formals`.
+
+# 006: Remove error recovery codes
+
+We will implement panic mode error recovery laster then remove error recovery codes right now.
+There are two error recovery codes, one is `if (yyn == -2) { ... }` in `yydefault` and another is `if (yyn == 0) { ... }` in `yydefault`. Remove both of them.
+
+# 007: Fix compressed state table
 
 
 
-* `YYEOFCODE`
-* `YYERRCODE`
-
-# XXX: Embed actions
+# 008: Embed actions
 
 `$A`
 
-# XXX: Setup test environment
-
-
 # Step 2: Modernize iyacc
-
-# XXX: Formatting
-
-if, for, switch
 
 # XXX: Remove global variables
 
