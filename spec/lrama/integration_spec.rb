@@ -19,7 +19,7 @@ RSpec.describe "integration" do
       ENV['COMPILER'] == "gcc" ? ".c" : ".cpp"
     end
 
-    def test_parser(parser_name, input, expected, expect_success: true, lrama_command_args: [], debug: false)
+    def test_parser(parser_name, input, expected, expect_success: true, lrama_command_args: [], template: nil, debug: false)
       tmpdir = Dir.tmpdir
       grammar_file_path = fixture_path("integration/#{parser_name}.y")
       lexer_file_path = fixture_path("integration/#{parser_name}.l")
@@ -28,6 +28,10 @@ RSpec.describe "integration" do
       lexer_c_path = tmpdir + "/#{parser_name}-lexer#{file_extension}"
       lexer_h_path = tmpdir + "/#{parser_name}-lexer.h"
       obj_path = tmpdir + "/#{parser_name}"
+
+      if template
+        lrama_command_args << "-S#{template}"
+      end
 
       command = [obj_path, input]
       if ENV['ENABEL_VALGRIND']
@@ -67,6 +71,7 @@ RSpec.describe "integration" do
   describe "calculator" do
     it "returns 9 for '(1+2)*3'" do
       test_parser("calculator", "( 1 + 2 ) * 3", "=> 9")
+      test_parser("calculator", "( 1 + 2 ) * 3", "=> 9", template: "iyacc/iyacc.c")
     end
   end
 
