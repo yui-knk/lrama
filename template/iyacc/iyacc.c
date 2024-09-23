@@ -38,10 +38,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+<%- if output.aux.prologue -%>
+#line <%= output.aux.prologue_first_lineno %> "<%= output.grammar_file_path %>"
+<%= output.aux.prologue %>
+#line [@oline@] [@ofile@]
+<%- end -%>
+
+
+#if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE {
+#line <%= output.grammar.union.lineno %> "<%= output.grammar_file_path %>"
+<%= output.grammar.union.braces_less_code %>
+#line [@oline@] [@ofile@]
+} YYSTYPE;
+
+#define YYSTYPE_IS_DECLARED 1
+#endif
+
+#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE {
+    int first_line;
+    int first_column;
+    int last_line;
+    int last_column;
+} YYLTYPE;
+
+#define YYLTYPE_IS_DECLARED 1
+#endif
 
 #define YYFLAG      -1000
 #define yyclearin   yychar = -1
 #define yyerrok     yyerrflag = 0
+
+#ifndef YYMAXDEPTH
+#define YYMAXDEPTH 200
+#endif
 
 #ifdef  yydebug
 #include    "y.debug"
@@ -67,7 +98,7 @@ yytokname(int yyc)
     if (yyc > 0 && yyc <= sizeof(yytoknames) / sizeof(yytoknames[0]))
     if (yytoknames[yyc-1])
         return yytoknames[yyc-1];
-    sprint(x, "<%d>", yyc);
+    sprint(x, "<%%d>", yyc);
     return x;
 }
 
@@ -79,7 +110,7 @@ yystatname(int yys)
     if (yys >= 0 && yys < sizeof(yystates) / sizeof(yystates[0]))
     if (yystates[yys])
         return yystates[yys];
-    sprint(x, "<%d>\n", yys);
+    sprint(x, "<%%d>\n", yys);
     return x;
 }
 
@@ -96,6 +127,10 @@ yyparse(void)
     long yychar;
     YYSTYPE save1, save2;
     int save3, save4;
+    YYSTYPE yylval;
+    YYSTYPE yyval;
+    YYLTYPE yylloc;
+    YYLTYPE yyloc;
 
     save1 = yylval;
     save2 = yyval;
@@ -142,7 +177,7 @@ yynewstate:
     if (yyn <= YYFLAG)
         goto yydefault; /* simple state */
     if (yychar < 0)
-        yychar = yylex();
+        yychar = yylex <%= output.yylex_formals %>;
     yyn += yychar;
     if (yyn < 0 || yyn >= YYLAST)
         goto yydefault;
@@ -159,65 +194,6 @@ yynewstate:
 yydefault:
     /* default state action */
     yyn = yydef[yystate];
-    if (yyn == -2) {
-        if (yychar < 0)
-            yychar = yylex();
-
-        /* look through exception table */
-        for (yyxi = yyexca;; yyxi+=2)
-            if (yyxi[0] == -1 && yyxi[1] == yystate)
-                break;
-        for (yyxi += 2;; yyxi += 2) {
-            yyn = yyxi[0];
-            if (yyn < 0 || yyn == yychar)
-                break;
-        }
-        yyn = yyxi[1];
-        if (yyn < 0)
-            goto ret0;
-    }
-    if (yyn == 0) {
-        /* error ... attempt to resume parsing */
-        switch (yyerrflag) {
-          case 0:   /* brand new error */
-            yyerror("syntax error");
-            yynerrs++;
-            if (yydebug >= 1) {
-                fprint(2, "%s", yystatname(yystate));
-                fprint(2, "saw %s\n", yytokname(yychar));
-            }
-
-          case 1:
-          case 2: /* incompletely recovered error ... try again */
-            yyerrflag = 3;
-
-            /* find a state where "error" is a legal shift action */
-            while (yyp >= yys) {
-                yyn = yypact[yyp->yys] + YYERRCODE;
-                if (yyn >= 0 && yyn < YYLAST) {
-                    yystate = yyact[yyn];  /* simulate a shift of "error" */
-                    if (yychk[yystate] == YYERRCODE)
-                        goto yystack;
-                }
-
-                /* the current yyp has no shift onn "error", pop stack */
-                if (yydebug >= 2)
-                    fprint(2, "error recovery pops state %d, uncovers %d\n",
-                        yyp->yys, (yyp-1)->yys );
-                yyp--;
-            }
-            /* there is no state on the stack with an error shift ... abort */
-            goto ret1;
-
-          case 3:  /* no shift yet; clobber input char */
-            if (yydebug >= 2)
-                fprint(2, "error recovery discards %s\n", yytokname(yychar));
-            if (yychar == YYEOFCODE)
-                goto ret1;
-            yychar = -1;
-            goto yynewstate;   /* try again in the same state */
-        }
-    }
 
     /* reduction by production yyn */
     if (yydebug >= 2)
