@@ -82,6 +82,48 @@ char*   yytoknames[1];      /* for debugging */
 char*   yystates[1];        /* for debugging */
 #endif
 
+typedef int yytype_int8;
+typedef unsigned int yytype_uint8;
+typedef int yytype_int16;
+typedef unsigned int yytype_uint16;
+
+#define YYLAST <%= output.yylast %>
+
+#define YYPACT_NINF <%= output.yypact_ninf %>
+#define YYTABLE_NINF <%= output.yytable_ninf %>
+
+static const <%= output.int_type_for(output.context.yypact) %> yypact[] = {
+<%= output.int_array_to_string(output.context.yypact) %>
+};
+
+static const <%= output.int_type_for(output.context.yydefact) %> yydefact[] = {
+<%= output.int_array_to_string(output.context.yydefact) %>
+};
+
+static const <%= output.int_type_for(output.context.yypgoto) %> yypgoto[] = {
+<%= output.int_array_to_string(output.context.yypgoto) %>
+};
+
+static const <%= output.int_type_for(output.context.yydefgoto) %> yydefgoto[] = {
+<%= output.int_array_to_string(output.context.yydefgoto) %>
+};
+
+static const <%= output.int_type_for(output.context.yytable) %> yytable[] = {
+<%= output.int_array_to_string(output.context.yytable) %>
+};
+
+static const <%= output.int_type_for(output.context.yycheck) %> yycheck[] = {
+<%= output.int_array_to_string(output.context.yycheck) %>
+};
+
+static const <%= output.int_type_for(output.context.yyr1) %> yyr1[] = {
+<%= output.int_array_to_string(output.context.yyr1) %>
+};
+
+static const <%= output.int_type_for(output.context.yyr2) %> yyr2[] = {
+<%= output.int_array_to_string(output.context.yyr2) %>
+};
+
 /*  parser for yacc output  */
 
 int yynerrs = 0;        /* number of errors */
