@@ -2,30 +2,6 @@
 
 The first milestone is to create new template and enable CI for new template parser.
 
-## The strucute of "iyacc.c" template file
-
-```c
-// (1) Few macros are defined
-
-// (2) prologue
-
-// (3) Include or embed parser header file
-
-// (4) Standard header inclusion
-
-// (5) Many macros and types are defined
-
-// (6) Functions are defined
-
-// (7)`yyparse` function is defined
-
-// (8) epilogue
-```
-
-## Event loop
-
-## Scope of local variables
-
 # 001: Copy iyacc file
 
 Create "template/iyacc" folder.
@@ -155,7 +131,11 @@ switch (var) {
 
 * Replace `<%` in `sprint` arguments with `<%%`. Because "iyacc.c" template is evaluated as ERB template, `<%` is needed to be escaped with `<%%`.
 
-# 004: Add missed variables and macros to the template
+# 004: Introduce scopes to actions in `yyparse`
+
+
+
+# 005: Add missed variables and macros to the template
 
 Because some codes are rendered by "iyacc/yacc.c", we need to add these codes to "iyacc.c" template.
 
@@ -224,7 +204,7 @@ This is not defined in orignal iyacc template then define `yylloc` as local vari
 `yyloc` is location information of LHS set by each action, whose type is `YYLTYPE`.
 This is not defined in orignal iyacc template then define `yyloc` as local variable in `yyparse` function.
 
-# 005: Fix `yylex` function
+# 006: Fix `yylex` function
 
 ## Remove `yylex1` function
 
@@ -259,12 +239,12 @@ end
 Arguments passed to `yylex` changes depending on `%locations`, `%lex-param` and `%param` directive are specified in the grammar file.
 Then need to change `yylex` arguments to be `output.yylex_formals`.
 
-# 006: Remove error recovery codes
+# 007: Remove error recovery codes
 
 We will implement panic mode error recovery laster then remove error recovery codes right now.
 There are two error recovery codes, one is `if (yyn == -2) { ... }` in `yydefault` and another is `if (yyn == 0) { ... }` in `yydefault`. Remove both of them.
 
-# 007: Fix compressed state table
+# 008: Fix compressed state table
 
 How to compress state table in iyacc is a bit different from how Lrama compresses.
 Replase compressed state table access algorithm.
@@ -277,7 +257,7 @@ These variable usages are removed with this change.
 * `yydef`
 * `yypgo`
 
-## Define macros, variables and types:
+## Define macros, variables and types
 
 ### Macros
 
@@ -288,7 +268,8 @@ These variable usages are removed with this change.
   * Last valid index of `yycheck` and `yytable`.
   * `output.yylast` provides the corresponding value.
 * `YYNTOKENS` macro
-  * 
+  * The number of terminal symbols.
+  * `yyr1` stores symbol id of LHS nonterminals, in other words `enum yysymbol_kind_t`. However `yypgoto` and `yydefgoto` index is nonterminal id which starts from `0`. `enum yysymbol_kind_t` nonterminals can be converted to nonterminal id by `nonterminal_symbol - YYNTOKENS`.
   * `output.yyntokens` provides the corresponding value.
 * `YYPACT_NINF` macro.
   * Negative INFinity number in `yypact`.
@@ -345,6 +326,7 @@ Right now, define these types with `int` and `unsigned int` simply.
 ### Declear local variables in `yyparse`
 
 * `int yyrule`
+  * `yyrule` stores rule id for reduce. `yynewstate` and `yydefault` update the value and `yyreduce` uses this value. Therefore need to declear as an local variable of `yyparse`.
 
 ### Define macros
 
@@ -352,16 +334,42 @@ Right now, define these types with `int` and `unsigned int` simply.
 #define yyunreachable() assert(0 && "unreachable")
 ```
 
+### Change `yystack`
+
+See also `:push_state` in "compressed_state_table/parser.rb".
+
+`yystack` is an action to push a state (`yystate`) and a state semantic value (`yyval`) to the parser stack (`yyp`). Finally check the current stack top, go to `ret0` if the top is the final state (`YYFINAL`).
+
+#### Check the latest state
+
+Add codes to check the pushed state to be the final state (`YYFINAL`).
+If it's the final state, it means the input is accepted then go to `ret0`.
+Otherwise next parser action is `yynewstate` so fall through.
+
+The codes are written on the last of `yystack`, after values are pushed to the stack.
+
 ### Change `yynewstate`
 
 See also `:decide_parser_action` in "compressed_state_table/parser.rb".
 
+`yynewstate` is an action to decide parser action (default reduce, error, shift, reduce).
+
+#### Add local variables
+
+Add these local variables on the top of `yynewstate` scope.
+
 * `int yyoffset`
+  * Offset calculated from `yypact`
 * `int yyindex`
+  * Index for `yycheck` and `yytable`
 * `int yyaction`
+  * Parser action (error, shift, reduce) calculated from `yytable`
 
+#### Update logic
 
-* Lookup `yypact` by `yystate` to get `yyoffset`.
+Rewrite `yynewstate` logic like below.
+
+* Lookup `yypact` by `yystate` and set the value to `yyoffset`.
 * Check `yyoffset`.
   * If it's same with `YYPACT_NINF`, go to `yydefault`.
 * Ensure next token (`yychar`) is set. If not, call `yychar` to get next token
@@ -383,34 +391,90 @@ See also `:decide_parser_action` in "compressed_state_table/parser.rb".
 
 ### Change `yydefault`
 
+See also `:yydefault` in "compressed_state_table/parser.rb".
 
+`yydefault` is an action to decide default reduction rule.
+
+#### Split reduction logic to `yyreduce`
+
+iyacc `yydefault` includes both (1) the logic for deciding rule of default reduction rule and (2) the logic of reduce. We will spilt them to two actions, (1) for `yydefault` and (2) for `yyreduce`.
+
+#### Update logic
+
+`yydefault` only determines default reduction rule.
+Rewrite `yydefault` logic like below.
+
+* Lookup `yydefact` by current state (`yystate`) and assign the value to `yyrule`.
+* Check if `yyrule` is `0`. `0` means syntax error then go to `ret1`. Otherwise go to `yyreduce` by fall through.
 
 ### Change `yyreduce`
 
-* `int yyoffset`
-* `int yyindex`
-* `int yy_lhs_nterm`
-* `int yy_rhs_len`
+See also `:yyreduce` in "compressed_state_table/parser.rb".
 
-* Execute semantic value action
-  * `output.user_actions`
+`yyreduce` is an action to execute reduce.
+
+#### Define `yyreduce` label
+
+`yyreduce` is splited from `yydefault`.
+The first step is to define `yyreduce` label after `yydefault`.
+
+#### Add local variables
+
+Add these local variables on the top of `yyreduce` scope.
+
+* `int yyoffset`
+  * Offset calculated from `yypgoto`
+* `int yyindex`
+  * Index for `yycheck` and `yytable`
+* `int yy_lhs_nterm`
+  * Left-Hand-Side nonterminal symbol id of the rule (`yyrule`)
+* `int yy_rhs_len`
+  * The lenght of the rule (`yyrule`), that is, number of symbols on the rule's Right-Hand-Side.
+
+#### Update logic
+
+* Set `yy_lhs_nterm`. Lookup `yyr1` by `yyrule` to get Left-Hand-Side nonterminal symbol of the rule. Because the value on `yyr1` is `yysymbol_kind_t` then need to conver it to nonterminal id. Convertion is to substruct `YYNTOKENS` from the value on `yyr1`.
+* Set `yy_rhs_len`. Lookup `yyr2` by `yyrule`.
+* Set `$$ = $1` as default value before calling semantic value action.
+  * `$$` is `yyval`.
+  * `yyp` points to current parser stack top.
+  * `yyp[-yy_rhs_len + 1]` points to `$1`.
+  * `yyp->yyv` is semantic value of parser stack.
+
+```
+  $$      $1  $2     $3
+expr: number '+' number
+                 ^^^^^^ yyp
+      ^^^^^^ yyp[-2] = yyp[-3 + 1] = yyp[-yy_rhs_len + 1]
+```
+
+* Execute semantic action
+  * Comment out `$A` right now, it will be replaced with actual user defined semantic actions later.
+* Pop parser stack by `yy_rhs_len`
+  * Substract `yy_rhs_len` from `yyp` to pop `yy_rhs_len` elements from parser stack.
+* Determine next state and assign it to `yystate`.
+  * Lookup `yypgoto` by `yy_lhs_nterm` and set the value to `yyoffset`.
+  * Check `yyoffset`.
+    * If it's same with `YYPACT_NINF`, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
+    * Otherwise calculate index (`yyindex = yyoffset + yystate`).
+      * Check `yyindex`.
+        * Valid range of `yyindex` is greater or equal to 0 and less or equal to `YYLAST`. If it's out of range, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
+        * If `yycheck[yyindex]` is not same with `yystate`, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
+        * Otherwise lookup `yytable` by `yyindex` and assign it to `yystate`.
+  * Go to `yystack`.
+* Call `yyunreachable()` on the end of `yyreduce`
+
+# 009: Embed actions
+
+`$A`
+
+`output.user_actions`
 
 ```c
 default:
     break;
 ```
 
-* Pop parser stack by `yy_rhs_len`
-  * `yyp`
-
-* Call `yyunreachable()` on the end of `yynewstate`
-
-
-# 008: Embed actions
-
-`$A`
-
-`output.user_actions`
 
 yyvsp
 
