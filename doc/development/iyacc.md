@@ -11,15 +11,20 @@ The first milestone is to create new template and enable CI for new template par
 
 // (3) Include or embed parser header file
 
-// (4) Many macros and types are defined
+// (4) Standard header inclusion
 
-// (5) Functions are defined
+// (5) Many macros and types are defined
 
-// (6)`yyparse` function is defined
+// (6) Functions are defined
 
-// (7) epilogue
+// (7)`yyparse` function is defined
+
+// (8) epilogue
 ```
 
+## Event loop
+
+## Scope of local variables
 
 # 001: Copy iyacc file
 
@@ -261,11 +266,153 @@ There are two error recovery codes, one is `if (yyn == -2) { ... }` in `yydefaul
 
 # 007: Fix compressed state table
 
+How to compress state table in iyacc is a bit different from how Lrama compresses.
+Replase compressed state table access algorithm.
+"compressed_state_table/main.md" explains the algorithm, please see it too.
+
+These variable usages are removed with this change.
+
+* `yyact`
+* `yychk`
+* `yydef`
+* `yypgo`
+
+## Define macros, variables and types:
+
+### Macros
+
+* `YYFINAL` macro
+  * State id which accepts the input.
+  * `output.yyfinal` provides the corresponding value.
+* `YYLAST` macro
+  * Last valid index of `yycheck` and `yytable`.
+  * `output.yylast` provides the corresponding value.
+* `YYNTOKENS` macro
+  * 
+  * `output.yyntokens` provides the corresponding value.
+* `YYPACT_NINF` macro.
+  * Negative INFinity number in `yypact`.
+  * `output.yypact_ninf` provides the corresponding value.
+* `YYTABLE_NINF` macro
+  * Negative INFinity number in `yytable`.
+  * `output.yytable_ninf` provides the corresponding value.
+
+### Static const variables
+
+* `yypact` array.
+  * This array stores offset on `yytable`. If value is `YYPACT_NINF`, it means execution of default reduce action.
+  * Index is state id.
+* `yydefact` array.
+  * This array stores rule id of default actions. If value is `0`, it means syntax error.
+  * Index is state id.
+* `yypgoto` array.
+  * This array stores offset on `yytable`. If value is `YYPACT_NINF`, it means execution of default reduce action.
+  * Index is nonterminal id.
+* `yydefgoto` array.
+  * This array stores next state id.
+  * Index is nonterminal id.
+* `yytable` array.
+  * This array is a mixture of action table and GOTO table. As action table, `YYTABLE_NINF` means syntax error, positive number means shift and next state is the number, negative number and zero mean reducing with the rule whose number is opposite.
+  * Index is `yypact[state] + token_id` for action table parts and `yypgoto[nonterminal] + state` for GOTO table parts.
+* `yycheck` array.
+  * This array stores indexes of original action table and GOTO table. We can validate access to `yytable` by consulting this array.
+  * Index is same with `yytable`.
+* `yyr1` array.
+  * This array stores nonterminal symbol id of rule's Left-Hand-Side.
+  * Index is rule id.
+* `yyr2` array.
+  * This array stores the length of the rule, that is, number of symbols on the rule's Right-Hand-Side.
+  * Index is rule id.
+
+For static const array, `Lrama::Output` provides some helper methods:
+
+* `output.context.xxx` provides the corresponding value.
+* `Output#int_type_for(ary)` returns appropriate type based on the number of `ary`
+* `Output#int_array_to_string(ary)` returns formatted string of `ary`.
+
+### Types
+
+`Output#int_type_for` returns these types.
+Right now, define these types with `int` and `unsigned int` simply.
+
+* `yytype_int8` as `int`
+* `yytype_uint8` as `unsigned int`
+* `yytype_int16` as `int`
+* `yytype_uint16` as `unsigned int`
+
+## Update compressed state table codes
+
+### Declear local variables in `yyparse`
+
+* `int yyrule`
+
+### Define macros
+
+```c
+#define yyunreachable() assert(0 && "unreachable")
+```
+
+### Change `yynewstate`
+
+See also `:decide_parser_action` in "compressed_state_table/parser.rb".
+
+* `int yyoffset`
+* `int yyindex`
+* `int yyaction`
+
+
+* Lookup `yypact` by `yystate` to get `yyoffset`.
+* Check `yyoffset`.
+  * If it's same with `YYPACT_NINF`, go to `yydefault`.
+* Ensure next token (`yychar`) is set. If not, call `yychar` to get next token
+* Check next token.
+  * If it's same with `output.error_symbol.id.s_value`, go to `ret1`.
+* It's ready to decide next action, calculate index (`yyindex = yyoffset + yychar`).
+* Check `yyindex`.
+  * Valid range of `yyindex` is greater or equal to 0 and less or equal to `YYLAST`. If it's out of range, go to `yydefault`.
+  * If `yycheck[yyindex]` is not same with `yychar`, go to `yydefault`.
+* Lookup `yytable` by `yyindex` and assign the value to `yyaction`.
+  * If the value is `YYTABLE_NINF` then go to `ret1`.
+  * If the value is greater than 0, it means shift.
+    * Clear `yychar` to `-1` so that next token is fetched in next loop.
+    * Assign `yylval` to `yyval` so that semantic value returned from `yylex` is pushed into stack by `yystack`.
+    * Assign `yyaction` to `yystate`.
+    * Go to `yystack`.
+  * Otherwise it means reduce. Assgin `-yyaction` to `yyrule` then go to `yyreduce`. Note: `yyreduce` is introduced later.
+* Call `yyunreachable()` on the end of `yynewstate`
+
+### Change `yydefault`
+
+
+
+### Change `yyreduce`
+
+* `int yyoffset`
+* `int yyindex`
+* `int yy_lhs_nterm`
+* `int yy_rhs_len`
+
+* Execute semantic value action
+  * `output.user_actions`
+
+```c
+default:
+    break;
+```
+
+* Pop parser stack by `yy_rhs_len`
+  * `yyp`
+
+* Call `yyunreachable()` on the end of `yynewstate`
 
 
 # 008: Embed actions
 
 `$A`
+
+`output.user_actions`
+
+yyvsp
 
 # Step 2: Modernize iyacc
 
