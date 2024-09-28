@@ -44,6 +44,9 @@ THE SOFTWARE.
 #line [@oline@] [@ofile@]
 <%- end -%>
 
+#ifndef YY_NULLPTR
+#define YY_NULLPTR NULL
+#endif
 
 #if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE {
@@ -66,6 +69,13 @@ typedef struct YYLTYPE {
 #define YYLTYPE_IS_DECLARED 1
 #endif
 
+#include <assert.h>
+
+enum yysymbol_kind_t {
+<%= output.symbol_enum %>
+};
+typedef enum yysymbol_kind_t yysymbol_kind_t;
+
 #define YYFLAG      -1000
 #define yyclearin   yychar = -1
 #define yyerrok     yyerrflag = 0
@@ -78,19 +88,31 @@ typedef struct YYLTYPE {
 #include    "y.debug"
 #else
 #define yydebug     0
-char*   yytoknames[1];      /* for debugging */
-char*   yystates[1];        /* for debugging */
 #endif
+
+static const char *const yytname[] = {
+<%= output.yytname %>
+};
 
 typedef int yytype_int8;
 typedef unsigned int yytype_uint8;
 typedef int yytype_int16;
 typedef unsigned int yytype_uint16;
 
+#define YYFINAL <%= output.yyfinal %>
 #define YYLAST <%= output.yylast %>
+#define YYNTOKENS <%= output.yyntokens %>
 
 #define YYPACT_NINF <%= output.yypact_ninf %>
 #define YYTABLE_NINF <%= output.yytable_ninf %>
+
+#define YYMAXUTOK <%= output.yymaxutok %>
+#define YYTRANSLATE(yytoken) \
+  ((0 <= (yytoken) && (yytoken) <= YYMAXUTOK) ? ((yysymbol_kind_t) yytranslate[yytoken]) : (YYSYMBOL_YYUNDEF))
+
+static const <%= output.int_type_for(output.context.yytranslate) %> yytranslate[] = {
+<%= output.int_array_to_string(output.context.yytranslate) %>
+};
 
 static const <%= output.int_type_for(output.context.yypact) %> yypact[] = {
 <%= output.int_array_to_string(output.context.yypact) %>
@@ -124,36 +146,20 @@ static const <%= output.int_type_for(output.context.yyr2) %> yyr2[] = {
 <%= output.int_array_to_string(output.context.yyr2) %>
 };
 
+
+#define yyunreachable() assert(0 && "unreachable")
+
 /*  parser for yacc output  */
 
 int yynerrs = 0;        /* number of errors */
 int yyerrflag = 0;      /* error recovery flag */
 
 extern  int fprint(int, char*, ...);
-extern  int sprint(char*, char*, ...);
 
-char*
-yytokname(int yyc)
+static const char *
+yysymbolname(yysymbol_kind_t yysymbol)
 {
-    static char x[16];
-
-    if (yyc > 0 && yyc <= sizeof(yytoknames) / sizeof(yytoknames[0]))
-    if (yytoknames[yyc-1])
-        return yytoknames[yyc-1];
-    sprint(x, "<%%d>", yyc);
-    return x;
-}
-
-char*
-yystatname(int yys)
-{
-    static char x[16];
-
-    if (yys >= 0 && yys < sizeof(yystates) / sizeof(yystates[0]))
-    if (yystates[yys])
-        return yystates[yys];
-    sprint(x, "<%%d>\n", yys);
-    return x;
+    return yytname[yysymbol];
 }
 
 int
@@ -163,21 +169,16 @@ yyparse(void)
     {
         YYSTYPE yyv;
         int yys;
-    } yys[YYMAXDEPTH], *yyp, *yypt;
-    short *yyxi;
-    int yyj, yym, yystate, yyn, yyg;
+    } yys[YYMAXDEPTH], *yyp;
+    int yystate, yyn;
     long yychar;
-    YYSTYPE save1, save2;
-    int save3, save4;
+
+    int yyrule;
+    yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
     YYSTYPE yylval;
     YYSTYPE yyval;
     YYLTYPE yylloc;
     YYLTYPE yyloc;
-
-    save1 = yylval;
-    save2 = yyval;
-    save3 = yynerrs;
-    save4 = yyerrflag;
 
     yystate = 0;
     yychar = -1;
@@ -187,74 +188,149 @@ yyparse(void)
     goto yystack;
 
 ret0:
-    yyn = 0;
-    goto ret;
+    {
+        yyn = 0;
+        goto ret;
+    }
 
 ret1:
-    yyn = 1;
-    goto ret;
+    {
+        yyn = 1;
+        goto ret;
+    }
 
 ret:
-    yylval = save1;
-    yyval = save2;
-    yynerrs = save3;
-    yyerrflag = save4;
-    return yyn;
+    {
+        return yyn;
+    }
 
 yystack:
-    /* put a state and value onto the stack */
-    if (yydebug >= 4)
-        fprint(2, "char %s in %s", yytokname(yychar), yystatname(yystate));
+    {
+        /* put a state and value onto the stack */
+        if (yydebug >= 4)
+            fprint(1, "char %s", yysymbolname(yytoken));
 
-    yyp++;
-    if (yyp >= &yys[YYMAXDEPTH]) {
-        yyerror("yacc stack overflow");
-        goto ret1;
+        yyp++;
+        if (yyp >= &yys[YYMAXDEPTH]) {
+            yyerror(<%= output.yyerror_args %>, "yacc stack overflow");
+            goto ret1;
+        }
+        yyp->yys = yystate;
+        yyp->yyv = yyval;
+
+        if (yystate == YYFINAL) {
+            goto ret0;
+        }
     }
-    yyp->yys = yystate;
-    yyp->yyv = yyval;
+    /* fall through */
 
 yynewstate:
-    yyn = yypact[yystate];
-    if (yyn <= YYFLAG)
-        goto yydefault; /* simple state */
-    if (yychar < 0)
-        yychar = yylex <%= output.yylex_formals %>;
-    yyn += yychar;
-    if (yyn < 0 || yyn >= YYLAST)
-        goto yydefault;
-    yyn = yyact[yyn];
-    if (yychk[yyn] == yychar) { /* valid shift */
-        yychar = -1;
-        yyval = yylval;
-        yystate = yyn;
-        if (yyerrflag > 0)
-            yyerrflag--;
-        goto yystack;
+    {
+        int yyoffset, yyindex, yyaction;
+
+        yyoffset = yypact[yystate];
+        if (yyoffset == YYPACT_NINF) {
+            goto yydefault;
+        }
+
+        if (yychar < 0) {
+            yychar = yylex <%= output.yylex_formals %>;
+        }
+        if (yychar == <%= output.error_symbol.id.s_value %>) {
+            yychar = <%= output.undef_symbol.id.s_value %>;
+            yytoken = <%= output.error_symbol.enum_name %>;
+            goto ret1;
+        }
+
+        yytoken = YYTRANSLATE(yychar);
+
+        yyindex = yyoffset + yytoken;
+        if (yyindex < 0 || YYLAST < yyindex) {
+            goto yydefault;
+        }
+        if (yycheck[yyindex] != yytoken) {
+            goto yydefault;
+        }
+
+        yyaction = yytable[yyindex];
+        if (yyaction == YYTABLE_NINF) {
+            goto ret1;
+        }
+        if (yyaction > 0) {
+            /* Shift */
+            yychar = -1;
+            yyval = yylval;
+            yystate = yyaction;
+            goto yystack;
+        }
+        else {
+            /* Reduce */
+            yyrule = -yyaction;
+            goto yyreduce;
+        }
     }
+    yyunreachable();
 
 yydefault:
-    /* default state action */
-    yyn = yydef[yystate];
-
-    /* reduction by production yyn */
-    if (yydebug >= 2)
-        fprint(2, "reduce %d in:\n\t%s", yyn, yystatname(yystate));
-
-    yypt = yyp;
-    yyp -= yyr2[yyn];
-    yyval = (yyp+1)->yyv;
-    yym = yyn;
-
-    /* consult goto table to find next state */
-    yyn = yyr1[yyn];
-    yyg = yypgo[yyn];
-    yyj = yyg + yyp->yys + 1;
-
-    if (yyj >= YYLAST || yychk[yystate=yyact[yyj]] != -yyn)
-        yystate = yyact[yyg];
-    switch (yym) {
-        $A
+    {
+        /* default state action */
+        yyrule = yydefact[yystate];
+        if (yyrule == 0) {
+            goto ret1;
+        }
     }
-    goto yystack;  /* stack new state and value */
+    /* fall through */
+
+yyreduce:
+    /* reduction by yyrule */
+    {
+        int yyoffset, yyindex;
+        int yy_lhs_nterm, yy_rhs_len;
+
+        if (yydebug >= 2)
+            fprint(1, "reduce %d\t%s", yyn);
+
+        yy_lhs_nterm = yyr1[yyrule] - YYNTOKENS;
+        yy_rhs_len = yyr2[yyrule];
+
+        /* Set `$1` to `$$` (`yyval`) as default value before calling semantic action */
+        yyval = yyp[-yy_rhs_len + 1].yyv;
+
+        /*
+         * `$$` is expanded to `yyval`
+         * `$n` is expanded to `yyvsp[-i]`
+         */
+        switch (yyrule) {
+            // $A
+        }
+
+        // stack pop by yy_rhs_len
+        yyp -= yy_rhs_len;
+
+        yyoffset = yypgoto[yy_lhs_nterm];
+        if (yyoffset == YYPACT_NINF) {
+            yystate = yydefgoto[yy_lhs_nterm];
+        }
+        else {
+            yyindex = yyoffset + yystate;
+            if (yyindex < 0 || YYLAST < yyindex) {
+                yystate = yydefgoto[yy_lhs_nterm];
+            }
+            else if (yycheck[yyindex] != yystate) {
+                yystate = yydefgoto[yy_lhs_nterm];
+            }
+            else {
+                yystate = yytable[yyindex];
+            }
+        }
+
+        goto yystack;  /* stack new state and value */
+    }
+    yyunreachable();
 }
+
+<%- if output.aux.epilogue -%>
+#line <%= output.aux.epilogue_first_lineno %> "<%= output.grammar_file_path %>"
+<%= output.aux.epilogue %>
+#line [@oline@] [@ofile@]
+<%- end -%>
