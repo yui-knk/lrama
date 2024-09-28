@@ -213,10 +213,10 @@ We expect users to provide `yylex` fuction then:
 * Remove `yylex1` function definition from the template
 * Rename `yylex1` function call to `yylex` function call
 
-## Support prologue
+## Support prologue and epilogue
 
 Lexer header, e.g. "calculator-lexer.h", is included into grammar file by prologue section.
-Therefore need to support prologue to run the test case .
+Therefore need to support prologue to run the test case.
 
 The content of prologue is contained in `output.aux.prologue`. If prologue is not defined, no need to render anything about prologue, so check `output.aux.prologue` before try to render it.
 
@@ -229,6 +229,23 @@ if output.aux.prologue
 puts <<~CODE
 #line #{output.aux.prologue_first_lineno} "#{output.grammar_file_path}"
 #{output.aux.prologue}
+#line [@oline@] [@ofile@]
+CODE
+end
+```
+
+Function definitions, e.g. `yyerror`, is defined by the epilogue.
+Therefore need to support epilogue to run the test case too.
+
+The content of epilogue is contained in `output.aux.epilogue`. If epilogue is not defined, no need to render anything about epilogue, so check `output.aux.epilogue` before try to render it.
+
+Code example is like this:
+
+```ruby
+if output.aux.epilogue
+puts <<~CODE
+#line #{output.aux.epilogue_first_lineno} "#{output.grammar_file_path}"
+#{output.aux.epilogue}
 #line [@oline@] [@ofile@]
 CODE
 end
@@ -329,6 +346,10 @@ Right now, define these types with `int` and `unsigned int` simply.
   * `yyrule` stores rule id for reduce. `yynewstate` and `yydefault` update the value and `yyreduce` uses this value. Therefore need to declear as an local variable of `yyparse`.
 
 ### Define macros
+
+* Include `<assert.h>` to use `assert`
+* Define `yyunreachable` macro
+  * In `yyparse`, it's convenient to ensure it never reach to the end of actions. `yyunreachable` ensures it.
 
 ```c
 #define yyunreachable() assert(0 && "unreachable")
@@ -464,19 +485,21 @@ expr: number '+' number
   * Go to `yystack`.
 * Call `yyunreachable()` on the end of `yyreduce`
 
-# 009: Embed actions
+# 009: Fix arguments of `yyerror`
 
-`$A`
+* Add `output.yyerror_args` to the head of `yyerror` function call.
 
-`output.user_actions`
+# 010: Embed actions
+
+* Replace `$A` with `output.user_actions`.
+* Add `default` label on the bottom of `switch`.
 
 ```c
 default:
     break;
 ```
 
-
-yyvsp
+* `yyvsp`
 
 # Step 2: Modernize iyacc
 
