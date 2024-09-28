@@ -481,6 +481,8 @@ Add these local variables on the top of `yyreduce` scope.
   * Left-Hand-Side nonterminal symbol id of the rule (`yyrule`)
 * `int yy_rhs_len`
   * The lenght of the rule (`yyrule`), that is, number of symbols on the rule's Right-Hand-Side.
+* `int yystate2`
+  * Stores current state after reduce. Lookup for `yycheck` and `yytable` depend on the state after reduce. Use `yystate2` to avoid using `yystate` as a temporal variable.
 
 #### Update logic
 
@@ -503,14 +505,15 @@ expr: number '+' number
   * Comment out `$A` right now, it will be replaced with actual user defined semantic actions later.
 * Pop parser stack by `yy_rhs_len`
   * Substract `yy_rhs_len` from `yyp` to pop `yy_rhs_len` elements from parser stack.
+* Assign the state after reduce (`yyp->yys`) to `yystate2`.
 * Determine next state and assign it to `yystate`.
   * Lookup `yypgoto` by `yy_lhs_nterm` and set the value to `yyoffset`.
   * Check `yyoffset`.
     * If it's same with `YYPACT_NINF`, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
-    * Otherwise calculate index (`yyindex = yyoffset + yystate`).
+    * Otherwise calculate index (`yyindex = yyoffset + yystate2`).
       * Check `yyindex`.
         * Valid range of `yyindex` is greater or equal to 0 and less or equal to `YYLAST`. If it's out of range, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
-        * If `yycheck[yyindex]` is not same with `yystate`, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
+        * If `yycheck[yyindex]` is not same with `yystate2`, lookup `yydefgoto` by `yy_lhs_nterm` then assign it to `yystate`.
         * Otherwise lookup `yytable` by `yyindex` and assign it to `yystate`.
   * Go to `yystack`.
 * Call `yyunreachable()` on the end of `yyreduce`
@@ -519,13 +522,15 @@ expr: number '+' number
 
 * Add `output.yyerror_args` to the head of `yyerror` function call.
 
-# 010: Fix `yytokname` and `yystatname`
+# 010: Fix debug codes
+
+## Fix `yytokname` and `yystatname`
 
 Both functions are used for debugging, especially when `yydebug` is set.
 `yytokname` function returns token name corresponding to given token id.
 `yystatname` function returns state string corresponding to given state id.
 
-## `yytokname`
+### `yytokname`
 
 `yytokname` can handle only terminal symbols however it's useful to handle both terminal and nonterminal symbols. Therefore change `yytokname` to `yysymbolname`.
 
@@ -541,7 +546,7 @@ Both functions are used for debugging, especially when `yydebug` is set.
 * Remove usage of `yytokname` and replace it with `yysymbolname`. Also change argument from `yychar` to `yytoken`.
 * Define `YY_NULLPTR` macro whose value is `NULL` if `YY_NULLPTR` is not defined
 
-## `yystatname`
+### `yystatname`
 
 `yystatname` function will not be used then
 
@@ -550,7 +555,19 @@ Both functions are used for debugging, especially when `yydebug` is set.
 * Remove usage of `yystatname` and update the format passed to `fprint`.
 * Remove extern declaration of `sprint`.
 
-# 011: Embed actions
+## Replace `fprint` with `fprintf`
+
+* Include `<stdio.h>` to use `fprintf`.
+* Replace `fprint` with `fprintf`. Write debug messages to `stderr`.
+* Remove extern declaration of `fprint`.
+* Pass `yyrule` to `yyreduce` debug message instead of `yyn`.
+
+# 011: Improve debug feature
+
+* Check only `yydebug` instread of checking the value of `yydebug`.
+
+
+# 012: Embed actions
 
 * Replace `$A` with `output.user_actions`.
 * Add `default` label on the bottom of `switch`.
