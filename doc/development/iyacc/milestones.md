@@ -294,9 +294,22 @@ These variable usages are removed with this change.
 * `YYTABLE_NINF` macro
   * Negative INFinity number in `yytable`.
   * `output.yytable_ninf` provides the corresponding value.
+* `YYMAXUTOK` macro
+  * Maximum number of valid token returned by yylex fuction
+  * `output.yymaxutok` provides the corresponding value.
+* `YYTRANSLATE(yytoken)` macro
+  * Convert token like `yychar` to corresponding symbol. Symbol is a sum of terminals and nonterminals, whose type is `yysymbol_kind_t`.
+  * This macro checks boundary of `yytoken` because what `yylex` returns can be out of boundary.
+  * Convertion logic is like below
+    * If `yytoken` is greater or equal to 0 and `yytoken` is less than or equal to `YYMAXUTOK`, lookup `yytranslate` array by `yytoken` and cast it to `yysymbol_kind_t` because the type of `yytranslate` is defined by `Output#int_type_for`.
+    * Otherwise convert `yytoken` to `YYSYMBOL_YYUNDEF`.
+    * Hint: we can use ternary operator in macro definition.
 
 ### Static const variables
 
+* `yytranslate` array.
+  * This array stores symbol id corresponding to token id. `YYTRANSLATE` uses this array to convert `yychar` to symbol.
+  * Index is token id.
 * `yypact` array.
   * This array stores offset on `yytable`. If value is `YYPACT_NINF`, it means execution of default reduce action.
   * Index is state id.
@@ -330,7 +343,7 @@ For static const array, `Lrama::Output` provides some helper methods:
 
 ### Types
 
-`Output#int_type_for` returns these types.
+`Output#int_type_for` returns `yytype_int8`, `yytype_uint8`, `yytype_int16`, `yytype_uint16` or `int`.
 Right now, define these types with `int` and `unsigned int` simply.
 
 * `yytype_int8` as `int`
@@ -338,12 +351,24 @@ Right now, define these types with `int` and `unsigned int` simply.
 * `yytype_int16` as `int`
 * `yytype_uint16` as `unsigned int`
 
+Generated parser internally handles both terminal symbols and nonterminal symbols seamlessly.
+`yysymbol_kind_t` is a type for this purpose.
+`yysymbol_kind_t` is internal data type then no need to check any macro before define `yysymbol_kind_t` like `YYSTYPE`.
+
+* Define `enum yysymbol_kind_t`
+  * `output.symbol_enum` provides actual values
+* Also declare `yysymbol_kind_t` as a new type by `typedef`.
+
 ## Update compressed state table codes
 
 ### Declear local variables in `yyparse`
 
 * `int yyrule`
   * `yyrule` stores rule id for reduce. `yynewstate` and `yydefault` update the value and `yyreduce` uses this value. Therefore need to declear as an local variable of `yyparse`.
+* `yysymbol_kind_t yytoken`
+  * `yytoken` stores symbol id corresponding to `yychar`, note `yychar` type is `yytoken_kind_t`.
+  * `yyparse` uses `yytoken` internally instead of `yychar`.
+  * Its default value is `YYSYMBOL_YYEMPTY`.
 
 ### Define macros
 
@@ -393,13 +418,18 @@ Rewrite `yynewstate` logic like below.
 * Lookup `yypact` by `yystate` and set the value to `yyoffset`.
 * Check `yyoffset`.
   * If it's same with `YYPACT_NINF`, go to `yydefault`.
-* Ensure next token (`yychar`) is set. If not, call `yychar` to get next token
+* Ensure next token (`yychar`) is set. If not
+  * Call `yylex` to get next token then set it to `yychar`.
 * Check next token.
-  * If it's same with `output.error_symbol.id.s_value`, go to `ret1`.
-* It's ready to decide next action, calculate index (`yyindex = yyoffset + yychar`).
+  * If it's same with `output.error_symbol.id.s_value`
+    * Set `output.undef_symbol.id.s_value` to `yychar`
+    * Set `output.error_symbol.enum_name` to `yytoken`
+    * Go to `ret1`.
+* Convert `yychar` to symbol id by looking up `YYTRANSLATE` and set it to `yytoken`.
+* It's ready to decide next action, calculate index (`yyindex = yyoffset + yytoken`).
 * Check `yyindex`.
   * Valid range of `yyindex` is greater or equal to 0 and less or equal to `YYLAST`. If it's out of range, go to `yydefault`.
-  * If `yycheck[yyindex]` is not same with `yychar`, go to `yydefault`.
+  * If `yycheck[yyindex]` is not same with `yytoken`, go to `yydefault`.
 * Lookup `yytable` by `yyindex` and assign the value to `yyaction`.
   * If the value is `YYTABLE_NINF` then go to `ret1`.
   * If the value is greater than 0, it means shift.
@@ -489,7 +519,38 @@ expr: number '+' number
 
 * Add `output.yyerror_args` to the head of `yyerror` function call.
 
-# 010: Embed actions
+# 010: Fix `yytokname` and `yystatname`
+
+Both functions are used for debugging, especially when `yydebug` is set.
+`yytokname` function returns token name corresponding to given token id.
+`yystatname` function returns state string corresponding to given state id.
+
+## `yytokname`
+
+`yytokname` can handle only terminal symbols however it's useful to handle both terminal and nonterminal symbols. Therefore change `yytokname` to `yysymbolname`.
+
+* Define `yytname` static array
+  * Whose type is `static const char *const`
+  * `output.yytname` provides actual values
+  * `yytname` is always defined, regardless of `yydebug`
+* Delete `yytoknames` array
+* Define `yysymbolname` static function
+  * Whose signature is `yysymbol_kind_t yysymbol` as parameter and `const char *` as return value
+  * This function just lookup `yytname` by `yysymbol` without any boundary check
+* Delete `yytokname` function
+* Remove usage of `yytokname` and replace it with `yysymbolname`. Also change argument from `yychar` to `yytoken`.
+* Define `YY_NULLPTR` macro whose value is `NULL` if `YY_NULLPTR` is not defined
+
+## `yystatname`
+
+`yystatname` function will not be used then
+
+* Delete `yystatname` function.
+* Delete `yystates` variable.
+* Remove usage of `yystatname` and update the format passed to `fprint`.
+* Remove extern declaration of `sprint`.
+
+# 011: Embed actions
 
 * Replace `$A` with `output.user_actions`.
 * Add `default` label on the bottom of `switch`.
@@ -500,6 +561,23 @@ default:
 ```
 
 * `yyvsp`
+
+# 012: Remove unused variables
+
+Remove unused variables to suppress warnings.
+
+* `yypt`
+* `yyxi`
+* `yyj`
+* `yym`
+* `yyg`
+
+Remove these meaningless variables and assignments to them.
+
+* `save1`
+* `save2`
+* `save3`
+* `save4`
 
 # Step 2: Modernize iyacc
 
