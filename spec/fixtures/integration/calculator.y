@@ -6,6 +6,8 @@
 
 static int yyerror(YYLTYPE *loc, const char *str);
 
+#define yydebug 10
+
 %}
 
 %union {

@@ -70,6 +70,7 @@ typedef struct YYLTYPE {
 #endif
 
 #include <assert.h>
+#include <stdio.h>
 
 enum yysymbol_kind_t {
 <%= output.symbol_enum %>
@@ -85,10 +86,16 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 #endif
 
 #ifdef  yydebug
-#include    "y.debug"
+// #include    "y.debug"
 #else
 #define yydebug     0
 #endif
+
+#define YYDEBUGPRINT(...) do { \
+    if (yydebug) { \
+        fprintf(__VA_ARGS__); \
+    } \
+} while (0)
 
 static const char *const yytname[] = {
 <%= output.yytname %>
@@ -154,8 +161,6 @@ static const <%= output.int_type_for(output.context.yyr2) %> yyr2[] = {
 int yynerrs = 0;        /* number of errors */
 int yyerrflag = 0;      /* error recovery flag */
 
-extern  int fprint(int, char*, ...);
-
 static const char *
 yysymbolname(yysymbol_kind_t yysymbol)
 {
@@ -207,8 +212,7 @@ ret:
 yystack:
     {
         /* put a state and value onto the stack */
-        if (yydebug >= 4)
-            fprint(1, "char %s", yysymbolname(yytoken));
+        // YYDEBUGPRINT(stderr, "char %s\n", yysymbolname(yytoken));
 
         yyp++;
         if (yyp >= &yys[YYMAXDEPTH]) {
@@ -228,12 +232,15 @@ yynewstate:
     {
         int yyoffset, yyindex, yyaction;
 
+        YYDEBUGPRINT(stderr, "Entering state %d\n", yystate);
+
         yyoffset = yypact[yystate];
         if (yyoffset == YYPACT_NINF) {
             goto yydefault;
         }
 
         if (yychar < 0) {
+            YYDEBUGPRINT(stderr, "Reading a token\n");
             yychar = yylex <%= output.yylex_formals %>;
         }
         if (yychar == <%= output.error_symbol.id.s_value %>) {
@@ -243,6 +250,7 @@ yynewstate:
         }
 
         yytoken = YYTRANSLATE(yychar);
+        YYDEBUGPRINT(stderr, "Next token is token %s\n", yysymbolname(yytoken));
 
         yyindex = yyoffset + yytoken;
         if (yyindex < 0 || YYLAST < yyindex) {
@@ -258,6 +266,8 @@ yynewstate:
         }
         if (yyaction > 0) {
             /* Shift */
+            YYDEBUGPRINT(stderr, "Shifting token %s\n", yysymbolname(yytoken));
+
             yychar = -1;
             yyval = yylval;
             yystate = yyaction;
@@ -286,9 +296,9 @@ yyreduce:
     {
         int yyoffset, yyindex;
         int yy_lhs_nterm, yy_rhs_len;
+        int yystate2;
 
-        if (yydebug >= 2)
-            fprint(1, "reduce %d\t%s", yyn);
+        YYDEBUGPRINT(stderr, "Reducing stack by rule %d\n", yyrule - 1);
 
         yy_lhs_nterm = yyr1[yyrule] - YYNTOKENS;
         yy_rhs_len = yyr2[yyrule];
@@ -306,17 +316,18 @@ yyreduce:
 
         // stack pop by yy_rhs_len
         yyp -= yy_rhs_len;
+        yystate2 = yyp->yys;
 
         yyoffset = yypgoto[yy_lhs_nterm];
         if (yyoffset == YYPACT_NINF) {
             yystate = yydefgoto[yy_lhs_nterm];
         }
         else {
-            yyindex = yyoffset + yystate;
+            yyindex = yyoffset + yystate2;
             if (yyindex < 0 || YYLAST < yyindex) {
                 yystate = yydefgoto[yy_lhs_nterm];
             }
-            else if (yycheck[yyindex] != yystate) {
+            else if (yycheck[yyindex] != yystate2) {
                 yystate = yydefgoto[yy_lhs_nterm];
             }
             else {

@@ -564,8 +564,9 @@ Both functions are used for debugging, especially when `yydebug` is set.
 
 # 011: Improve debug feature
 
-* Check only `yydebug` instread of checking the value of `yydebug`.
-
+* Check only `yydebug` instead of comparing the value of `yydebug` to numbers like `2` or `4`.
+* Define `YYDEBUGPRINT` macro for refactoring
+  * 
 
 # 012: Embed actions
 

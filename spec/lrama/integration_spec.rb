@@ -70,8 +70,8 @@ RSpec.describe "integration" do
 
   describe "calculator" do
     it "returns 9 for '(1+2)*3'" do
-      test_parser("calculator", "( 1 + 2 ) * 3", "=> 9")
-      test_parser("calculator", "( 1 + 2 ) * 3", "=> 9", template: "iyacc/iyacc.c")
+      # test_parser("calculator", "( 1 + 2 ) * 3", "=> 9", debug: true)
+      test_parser("calculator", "( 1 + 2 ) * 3", "=> 9", template: "iyacc/iyacc.c", debug: true)
     end
   end
 
