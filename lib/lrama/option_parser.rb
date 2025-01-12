@@ -47,6 +47,7 @@ module Lrama
     private
 
     def parse_by_option_parser(argv)
+      p argv
       ::OptionParser.new do |o|
         o.banner = <<~BANNER
           Lrama is LALR (1) parser generator written by Ruby.
