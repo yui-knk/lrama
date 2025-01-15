@@ -2100,36 +2100,9 @@ RSpec.describe Lrama::States do
     end
 
     it 'recompute states' do
-      y = <<~INPUT
-        %{
-        // Prologue
-        %}
-
-        %token NUM
-
-        %nonassoc  tCMP
-        %left '>'
-        %left '+'
-
-        %%
-
-        program : arg
-                ;
-
-        arg : arg '+' arg
-            | rel_expr    %prec tCMP
-            | NUM
-            ;
-
-        relop : '>'
-              ;
-
-        rel_expr : arg relop arg   %prec '>'
-                 ;
-
-        %%
-      INPUT
-      grammar = Lrama::Parser.new(y, "states/ielr_prec.y").parse
+      path = "states/ielr_loop.y"
+      y = File.read(fixture_path(path))
+      grammar = Lrama::Parser.new(y, path).parse
       grammar.prepare
       grammar.validate!
       states = Lrama::States.new(grammar)
