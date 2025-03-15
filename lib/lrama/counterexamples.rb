@@ -192,6 +192,7 @@ module Lrama
               key = [si.state, si.item.lhs]
               @reverse_productions[key].each do |item|
                 state_item = StateItem.new(si.state, item)
+                next if Node.include?(sis, state_item)
                 queue << Node.new(state_item, sis)
               end
             else

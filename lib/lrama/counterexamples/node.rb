@@ -20,6 +20,16 @@ module Lrama
         a
       end
 
+      # @rbs [T < Object] (Node[T] node, T elem) -> bool
+      def self.include?(node, elem)
+        while (node)
+          return true if node.elem == elem
+          node = node.next_node
+        end
+
+        false
+      end
+
       # @rbs (E elem, Node[E]? next_node) -> void
       def initialize(elem, next_node)
         @elem = elem
