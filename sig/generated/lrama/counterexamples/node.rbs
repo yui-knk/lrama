@@ -11,6 +11,9 @@ module Lrama
       # @rbs　[T] (Node[T] node) -> Array[T]
       def self.to_a: (untyped node) -> untyped
 
+      # @rbs [T < Object] (Node[T] node, T elem) -> bool
+      def self.include?: [T < Object] (Node[T] node, T elem) -> bool
+
       # @rbs (E elem, Node[E]? next_node) -> void
       def initialize: (E elem, Node[E]? next_node) -> void
     end

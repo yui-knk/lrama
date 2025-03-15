@@ -605,5 +605,97 @@ RSpec.describe Lrama::Counterexamples do
         STR
       end
     end
+
+    describe "TODO" do
+      let(:y) do
+        <<~STR
+          %{
+          // Prologue
+          %}
+
+          %union {
+              int i;
+          }
+
+          %token <i> digit
+
+          %%
+
+          stmt : expr
+               ;
+
+          expr : expr '+' expr
+               | digit
+               ;
+
+          %%
+
+        STR
+      end
+
+      it "build counterexamples of S/R and R/R conflicts" do
+        grammar = Lrama::Parser.new(y, "parse.y").parse
+        grammar.prepare
+        grammar.validate!
+        states = Lrama::States.new(grammar, Lrama::Tracer.new(Lrama::Logger.new))
+        states.compute
+        counterexamples = Lrama::Counterexamples.new(states)
+
+        # State 10
+        #
+        #     3 expr: expr • opt_nl '+' expr
+        #     3     | expr opt_nl '+' expr •  ["end of file", '+', '\n']
+        #     6 opt_nl: ε •  ['+']
+        #     7       | • '\n'
+        #
+        #     '\n'  shift, and go to state 6
+        #     '\n'           reduce using rule 3 (expr)
+        #
+        #     '+'            reduce using rule 3 (expr)
+        #     '+'            reduce using rule 6 (opt_nl)
+        state_6 = states.states[6]
+        examples = counterexamples.compute(state_6)
+        expect(examples.count).to eq 1
+        example = examples[0]
+
+        expect(example.type).to eq :shift_reduce
+        expect(example.conflict_symbol.id.s_value).to eq "'+'"
+        # Shift Conflict
+        expect(example.path1.map {|path| "#{path.state.id}. #{path.item}" }).to eq([
+          "0. $accept: • stmt \"end of file\"  (rule 0)",
+          "0. stmt: • expr  (rule 1)",
+          "0. expr: • expr '+' expr  (rule 2)",
+          "0. expr: • expr '+' expr  (rule 2)",
+          "3. expr: expr • '+' expr  (rule 2)",
+          "5. expr: expr '+' • expr  (rule 2)",
+          "5. expr: • expr '+' expr  (rule 2)",
+          "6. expr: expr • '+' expr  (rule 2)"
+        ])
+        expect(example.derivations1.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                             "end of file"
+              1:  expr
+                  2:  expr                            '+' expr
+                      2: expr '+' expr
+                                  2: expr  • '+' expr
+        STR
+        # Reduce Conflict
+        expect(example.path2.map {|path| "#{path.state.id}. #{path.item}" }).to eq([
+          "0. $accept: • stmt \"end of file\"  (rule 0)",
+          "0. stmt: • expr  (rule 1)",
+          "0. expr: • expr '+' expr  (rule 2)",
+          "0. expr: • expr '+' expr  (rule 2)",
+          "3. expr: expr • '+' expr  (rule 2)",
+          "5. expr: expr '+' • expr  (rule 2)",
+          "6. expr: expr '+' expr •  (rule 2)"
+        ])
+        expect(example.derivations2.render_for_report).to eq(<<~STR.chomp)
+          0:  stmt                                  "end of file"
+              1:  expr
+                  2:  expr                 '+' expr
+                      2: expr '+' expr  •
+        STR
+      end
+    end
+
   end
 end
