@@ -1328,6 +1328,7 @@ static int looking_at_eol_p(struct parser_params *p);
 %expect 0
 %define api.pure
 %define parse.error verbose
+%define lr.type ielr
 %printer {
 #ifndef RIPPER
     if ($$) {
