@@ -28,6 +28,7 @@ module Lrama
       %lex-param
       %parse-param
       %initial-action
+      %predict-token
       %precedence
       %prec
       %error-token

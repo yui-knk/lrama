@@ -105,6 +105,10 @@ rule
                          {
                            @grammar.after_pop_stack = val[1]
                          }
+                     | "%predict-token" id
+                        {
+                           @grammar.add_predict_token(val[1])
+                        }
 
   symbol_declaration: "%token" token_declarations
                     | "%type" symbol_declarations
