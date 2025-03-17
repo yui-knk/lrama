@@ -3811,7 +3811,7 @@ then		: term
 		;
 
 do		: term
-		| keyword_do_cond
+		| keyword_do
 		;
 
 if_tail		: opt_else
