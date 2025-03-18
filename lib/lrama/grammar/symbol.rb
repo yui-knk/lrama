@@ -23,6 +23,7 @@ module Lrama
       attr_accessor :error_token #: ErrorToken
       attr_accessor :first_set #: Set[Grammar::Symbol]
       attr_accessor :first_set_bitmap #: Bitmap::bitmap
+      attr_accessor :lexer_state_transitions #: Array[LexerState::Transition]
       attr_reader :term #: bool
       attr_writer :eof_symbol #: bool
       attr_writer :error_symbol #: bool
@@ -42,6 +43,7 @@ module Lrama
         @precedence = precedence
         @printer = printer
         @destructor = destructor
+        @lexer_state_transitions = []
       end
 
       # @rbs (Integer) -> void
@@ -78,6 +80,24 @@ module Lrama
       # @rbs () -> bool
       def accept_symbol?
         !!@accept_symbol
+      end
+
+      # @rbs () -> bool
+      def has_lexer_state_transitions?
+        !@lexer_state_transitions.empty?
+      end
+
+      # @rbs (Array[LexerState::Transition] transitions) -> bool
+      def merge_lexer_state_transitions(transitions)
+        updated = false
+
+        transitions.each do |transition|
+          next if @lexer_state_transitions.find {|t| t == transition }
+          @lexer_state_transitions << transition
+          updated = true
+        end
+
+        updated
       end
 
       # @rbs () -> String

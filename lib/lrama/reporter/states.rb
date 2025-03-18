@@ -4,12 +4,13 @@
 module Lrama
   class Reporter
     class States
-      # @rbs (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?verbose: bool, **bool _) -> void
-      def initialize(itemsets: false, lookaheads: false, solved: false, counterexamples: false, verbose: false, **_)
+      # @rbs (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?lexer_state: bool, ?verbose: bool, **bool _) -> void
+      def initialize(itemsets: false, lookaheads: false, solved: false, counterexamples: false, lexer_state: false, verbose: false, **_)
         @itemsets = itemsets
         @lookaheads = lookaheads
         @solved = solved
         @counterexamples = counterexamples
+        @lexer_state = lexer_state
         @verbose = verbose
       end
 
@@ -25,6 +26,7 @@ module Lrama
           report_nonassoc_errors(io, state)
           report_reduces(io, state)
           report_nterm_transitions(io, state)
+          report_lexer_states(io, state) if @lexer_state && states.lexer_state
           report_conflict_resolutions(io, state) if @solved
           report_counterexamples(io, state, cex) if @counterexamples && state.has_conflicts? # @type var cex: Lrama::Counterexamples
           report_verbose_info(io, state, states) if @verbose
@@ -170,6 +172,17 @@ module Lrama
         end.max
         goto_transitions.each do |goto|
           io << "    #{goto.next_sym.id.s_value.ljust(max_len)}  go to state #{goto.to_state.id}\n"
+        end
+
+        io << "\n"
+      end
+
+      # @rbs (IO io, Lrama::State state) -> void
+      def report_lexer_states(io, state)
+        return if state.lexer_states.empty?
+
+        state.lexer_states.each do |lexer_state|
+          io << "    #{lexer_state.map(&:to_s).join('|')}\n"
         end
 
         io << "\n"

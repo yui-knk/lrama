@@ -9,6 +9,7 @@ require_relative "grammar/counter"
 require_relative "grammar/destructor"
 require_relative "grammar/error_token"
 require_relative "grammar/inline"
+require_relative "grammar/lexer_state"
 require_relative "grammar/parameterized"
 require_relative "grammar/percent_code"
 require_relative "grammar/precedence"
@@ -32,6 +33,7 @@ module Lrama
     #     def accept_symbol: () -> Grammar::Symbol
     #     def eof_symbol: () -> Grammar::Symbol
     #     def undef_symbol: () -> Grammar::Symbol
+    #     def lexer_state: () -> LexerState?
     #
     #     # delegate to @symbols_resolver
     #     def symbols: () -> Array[Grammar::Symbol]
@@ -95,8 +97,10 @@ module Lrama
     attr_accessor :locations #: bool
     attr_accessor :define #: Hash[String, String]
     attr_accessor :required #: bool
+    attr_accessor :lexer_state #: LexerState?
 
-    def_delegators "@symbols_resolver", :symbols, :nterms, :terms, :add_nterm, :add_term, :find_term_by_s_value,
+    def_delegators "@symbols_resolver", :symbols, :nterms, :terms, :add_nterm, :add_term,
+                                        :find_term_by_s_value, :find_term_by_s_value!,
                                         :find_symbol_by_number!, :find_symbol_by_id!, :token_to_symbol,
                                         :find_symbol_by_s_value!, :fill_symbol_number, :fill_nterm_type,
                                         :fill_printer, :fill_destructor, :fill_error_token, :sort_by_number!

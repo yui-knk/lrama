@@ -8,19 +8,23 @@ module Lrama
 
     type c_token = [ :C_DECLARATION, Token::UserCode ]
 
+    type lexer_state_token = [ String, String ] | [ ::Symbol, Token::Char ] | [ ::Symbol, Token::Ident ]
+
     attr_reader head_line: Integer
 
     attr_reader head_column: Integer
 
     attr_reader line: Integer
 
-    attr_accessor status: :initial | :c_declaration
+    attr_accessor status: :initial | :c_declaration | :lexer_state
 
     attr_accessor end_symbol: String?
 
     SYMBOLS: Array[String]
 
     PERCENT_TOKENS: Array[String]
+
+    LEXER_STATE_TOKENS: Array[String]
 
     # @rbs (GrammarFile grammar_file) -> void
     def initialize: (GrammarFile grammar_file) -> void
@@ -39,6 +43,9 @@ module Lrama
 
     # @rbs () -> c_token
     def lex_c_code: () -> c_token
+
+    # @rbs () -> lexer_state_token?
+    def lex_lexer_state: () -> lexer_state_token?
 
     private
 

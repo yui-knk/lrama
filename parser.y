@@ -72,6 +72,7 @@ rule
       symbol_declaration
     | rule_declaration
     | inline_declaration
+    | lexer_state_declaration
     | "%union" param
         {
           @grammar.set_union(
@@ -281,6 +282,92 @@ rule
           result = builder
         }
 
+  lexer_state_declaration:
+      "%lexer-state"
+        {
+          begin_lexer_state
+          @lexer_state = Grammar::LexerState.new
+        }
+      "{" state_declaration+ initial_state_declaration predication_declaration* transitions_declaration "}"
+        {
+          end_lexer_state
+          @grammar.lexer_state = @lexer_state
+        }
+
+  state_declaration:
+      "state" IDENTIFIER ";"
+        {
+          @lexer_state.add_state_bit(val[1])
+        }
+
+  predication_declaration:
+      "predication" IDENTIFIER "=" pattern ";"
+        {
+          @lexer_state.add_predication(val[1], val[3])
+        }
+
+  pattern:
+      pattern '|' IDENTIFIER
+        {
+          state_bit = @lexer_state.find_state_bit!(val[2])
+          val[0].add_state_bit(state_bit)
+        }
+    | IDENTIFIER
+        {
+          state_bit = @lexer_state.find_state_bit!(val[0])
+          result = Grammar::LexerState::Predication::Pattern.new(state_bit)
+        }
+
+  initial_state_declaration:
+      "initial_state" IDENTIFIER ";"
+        {
+            @lexer_state.set_initial_state(val[1])
+        }
+
+  transitions_declaration:
+      "transitions" "{" transition_declaration+ "}" ";"
+        {
+          result = val[2].flatten
+        }
+
+  transition_declaration:
+      from_state_predication "{" to_state+ "}" ";"
+        {
+          val[2].each do |token, to_state|
+            @lexer_state.add_transition(val[0], token, to_state)
+          end
+        }
+
+  from_state_predication:
+      "*"
+        {
+          raise "not supported now"
+        }
+    | IDENTIFIER
+        {
+          result = @lexer_state.find_predication!(val[0])
+        }
+    | "!" IDENTIFIER
+        {
+          result = @lexer_state.find_predication!(val[0]).negative_predication
+        }
+
+  to_state:
+      id "=>" states ";"
+        {
+          result = [val[0], val[2]]
+        }
+
+  states:
+      states "|" IDENTIFIER
+        {
+          result = val[0] << @lexer_state.find_state_bit!(val[2])
+        }
+    | IDENTIFIER
+        {
+          result = Set.new([@lexer_state.find_state_bit!(val[0])])
+        }
+
   alias: string_as_id? { result = val[0].s_value if val[0] }
 
   symbol_declarations:
@@ -462,6 +549,10 @@ rule
   string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0]) }
 end
 
+---- header
+
+require "set"
+
 ---- inner
 
 include Lrama::Tracer::Duration
@@ -528,6 +619,14 @@ end
 def end_c_declaration
   @lexer.status = :initial
   @lexer.end_symbol = nil
+end
+
+def begin_lexer_state
+  @lexer.status = :lexer_state
+end
+
+def end_lexer_state
+  @lexer.status = :initial
 end
 
 def raise_parse_error(error_message, location)

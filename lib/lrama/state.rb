@@ -53,6 +53,9 @@ module Lrama
     attr_accessor :always_follows #: Hash[Action::Goto, Array[Grammar::Symbol]]
     attr_accessor :goto_follows #: Hash[Action::Goto, Array[Grammar::Symbol]]
 
+    # lexer state
+    attr_accessor :lexer_states #: Set[Grammar::LexerState::state]
+
     # @rbs (Integer id, Grammar::Symbol accessing_symbol, Array[States::Item] kernels) -> void
     def initialize(id, accessing_symbol, kernels)
       @id = id
@@ -75,6 +78,7 @@ module Lrama
       @follow_kernel_items = {}
       @always_follows = {}
       @goto_follows = {}
+      @lexer_states = Set.new
     end
 
     # @rbs (State other) -> bool

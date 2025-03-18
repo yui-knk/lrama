@@ -64,6 +64,9 @@ module Lrama
         # @rbs (::String s_value) -> Grammar::Symbol?
         def find_term_by_s_value: (::String s_value) -> Grammar::Symbol?
 
+        # @rbs (::String s_value) -> Grammar::Symbol
+        def find_term_by_s_value!: (::String s_value) -> Grammar::Symbol
+
         # @rbs (::String s_value) -> Grammar::Symbol?
         def find_symbol_by_s_value: (::String s_value) -> Grammar::Symbol?
 

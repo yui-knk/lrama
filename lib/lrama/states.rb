@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "forwardable"
+require "set"
 require_relative "tracer/duration"
 require_relative "states/item"
 
@@ -38,7 +39,8 @@ module Lrama
     include Lrama::Tracer::Duration
 
     def_delegators "@grammar", :symbols, :terms, :nterms, :rules,
-      :accept_symbol, :eof_symbol, :undef_symbol, :find_symbol_by_s_value!
+      :accept_symbol, :eof_symbol, :undef_symbol, :find_symbol_by_s_value!,
+      :lexer_state
 
     attr_reader :states #: Array[State]
     attr_reader :reads_relation #: Hash[transition, Array[transition]]
@@ -111,6 +113,7 @@ module Lrama
     def compute
       # Look Ahead Sets
       report_duration(:compute_lr0_states) { compute_lr0_states }
+      report_duration(:compute_lexer_states) { compute_lexer_states }
       report_duration(:compute_direct_read_sets) { compute_direct_read_sets }
       report_duration(:compute_reads_relation) { compute_reads_relation }
       report_duration(:compute_read_sets) { compute_read_sets }
@@ -313,6 +316,71 @@ module Lrama
           new_state, created = create_state(next_sym, to_items, states_created)
           state.set_items_to_state(to_items, new_state)
           enqueue_state(states, new_state) if created
+        end
+      end
+    end
+
+    # @rbs () -> void
+    def compute_lexer_states
+      return unless lexer_state
+      compute_lexer_state_for_nonterminals
+      compute_lexer_state_for_states
+    end
+
+    # @rbs () -> void
+    def compute_lexer_state_for_nonterminals
+      lexer_state.transitions.each do |token, transition|
+        term = @grammar.find_term_by_s_value!(token)
+        term.lexer_state_transitions += transition
+      end
+
+      terms.each do |term|
+        # append ID transition to term if term.lexer_state_transitions.empty?
+      end
+
+      nterm_dependencies = rules.each_with_object({}) do |rule, h|
+        rule.rhs.select(&:nterm?).each do |nterm|
+          h[nterm] ||= Set.new
+          h[nterm] << rule
+        end
+      end
+      nterm_to_rules = rules.group_by(&:lhs)
+      queue = nterms.dup
+
+      while (nterm = queue.shift)
+        updated = false
+        nterm_to_rules[nterm].each do |rule|
+          if rule.rhs.all?(&:has_lexer_state_transitions?)
+            updated ||= nterm.merge_lexer_state_transitions(rule.merged_lexer_state_transitions)
+          end
+        end
+
+        if updated
+          nterm_dependencies[nterm].each do |rule|
+            queue << rule.lhs
+          end
+        end
+      end
+    end
+
+    # @rbs () -> void
+    def compute_lexer_state_for_states
+      initial_state = @states.first
+      initial_state.lexer_states << lexer_state.initial_state
+      queue = [initial_state]
+
+      while (state = queue.shift)
+        state.transitions.each do |transition|
+          to_state = transition.to_state
+          transition.next_sym.lexer_state_transitions.each do |ls_transition|
+            state.lexer_states.each do |lexer_state|
+              if ls_transition.match?(lexer_state)
+                if to_state.lexer_states.add?(ls_transition.to_state)
+                  queue << to_state
+                end
+              end
+            end
+          end
         end
       end
     end

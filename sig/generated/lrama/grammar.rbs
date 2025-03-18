@@ -12,6 +12,8 @@ module Lrama
 
       def undef_symbol: () -> Grammar::Symbol
 
+      def lexer_state: () -> LexerState?
+
       # delegate to @symbols_resolver
       def symbols: () -> Array[Grammar::Symbol]
 
@@ -125,6 +127,8 @@ module Lrama
     attr_accessor define: Hash[String, String]
 
     attr_accessor required: bool
+
+    attr_accessor lexer_state: LexerState?
 
     # @rbs (Counter rule_counter) -> void
     def initialize: (Counter rule_counter) -> void

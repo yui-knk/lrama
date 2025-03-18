@@ -1,0 +1,31 @@
+# Generated from lib/lrama/grammar/lexer_state/transition.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class LexerState
+      class Transition
+        attr_reader predication: Predication
+
+        attr_reader to_state: LexerState::state
+
+        # @rbs (Predication predication, LexerState::state to_state) -> void
+        def initialize: (Predication predication, LexerState::state to_state) -> void
+
+        # @rbs (Transition other) -> bool
+        def ==: (Transition other) -> bool
+
+        # Merge other transition to this transition then returns new transition.
+        # Return `nil` if it can't merge other transition to this.
+        #
+        # @rbs (Transition other) -> Transition?
+        def merge: (Transition other) -> Transition?
+
+        # @rbs (LexerState::state state) -> bool
+        def match?: (LexerState::state state) -> bool
+
+        # @rbs () -> String
+        def to_s: () -> String
+      end
+    end
+  end
+end

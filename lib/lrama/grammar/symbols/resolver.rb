@@ -93,6 +93,11 @@ module Lrama
           terms.find { |s| s.id.s_value == s_value }
         end
 
+        # @rbs (::String s_value) -> Grammar::Symbol
+        def find_term_by_s_value!(s_value)
+          find_term_by_s_value(s_value) || (raise "Terminal not found. value: `#{s_value}`")
+        end
+
         # @rbs (::String s_value) -> Grammar::Symbol?
         def find_symbol_by_s_value(s_value)
           symbols.find { |s| s.id.s_value == s_value }

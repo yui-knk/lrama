@@ -1,0 +1,30 @@
+# Generated from lib/lrama/grammar/lexer_state/predication.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class LexerState
+      class Predication
+        attr_reader id: Lexer::Token::Ident
+
+        attr_reader pattern: Pattern
+
+        attr_reader negative: bool
+
+        # @rbs (Lexer::Token::Ident id, Pattern pattern, bool negative) -> void
+        def initialize: (Lexer::Token::Ident id, Pattern pattern, bool negative) -> void
+
+        # @rbs (Predication other) -> bool
+        def ==: (Predication other) -> bool
+
+        # @rbs (LexerState::state state) -> bool
+        def match?: (LexerState::state state) -> bool
+
+        # @rbs () -> Predication
+        def negativeredication: () -> Predication
+
+        # @rbs () -> String
+        def to_s: () -> String
+      end
+    end
+  end
+end

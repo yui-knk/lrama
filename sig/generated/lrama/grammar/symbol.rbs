@@ -29,6 +29,8 @@ module Lrama
 
       attr_accessor first_set_bitmap: Bitmap::bitmap
 
+      attr_accessor lexer_state_transitions: Array[LexerState::Transition]
+
       attr_reader term: bool
 
       attr_writer eof_symbol: bool
@@ -63,6 +65,12 @@ module Lrama
 
       # @rbs () -> bool
       def accept_symbol?: () -> bool
+
+      # @rbs () -> bool
+      def has_lexer_state_transitions?: () -> bool
+
+      # @rbs (Array[LexerState::Transition] transitions) -> bool
+      def merge_lexer_state_transitions: (Array[LexerState::Transition] transitions) -> bool
 
       # @rbs () -> String
       def display_name: () -> String

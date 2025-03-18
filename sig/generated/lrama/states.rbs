@@ -97,6 +97,15 @@ module Lrama
     # @rbs () -> void
     def compute_lr0_states: () -> void
 
+    # @rbs () -> void
+    def compute_lexer_states: () -> void
+
+    # @rbs () -> void
+    def compute_lexer_state_for_nonterminals: () -> void
+
+    # @rbs () -> void
+    def compute_lexer_state_for_states: () -> void
+
     # @rbs () -> Array[State::Action::Goto]
     def nterm_transitions: () -> Array[State::Action::Goto]
 

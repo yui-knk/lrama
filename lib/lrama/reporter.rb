@@ -3,6 +3,7 @@
 
 require_relative 'reporter/conflicts'
 require_relative 'reporter/grammar'
+require_relative 'reporter/lexer_state'
 require_relative 'reporter/profile'
 require_relative 'reporter/rules'
 require_relative 'reporter/states'
@@ -19,6 +20,7 @@ module Lrama
       @terms = Terms.new(**options)
       @conflicts = Conflicts.new
       @grammar = Grammar.new(**options)
+      @lexer_state = LexerState.new(**options)
       @states = States.new(**options)
     end
 
@@ -29,6 +31,7 @@ module Lrama
         @terms.report(io, states)
         @conflicts.report(io, states)
         @grammar.report(io, states)
+        @lexer_state.report(io, states)
         @states.report(io, states)
       end
     end

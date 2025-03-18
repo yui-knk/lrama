@@ -3,8 +3,8 @@
 module Lrama
   class Reporter
     class States
-      # @rbs (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?verbose: bool, **bool _) -> void
-      def initialize: (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?verbose: bool, **bool _) -> void
+      # @rbs (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?lexer_state: bool, ?verbose: bool, **bool _) -> void
+      def initialize: (?itemsets: bool, ?lookaheads: bool, ?solved: bool, ?counterexamples: bool, ?lexer_state: bool, ?verbose: bool, **bool _) -> void
 
       # @rbs (IO io, Lrama::States states) -> void
       def report: (IO io, Lrama::States states) -> void
@@ -31,6 +31,9 @@ module Lrama
 
       # @rbs (IO io, Lrama::State state) -> void
       def report_nterm_transitions: (IO io, Lrama::State state) -> void
+
+      # @rbs (IO io, Lrama::State state) -> void
+      def report_lexer_states: (IO io, Lrama::State state) -> void
 
       # @rbs (IO io, Lrama::State state) -> void
       def report_conflict_resolutions: (IO io, Lrama::State state) -> void

@@ -74,6 +74,8 @@ module Lrama
       # @rbs () -> bool
       def contains_at_reference?: () -> bool
 
+      def merged_lexer_state_transitions: () -> untyped
+
       private
 
       # @rbs () -> Array[(RailroadDiagrams::Terminal | RailroadDiagrams::NonTerminal)]

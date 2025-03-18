@@ -118,6 +118,22 @@ module Lrama
         token_code.references.any? {|r| r.type == :at }
       end
 
+      def merged_lexer_state_transitions
+        return [] if rhs.empty?
+
+        transitions_array = rhs.map do |symbol|
+          symbol.lexer_state_transitions
+        end
+
+        products = transitions_array[0].product(*transitions_array[1..-1]) # steep:ignore
+
+        products.map do |transitions|
+          transitions.reduce do |acc, transition| # steep:ignore
+            acc.merge(transition) if acc
+          end
+        end.compact
+      end
+
       private
 
       # @rbs () -> Array[(RailroadDiagrams::Terminal | RailroadDiagrams::NonTerminal)]

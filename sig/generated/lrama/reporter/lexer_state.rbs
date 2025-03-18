@@ -1,0 +1,13 @@
+# Generated from lib/lrama/reporter/lexer_state.rb with RBS::Inline
+
+module Lrama
+  class Reporter
+    class LexerState
+      # @rbs (?lexer_state: bool, **bool _) -> void
+      def initialize: (?lexer_state: bool, **bool _) -> void
+
+      # @rbs (IO io, Lrama::States states) -> void
+      def report: (IO io, Lrama::States states) -> void
+    end
+  end
+end

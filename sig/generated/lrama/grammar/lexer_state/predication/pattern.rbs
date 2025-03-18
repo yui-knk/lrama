@@ -1,0 +1,28 @@
+# Generated from lib/lrama/grammar/lexer_state/predication/pattern.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class LexerState
+      class Predication
+        class Pattern
+          attr_reader state: LexerState::state
+
+          # @rbs (StateBit state_bit) -> void
+          def initialize: (StateBit state_bit) -> void
+
+          # @rbs (Pattern other) -> bool
+          def ==: (Pattern other) -> bool
+
+          # @rbs (StateBit state_bit) -> void
+          def add_state_bit: (StateBit state_bit) -> void
+
+          # @rbs (LexerState::state other_state) -> bool
+          def match?: (LexerState::state other_state) -> bool
+
+          # @rbs () -> String
+          def to_s: () -> String
+        end
+      end
+    end
+  end
+end

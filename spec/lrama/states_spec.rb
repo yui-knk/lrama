@@ -2672,6 +2672,155 @@ RSpec.describe Lrama::States do
     end
   end
 
+  describe "lexer state" do
+    it "basic.y" do
+      path = "lexer_state/basic.y"
+      y = File.read(fixture_path(path))
+      grammar = Lrama::Parser.new(y, path).parse
+      grammar.prepare
+      grammar.validate!
+      states = Lrama::States.new(grammar, Lrama::Tracer.new(Lrama::Logger.new))
+      states.compute
+
+      io = StringIO.new
+      Lrama::Reporter.new(lexer_state: true, states: true).report(io, states)
+
+      expect(io.string).to eq(<<~STR)
+        LexerState
+
+            YYEOF
+
+            YYerror
+
+            YYUNDEF
+
+            tNUMBER
+              EXPR_BEG => EXPR_END
+
+            '+'
+              EXPR_END => EXPR_BEG
+
+            '-'
+              EXPR_END => EXPR_BEG
+
+            $accept
+
+            program
+              EXPR_BEG => EXPR_END
+
+            expr
+              EXPR_BEG => EXPR_END
+
+            $accept -> program YYEOF
+
+            program -> expr
+              EXPR_BEG => EXPR_END
+
+            expr -> expr '+' expr
+              EXPR_BEG => EXPR_END
+
+            expr -> tNUMBER '-' tNUMBER
+              EXPR_BEG => EXPR_END
+
+            expr -> tNUMBER
+              EXPR_BEG => EXPR_END
+
+
+        State 0
+
+            0 $accept: • program "end of file"
+
+            tNUMBER  shift, and go to state 1
+
+            program  go to state 2
+            expr     go to state 3
+
+            EXPR_BEG
+
+
+        State 1
+
+            3 expr: tNUMBER • '-' tNUMBER
+            4     | tNUMBER •
+
+            '-'  shift, and go to state 4
+
+            $default  reduce using rule 4 (expr)
+
+            EXPR_END
+
+
+        State 2
+
+            0 $accept: program • "end of file"
+
+            "end of file"  shift, and go to state 5
+
+            EXPR_END
+
+
+        State 3
+
+            1 program: expr •
+            2 expr: expr • '+' expr
+
+            '+'  shift, and go to state 6
+
+            $default  reduce using rule 1 (program)
+
+            EXPR_END
+
+
+        State 4
+
+            3 expr: tNUMBER '-' • tNUMBER
+
+            tNUMBER  shift, and go to state 7
+
+            EXPR_BEG
+
+
+        State 5
+
+            0 $accept: program "end of file" •
+
+            $default  accept
+
+
+        State 6
+
+            2 expr: expr '+' • expr
+
+            tNUMBER  shift, and go to state 1
+
+            expr  go to state 8
+
+            EXPR_BEG
+
+
+        State 7
+
+            3 expr: tNUMBER '-' tNUMBER •
+
+            $default  reduce using rule 3 (expr)
+
+            EXPR_END
+
+
+        State 8
+
+            2 expr: expr • '+' expr
+            2     | expr '+' expr •
+
+            $default  reduce using rule 2 (expr)
+
+            EXPR_END
+
+
+      STR
+    end
+  end
+
   describe "#validate!" do
     let(:y) do
       <<~STR

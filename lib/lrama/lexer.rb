@@ -21,14 +21,18 @@ module Lrama
     #                      [::Symbol, Token::Ident]
     #
     #   type c_token = [:C_DECLARATION, Token::UserCode]
+    #
+    #   type lexer_state_token = [String, String] |
+    #                            [::Symbol, Token::Char] |
+    #                            [::Symbol, Token::Ident]
 
     attr_reader :head_line #: Integer
     attr_reader :head_column #: Integer
     attr_reader :line #: Integer
-    attr_accessor :status #: :initial | :c_declaration
+    attr_accessor :status #: :initial | :c_declaration | :lexer_state
     attr_accessor :end_symbol #: String?
 
-    SYMBOLS = ['%{', '%}', '%%', '{', '}', '\[', '\]', '\(', '\)', '\,', ':', '\|', ';'].freeze #: Array[String]
+    SYMBOLS = ['%{', '%}', '%%', '{', '}', '\[', '\]', '\(', '\)', '\,', ':', '\|', ';', '!', '=>', '='].freeze #: Array[String]
     PERCENT_TOKENS = %w(
       %union
       %token
@@ -60,6 +64,15 @@ module Lrama
       %inline
       %locations
       %categories
+      %lexer-state
+    ).freeze #: Array[String]
+
+    LEXER_STATE_TOKENS = %w(
+      state
+      predication
+      initial_state
+      transitions
+      \*
     ).freeze #: Array[String]
 
     # @rbs (GrammarFile grammar_file) -> void
@@ -79,6 +92,8 @@ module Lrama
         lex_token
       when :c_declaration
         lex_c_code
+      when :lexer_state
+        lex_lexer_state
       end
     end
 
@@ -186,6 +201,44 @@ module Lrama
         end
       end
       raise ParseError, "Unexpected code: #{code}." # steep:ignore UnknownConstant
+    end
+
+    # @rbs () -> lexer_state_token?
+    def lex_lexer_state
+      until @scanner.eos? do
+        case
+        when @scanner.scan(/\n/)
+          newline
+        when @scanner.scan(/\s+/)
+          # noop
+        when @scanner.scan(/\/\*/)
+          lex_comment
+        when @scanner.scan(/\/\/.*(?<newline>\n)?/)
+          newline if @scanner[:newline]
+        else
+          break
+        end
+      end
+
+      reset_first_position
+
+      case
+      when @scanner.eos?
+        return
+      when @scanner.scan(/#{SYMBOLS.join('|')}/)
+        return [@scanner.matched, @scanner.matched]
+      when @scanner.scan(/#{LEXER_STATE_TOKENS.join('|')}/)
+        return [@scanner.matched, @scanner.matched]
+      when @scanner.scan(/'.'/)
+        return [:CHARACTER, Lrama::Lexer::Token::Char.new(s_value: @scanner.matched, location: location)]
+      when @scanner.scan(/'\\\\'|'\\b'|'\\t'|'\\f'|'\\r'|'\\n'|'\\v'|'\\13'/)
+        return [:CHARACTER, Lrama::Lexer::Token::Char.new(s_value: @scanner.matched, location: location)]
+      when @scanner.scan(/([a-zA-Z_.][-a-zA-Z0-9_.]*)/)
+        token = Lrama::Lexer::Token::Ident.new(s_value: @scanner.matched, location: location)
+        return [:IDENTIFIER, token]
+      else
+        raise ParseError, "Unexpected token: #{@scanner.peek(10).chomp}." # steep:ignore UnknownConstant
+      end
     end
 
     private
