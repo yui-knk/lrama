@@ -27,18 +27,18 @@ module Lrama
 
       # @rbs (Lexer::Token::Ident id) -> void
       def set_initial_state(id)
-        state = @state_bits.find {|s| s.id == id } or raise "State #{id.s_value} is not found"
+        state = @state_bits.find {|s| s.name == id.s_value } or raise "State #{id.s_value} is not found"
         @initial_state = Set[state]
       end
 
       # @rbs (Lexer::Token::Ident id) -> void
       def add_state_bit(id)
-        @state_bits << StateBit.new(id)
+        @state_bits << StateBit.new(id.s_value)
       end
 
       # @rbs (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
       def add_predication(id, pattern)
-        @predications << Predication.new(id, pattern, false)
+        @predications << Predication.new(id.s_value, pattern, false)
       end
 
       # @rbs (Predication predication, Lexer::Token::Ident token, state to_state) -> void
@@ -49,16 +49,16 @@ module Lrama
 
       # @rbs (Lexer::Token::Ident id) -> StateBit
       def find_state_bit!(id)
-        @state_bits.find {|s| s.id == id } || (raise "StateBit #{id.s_value} is not found")
+        @state_bits.find {|s| s.name == id.s_value } || (raise "StateBit #{id.s_value} is not found")
       end
 
       # @rbs (Lexer::Token::Ident id) -> Predication
       def find_predication!(id)
-        if (state = @state_bits.find {|s| s.id == id })
-          return Predication.new(id, Predication::Pattern.new(state), false)
+        if (state = @state_bits.find {|s| s.name == id.s_value })
+          return Predication.new(id.s_value, Predication::Pattern.new(state), false)
         end
 
-        if (predication = @predications.find {|s| s.id == id })
+        if (predication = @predications.find {|predication| predication.name == id.s_value })
           return predication
         end
 

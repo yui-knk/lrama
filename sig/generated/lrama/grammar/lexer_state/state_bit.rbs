@@ -4,10 +4,10 @@ module Lrama
   class Grammar
     class LexerState
       class StateBit
-        attr_reader id: Lexer::Token::Ident
+        attr_reader name: String
 
-        # @rbs (Lexer::Token::Ident id) -> void
-        def initialize: (Lexer::Token::Ident id) -> void
+        # @rbs (String name) -> void
+        def initialize: (String name) -> void
 
         # @rbs (StateBit other) -> bool
         def ==: (StateBit other) -> bool

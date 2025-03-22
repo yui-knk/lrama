@@ -2881,26 +2881,26 @@ RSpec.describe Lrama::Parser do
           lexer_state = grammar.lexer_state
 
           expect(lexer_state.state_bits.count).to eq(3)
-          expect(lexer_state.state_bits[0].id.s_value).to eq("EXPR_BEG")
-          expect(lexer_state.state_bits[1].id.s_value).to eq("EXPR_END")
-          expect(lexer_state.state_bits[2].id.s_value).to eq("EXPR_CLASS")
+          expect(lexer_state.state_bits[0].name).to eq("EXPR_BEG")
+          expect(lexer_state.state_bits[1].name).to eq("EXPR_END")
+          expect(lexer_state.state_bits[2].name).to eq("EXPR_CLASS")
 
-          expect(lexer_state.initial_state.map(&:id).map(&:s_value)).to eq(["EXPR_BEG"])
+          expect(lexer_state.initial_state.map(&:name)).to eq(["EXPR_BEG"])
 
           expect(lexer_state.predications.count).to eq(1)
-          expect(lexer_state.predications[0].id.s_value).to eq("IS_BEG")
-          expect(lexer_state.predications[0].pattern.state.map(&:id).map(&:s_value)).to eq(["EXPR_BEG", "EXPR_CLASS"])
+          expect(lexer_state.predications[0].name).to eq("IS_BEG")
+          expect(lexer_state.predications[0].pattern.state.map(&:name)).to eq(["EXPR_BEG", "EXPR_CLASS"])
 
           expect(lexer_state.transitions.count).to eq(3)
           expect(lexer_state.transitions["tNUMBER"].count).to eq(1)
-          expect(lexer_state.transitions["tNUMBER"][0].predication.id.s_value).to eq("EXPR_BEG")
-          expect(lexer_state.transitions["tNUMBER"][0].to_state.map(&:id).map(&:s_value)).to eq(["EXPR_END"])
+          expect(lexer_state.transitions["tNUMBER"][0].predication.name).to eq("EXPR_BEG")
+          expect(lexer_state.transitions["tNUMBER"][0].to_state.map(&:name)).to eq(["EXPR_END"])
           expect(lexer_state.transitions["'+'"].count).to eq(1)
-          expect(lexer_state.transitions["'+'"][0].predication.id.s_value).to eq("EXPR_END")
-          expect(lexer_state.transitions["'+'"][0].to_state.map(&:id).map(&:s_value)).to eq(["EXPR_BEG"])
+          expect(lexer_state.transitions["'+'"][0].predication.name).to eq("EXPR_END")
+          expect(lexer_state.transitions["'+'"][0].to_state.map(&:name)).to eq(["EXPR_BEG"])
           expect(lexer_state.transitions["'-'"].count).to eq(1)
-          expect(lexer_state.transitions["'-'"][0].predication.id.s_value).to eq("EXPR_END")
-          expect(lexer_state.transitions["'-'"][0].to_state.map(&:id).map(&:s_value)).to eq(["EXPR_BEG"])
+          expect(lexer_state.transitions["'-'"][0].predication.name).to eq("EXPR_END")
+          expect(lexer_state.transitions["'-'"][0].to_state.map(&:name)).to eq(["EXPR_BEG"])
         end
       end
     end

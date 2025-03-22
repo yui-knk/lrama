@@ -5,22 +5,22 @@ module Lrama
   class Grammar
     class LexerState
       class StateBit
-        attr_reader :id #: Lexer::Token::Ident
+        attr_reader :name #: String
 
-        # @rbs (Lexer::Token::Ident id) -> void
-        def initialize(id)
-          @id = id
+        # @rbs (String name) -> void
+        def initialize(name)
+          @name = name
         end
 
         # @rbs (StateBit other) -> bool
         def ==(other)
           self.class == other.class &&
-          self.id == other.id
+          self.name == other.name
         end
 
         # @rbs () -> String
         def to_s
-          "#{id.s_value}"
+          "#{@name}"
         end
       end
     end

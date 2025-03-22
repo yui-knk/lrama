@@ -7,13 +7,13 @@ module Lrama
   class Grammar
     class LexerState
       class Predication
-        attr_reader :id #: Lexer::Token::Ident
+        attr_reader :name #: String
         attr_reader :pattern #: Pattern
         attr_reader :negative #: bool
 
-        # @rbs (Lexer::Token::Ident id, Pattern pattern, bool negative) -> void
-        def initialize(id, pattern, negative)
-          @id = id
+        # @rbs (String name, Pattern pattern, bool negative) -> void
+        def initialize(name, pattern, negative)
+          @name = name
           @pattern = pattern
           @negative = negative
         end
@@ -32,12 +32,12 @@ module Lrama
 
         # @rbs () -> Predication
         def negativeredication
-          Predication.new(@id, @pattern, !@negative)
+          Predication.new(@name, @pattern, !@negative)
         end
 
         # @rbs () -> String
         def to_s
-          "<#{id.s_value}: #{@pattern}>"
+          "<#{@name}: #{@pattern}>"
         end
       end
     end

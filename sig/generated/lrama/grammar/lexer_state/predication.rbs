@@ -4,14 +4,14 @@ module Lrama
   class Grammar
     class LexerState
       class Predication
-        attr_reader id: Lexer::Token::Ident
+        attr_reader name: String
 
         attr_reader pattern: Pattern
 
         attr_reader negative: bool
 
-        # @rbs (Lexer::Token::Ident id, Pattern pattern, bool negative) -> void
-        def initialize: (Lexer::Token::Ident id, Pattern pattern, bool negative) -> void
+        # @rbs (String name, Pattern pattern, bool negative) -> void
+        def initialize: (String name, Pattern pattern, bool negative) -> void
 
         # @rbs (Predication other) -> bool
         def ==: (Predication other) -> bool
