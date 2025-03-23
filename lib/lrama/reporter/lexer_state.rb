@@ -50,7 +50,8 @@ module Lrama
         when Lrama::Grammar::LexerState::Transition
           case transition.predication
           when Lrama::Grammar::LexerState::PatternPredication
-            "#{transition.predication.pattern} => #{transition._to_state.map(&:to_s).join('|')}"
+            prefix = transition.predication.negative ? "! " : ""
+            "#{prefix}#{transition.predication.pattern} => #{transition._to_state.map(&:to_s).join('|')}"
           when Lrama::Grammar::LexerState::AnyPredication
             "* => #{transition._to_state.map(&:to_s).join('|')}"
           else
