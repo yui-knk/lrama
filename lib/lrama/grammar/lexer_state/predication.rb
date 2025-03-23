@@ -6,6 +6,32 @@ require_relative "predication/pattern"
 module Lrama
   class Grammar
     class LexerState
+      # There are three kinds of predication in grammar file
+      #
+      # 1) Predication by StateBit, EXPR_END in the example.
+      #    This is handled by `Predication`.
+      #
+      #    EXPR_END {
+      #      tNUMBER => EXPR_END;
+      #    };
+      #
+      # 2) Predication by `predication`, IS_BEG in the example.
+      #    This is also handled by `Predication`.
+      #
+      #    predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS;
+      #    ...
+      #
+      #    IS_BEG_ANY {
+      #      tNUMBER => EXPR_END;
+      #    };
+      #
+      # 3) Predication by `*`.
+      #    This is handled by `AnyPredication`.
+      #
+      #    * {
+      #      tSTRING_END => EXPR_END;
+      #    };
+      #
       class Predication
         attr_reader :name #: String
         attr_reader :pattern #: Pattern

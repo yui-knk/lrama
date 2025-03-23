@@ -341,7 +341,7 @@ rule
   from_state_predication:
       "*"
         {
-          raise "not supported now"
+          result = Grammar::LexerState::AnyPredication.new
         }
     | IDENTIFIER
         {

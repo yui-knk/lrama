@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "set"
+require_relative "lexer_state/any_predication"
 require_relative "lexer_state/predication"
 require_relative "lexer_state/state_bit"
 require_relative "lexer_state/transition"
@@ -10,6 +11,12 @@ module Lrama
   class Grammar
     class LexerState
       # @rbs!
+      #
+      #   interface _Predication
+      #     def name: () -> String
+      #     def match?: (LexerState::state state) -> bool
+      #   end
+      #
       #   type state = Set[LexerState::StateBit]
 
       attr_reader :initial_state #: state

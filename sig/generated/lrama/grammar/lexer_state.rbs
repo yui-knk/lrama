@@ -3,6 +3,12 @@
 module Lrama
   class Grammar
     class LexerState
+      interface _Predication
+        def name: () -> String
+
+        def match?: (LexerState::state state) -> bool
+      end
+
       type state = Set[LexerState::StateBit]
 
       attr_reader initial_state: state

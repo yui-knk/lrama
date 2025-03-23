@@ -2027,7 +2027,7 @@ module_eval(<<'.,.,', 'parser.y', 335)
 
 module_eval(<<'.,.,', 'parser.y', 343)
   def _reduce_94(val, _values, result)
-              raise "not supported now"
+              result = Grammar::LexerState::AnyPredication.new
 
     result
   end
