@@ -323,8 +323,8 @@ module Lrama
     # @rbs () -> void
     def compute_lexer_states
       return unless lexer_state
-      compute_lexer_state_for_nonterminals
-      compute_lexer_state_for_states
+      report_duration(:compute_lexer_state_for_nonterminals) { compute_lexer_state_for_nonterminals }
+      report_duration(:compute_lexer_state_for_states) { compute_lexer_state_for_states }
     end
 
     # @rbs () -> void
