@@ -2897,6 +2897,39 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
 
 %token tLAST_TOKEN
 
+%lexer-state {
+    state EXPR_BEG; // = EXPR_VALUE
+    state EXPR_END;
+    state EXPR_ENDARG;
+    state EXPR_ENDFN;
+    state EXPR_ARG;
+    state EXPR_CMDARG;
+    state EXPR_MID;
+    state EXPR_FNAME;
+    state EXPR_DOT;
+    state EXPR_CLASS;
+    state EXPR_LABEL;
+    state EXPR_LABELED;
+    state EXPR_FITEM;
+
+    initial_state EXPR_BEG;
+
+    predication IS_ARG = EXPR_ARG | EXPR_CMDARG; // EXPR_ARG_ANY
+    predication IS_END = EXPR_END | EXPR_ENDARG | EXPR_ENDFN; // EXPR_END_ANY
+    predication_all IS_ARG_LABELED = EXPR_ARG | EXPR_LABELED;
+    predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS; // EXPR_BEG_ANY
+    predication IS_BEG = IS_BEG_ANY || IS_ARG_LABELED;
+    predication IS_AFTER_OPERATOR = EXPR_FNAME | EXPR_DOT;
+    // IS_SPCARG
+    // IS_LABEL_POSSIBLE
+
+    transitions {
+        EXPR_BEG {
+          tINTEGER => EXPR_END;
+        }
+    }
+}
+
 /*
  *	inlining rules
  */
