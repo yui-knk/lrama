@@ -7,8 +7,8 @@ module Lrama
         # @rbs () -> String
         def name: () -> String
 
-        # @rbs (Predication other) -> bool
-        def ==: (Predication other) -> bool
+        # @rbs (AnyPredication other) -> bool
+        def ==: (AnyPredication other) -> bool
 
         # @rbs (LexerState::state state) -> bool
         def match?: (LexerState::state state) -> bool

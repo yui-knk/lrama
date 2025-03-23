@@ -6,7 +6,7 @@ require "set"
 module Lrama
   class Grammar
     class LexerState
-      class Predication
+      class PatternPredication
         class Pattern
           attr_reader :state #: LexerState::state
 

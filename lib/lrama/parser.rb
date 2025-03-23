@@ -1965,7 +1965,7 @@ module_eval(<<'.,.,', 'parser.y', 311)
 module_eval(<<'.,.,', 'parser.y', 316)
   def _reduce_86(val, _values, result)
               state_bit = @lexer_state.find_state_bit!(val[0])
-          result = Grammar::LexerState::Predication::Pattern.new(state_bit)
+          result = Grammar::LexerState::PatternPredication::Pattern.new(state_bit)
 
     result
   end

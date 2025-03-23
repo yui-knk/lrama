@@ -47,7 +47,7 @@ module Lrama
       # @rbs (Lrama::Grammar::LexerState::Transition transition) -> String
       def pattern_to_s(transition)
         case transition.predication
-        when Lrama::Grammar::LexerState::Predication
+        when Lrama::Grammar::LexerState::PatternPredication
           "#{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}"
         when Lrama::Grammar::LexerState::AnyPredication
           "* => #{transition.to_state.map(&:to_s).join('|')}"

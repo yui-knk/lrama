@@ -1,7 +1,7 @@
 # rbs_inline: enabled
 # frozen_string_literal: true
 
-require_relative "predication/pattern"
+require_relative "pattern_predication/pattern"
 
 module Lrama
   class Grammar
@@ -9,14 +9,14 @@ module Lrama
       # There are three kinds of predication in grammar file
       #
       # 1) Predication by StateBit, EXPR_END in the example.
-      #    This is handled by `Predication`.
+      #    This is handled by `PatternPredication`.
       #
       #    EXPR_END {
       #      tNUMBER => EXPR_END;
       #    };
       #
       # 2) Predication by `predication`, IS_BEG in the example.
-      #    This is also handled by `Predication`.
+      #    This is also handled by `PatternPredication`.
       #
       #    predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS;
       #    ...
@@ -32,7 +32,7 @@ module Lrama
       #      tSTRING_END => EXPR_END;
       #    };
       #
-      class Predication
+      class PatternPredication
         attr_reader :name #: String
         attr_reader :pattern #: Pattern
         attr_reader :negative #: bool
@@ -44,7 +44,7 @@ module Lrama
           @negative = negative
         end
 
-        # @rbs (Predication other) -> bool
+        # @rbs (PatternPredication other) -> bool
         def ==(other)
           self.class == other.class &&
           self.pattern == other.pattern &&
@@ -62,9 +62,9 @@ module Lrama
           end
         end
 
-        # @rbs () -> Predication
+        # @rbs () -> PatternPredication
         def negative_predication
-          Predication.new(@name, @pattern, !@negative)
+          PatternPredication.new(@name, @pattern, !@negative)
         end
 
         # @rbs () -> String

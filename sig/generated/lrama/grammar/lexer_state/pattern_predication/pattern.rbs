@@ -1,9 +1,9 @@
-# Generated from lib/lrama/grammar/lexer_state/predication/pattern.rb with RBS::Inline
+# Generated from lib/lrama/grammar/lexer_state/pattern_predication/pattern.rb with RBS::Inline
 
 module Lrama
   class Grammar
     class LexerState
-      class Predication
+      class PatternPredication
         class Pattern
           attr_reader state: LexerState::state
 

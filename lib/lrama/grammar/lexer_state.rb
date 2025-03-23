@@ -3,7 +3,7 @@
 
 require "set"
 require_relative "lexer_state/any_predication"
-require_relative "lexer_state/predication"
+require_relative "lexer_state/pattern_predication"
 require_relative "lexer_state/state_bit"
 require_relative "lexer_state/transition"
 
@@ -22,7 +22,7 @@ module Lrama
 
       attr_reader :initial_state #: state
       attr_accessor :state_bits #: Array[StateBit]
-      attr_accessor :predications #: Array[Predication]
+      attr_accessor :predications #: Array[PatternPredication]
       attr_accessor :transitions #: Hash[String, Array[Transition]]
 
       # @rbs () -> void
@@ -44,9 +44,9 @@ module Lrama
         @state_bits << StateBit.new(id.s_value)
       end
 
-      # @rbs (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
+      # @rbs (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
       def add_predication(id, pattern)
-        @predications << Predication.new(id.s_value, pattern, false)
+        @predications << PatternPredication.new(id.s_value, pattern, false)
       end
 
       # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
@@ -60,10 +60,10 @@ module Lrama
         @state_bits.find {|s| s.name == id.s_value } || (raise "StateBit #{id.s_value} is not found")
       end
 
-      # @rbs (Lexer::Token::Ident id) -> Predication
+      # @rbs (Lexer::Token::Ident id) -> PatternPredication
       def find_predication!(id)
         if (state = @state_bits.find {|s| s.name == id.s_value })
-          return Predication.new(id.s_value, Predication::Pattern.new(state), false)
+          return PatternPredication.new(id.s_value, PatternPredication::Pattern.new(state), false)
         end
 
         if (predication = @predications.find {|predication| predication.name == id.s_value })

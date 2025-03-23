@@ -10,7 +10,7 @@ module Lrama
           "*"
         end
 
-        # @rbs (Predication other) -> bool
+        # @rbs (AnyPredication other) -> bool
         def ==(other)
           self.class == other.class
         end

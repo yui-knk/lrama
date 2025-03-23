@@ -17,7 +17,7 @@ module Lrama
 
       attr_accessor state_bits: Array[StateBit]
 
-      attr_accessor predications: Array[Predication]
+      attr_accessor predications: Array[PatternPredication]
 
       attr_accessor transitions: Hash[String, Array[Transition]]
 
@@ -30,8 +30,8 @@ module Lrama
       # @rbs (Lexer::Token::Ident id) -> void
       def add_state_bit: (Lexer::Token::Ident id) -> void
 
-      # @rbs (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
-      def add_predication: (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
+      # @rbs (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
+      def add_predication: (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
 
       # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
       def add_transition: (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
@@ -39,8 +39,8 @@ module Lrama
       # @rbs (Lexer::Token::Ident id) -> StateBit
       def find_state_bit!: (Lexer::Token::Ident id) -> StateBit
 
-      # @rbs (Lexer::Token::Ident id) -> Predication
-      def find_predication!: (Lexer::Token::Ident id) -> Predication
+      # @rbs (Lexer::Token::Ident id) -> PatternPredication
+      def find_predication!: (Lexer::Token::Ident id) -> PatternPredication
     end
   end
 end

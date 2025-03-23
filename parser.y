@@ -315,7 +315,7 @@ rule
     | IDENTIFIER
         {
           state_bit = @lexer_state.find_state_bit!(val[0])
-          result = Grammar::LexerState::Predication::Pattern.new(state_bit)
+          result = Grammar::LexerState::PatternPredication::Pattern.new(state_bit)
         }
 
   initial_state_declaration:

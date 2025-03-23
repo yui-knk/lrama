@@ -1,4 +1,4 @@
-# Generated from lib/lrama/grammar/lexer_state/predication.rb with RBS::Inline
+# Generated from lib/lrama/grammar/lexer_state/pattern_predication.rb with RBS::Inline
 
 module Lrama
   class Grammar
@@ -6,14 +6,14 @@ module Lrama
       # There are three kinds of predication in grammar file
       #
       # 1) Predication by StateBit, EXPR_END in the example.
-      #    This is handled by `Predication`.
+      #    This is handled by `PatternPredication`.
       #
       #    EXPR_END {
       #      tNUMBER => EXPR_END;
       #    };
       #
       # 2) Predication by `predication`, IS_BEG in the example.
-      #    This is also handled by `Predication`.
+      #    This is also handled by `PatternPredication`.
       #
       #    predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS;
       #    ...
@@ -28,7 +28,7 @@ module Lrama
       #    * {
       #      tSTRING_END => EXPR_END;
       #    };
-      class Predication
+      class PatternPredication
         attr_reader name: String
 
         attr_reader pattern: Pattern
@@ -38,14 +38,14 @@ module Lrama
         # @rbs (String name, Pattern pattern, bool negative) -> void
         def initialize: (String name, Pattern pattern, bool negative) -> void
 
-        # @rbs (Predication other) -> bool
-        def ==: (Predication other) -> bool
+        # @rbs (PatternPredication other) -> bool
+        def ==: (PatternPredication other) -> bool
 
         # @rbs (LexerState::state state) -> bool
         def match?: (LexerState::state state) -> bool
 
-        # @rbs () -> Predication
-        def negative_predication: () -> Predication
+        # @rbs () -> PatternPredication
+        def negative_predication: () -> PatternPredication
 
         # @rbs () -> String
         def to_s: () -> String
