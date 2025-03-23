@@ -27,7 +27,13 @@ module Lrama
 
         # @rbs (LexerState::state state) -> bool
         def match?(state)
-          @pattern.match?(state)
+          b = @pattern.match?(state)
+
+          if negative
+            !b
+          else
+            b
+          end
         end
 
         # @rbs () -> Predication
