@@ -375,7 +375,7 @@ rule
         }
     | "!" IDENTIFIER
         {
-          result = @lexer_state.find_predication!(val[0]).negative_predication
+          result = @lexer_state.find_predication!(val[1]).negative_predication
         }
 
   to_state:

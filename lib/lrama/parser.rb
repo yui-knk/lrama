@@ -2100,7 +2100,7 @@ module_eval(<<'.,.,', 'parser.y', 373)
 
 module_eval(<<'.,.,', 'parser.y', 377)
   def _reduce_102(val, _values, result)
-              result = @lexer_state.find_predication!(val[0]).negative_predication
+              result = @lexer_state.find_predication!(val[1]).negative_predication
 
     result
   end
