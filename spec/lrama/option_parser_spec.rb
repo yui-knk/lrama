@@ -133,7 +133,7 @@ RSpec.describe Lrama::OptionParser do
           expect(opts).to eq({
             grammar: true, states: true, itemsets: true,
             lookaheads: true, solved: true, counterexamples: true,
-            rules: true, terms: true, verbose: true
+            rules: true, terms: true, lexer_state: true, verbose: true
           })
         end
       end

@@ -140,7 +140,7 @@ module Lrama
     end
 
     ALIASED_REPORTS = { cex: :counterexamples }.freeze #: Hash[Symbol, Symbol]
-    VALID_REPORTS = %i[states itemsets lookaheads solved counterexamples rules terms verbose].freeze #: Array[Symbol]
+    VALID_REPORTS = %i[states itemsets lookaheads solved counterexamples rules terms lexer_state verbose].freeze #: Array[Symbol]
 
     # @rbs (Array[String]) -> Hash[Symbol, bool]
     def validate_report(report)
