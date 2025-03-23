@@ -31,7 +31,7 @@ module Lrama
         end
 
         # @rbs () -> Predication
-        def negativeredication
+        def negative_predication
           Predication.new(@name, @pattern, !@negative)
         end
 

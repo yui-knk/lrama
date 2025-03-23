@@ -20,7 +20,7 @@ module Lrama
         def match?: (LexerState::state state) -> bool
 
         # @rbs () -> Predication
-        def negativeredication: () -> Predication
+        def negative_predication: () -> Predication
 
         # @rbs () -> String
         def to_s: () -> String
