@@ -14,6 +14,7 @@ module Lrama
       #
       #   interface _Predication
       #     def name: () -> String
+      #     def ==: (self other) -> bool
       #     def match?: (LexerState::state state) -> bool
       #   end
       #
@@ -48,7 +49,7 @@ module Lrama
         @predications << Predication.new(id.s_value, pattern, false)
       end
 
-      # @rbs (Predication predication, Lexer::Token::Ident token, state to_state) -> void
+      # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
       def add_transition(predication, token, to_state)
         @transitions[token.s_value] ||= []
         @transitions[token.s_value] << Transition.new(predication, to_state)

@@ -6,6 +6,8 @@ module Lrama
       interface _Predication
         def name: () -> String
 
+        def ==: (self other) -> bool
+
         def match?: (LexerState::state state) -> bool
       end
 
@@ -31,8 +33,8 @@ module Lrama
       # @rbs (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
       def add_predication: (Lexer::Token::Ident id, Predication::Pattern pattern) -> void
 
-      # @rbs (Predication predication, Lexer::Token::Ident token, state to_state) -> void
-      def add_transition: (Predication predication, Lexer::Token::Ident token, state to_state) -> void
+      # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
+      def add_transition: (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
 
       # @rbs (Lexer::Token::Ident id) -> StateBit
       def find_state_bit!: (Lexer::Token::Ident id) -> StateBit

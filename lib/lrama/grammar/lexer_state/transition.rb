@@ -5,10 +5,10 @@ module Lrama
   class Grammar
     class LexerState
       class Transition
-        attr_reader :predication #: Predication
+        attr_reader :predication #: _Predication
         attr_reader :to_state #: LexerState::state
 
-        # @rbs (Predication predication, LexerState::state to_state) -> void
+        # @rbs (_Predication predication, LexerState::state to_state) -> void
         def initialize(predication, to_state)
           @predication = predication
           @to_state = to_state
