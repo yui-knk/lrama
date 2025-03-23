@@ -18,7 +18,7 @@ module Lrama
         states.terms.each do |term|
           io << "    #{term.id.s_value}\n"
           term.lexer_state_transitions.each do |transition|
-            io << "      #{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}\n"
+            io << "      #{pattern_to_s(transition)}\n"
           end
           io << "\n"
         end
@@ -26,7 +26,7 @@ module Lrama
         states.nterms.each do |nterm|
           io << "    #{nterm.id.s_value}\n"
           nterm.lexer_state_transitions.each do |transition|
-            io << "      #{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}\n"
+            io << "      #{pattern_to_s(transition)}\n"
           end
           io << "\n"
         end
@@ -34,12 +34,26 @@ module Lrama
         states.rules.each do |rule|
           io << "    #{rule.display_name}\n"
           rule.merged_lexer_state_transitions.each do |transition|
-            io << "      #{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}\n"
+            io << "      #{pattern_to_s(transition)}\n"
           end
           io << "\n"
         end
 
         io << "\n"
+      end
+
+      private
+
+      # @rbs (Lrama::Grammar::LexerState::Transition transition) -> String
+      def pattern_to_s(transition)
+        case transition.predication
+        when Lrama::Grammar::LexerState::Predication
+          "#{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}"
+        when Lrama::Grammar::LexerState::AnyPredication
+          "* => #{transition.to_state.map(&:to_s).join('|')}"
+        else
+          ""
+        end
       end
     end
   end

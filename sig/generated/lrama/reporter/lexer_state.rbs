@@ -8,6 +8,11 @@ module Lrama
 
       # @rbs (IO io, Lrama::States states) -> void
       def report: (IO io, Lrama::States states) -> void
+
+      private
+
+      # @rbs (Lrama::Grammar::LexerState::Transition transition) -> String
+      def pattern_to_s: (Lrama::Grammar::LexerState::Transition transition) -> String
     end
   end
 end
