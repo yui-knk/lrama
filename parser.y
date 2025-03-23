@@ -351,13 +351,13 @@ rule
         }
 
   transitions_declaration:
-      "transitions" "{" transition_declaration+ "}" ";"
+      "transitions" "{" transition_declaration+ "}"
         {
           result = val[2].flatten
         }
 
   transition_declaration:
-      from_state_predication "{" to_state+ "}" ";"
+      from_state_predication "{" to_state+ "}"
         {
           val[2].each do |token, to_state|
             @lexer_state.add_transition(val[0], token, to_state)

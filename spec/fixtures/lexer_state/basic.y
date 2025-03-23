@@ -41,17 +41,17 @@
   transitions {
     EXPR_BEG {
       tNUMBER => EXPR_END;
-    };
+    }
 
     IS_AFTER_OPERATOR {
       '+' => EXPR_ARG;
       '-' => EXPR_ARG;
-    };
+    }
 
     !IS_AFTER_OPERATOR {
       '+' => EXPR_BEG;
       '-' => EXPR_BEG;
-    };
+    }
 
     * {
       tSTRING_END => EXPR_END;
@@ -60,8 +60,8 @@
       '(' => EXPR_BEG | EXPR_LABEL;
       ')' => EXPR_ENDFN;
       ',' => EXPR_BEG | EXPR_LABEL;
-    };
-  };
+    }
+  }
 }
 
 %%
