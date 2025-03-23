@@ -60,6 +60,19 @@ module Lrama
         @state_bits.find {|s| s.name == id.s_value } || (raise "StateBit #{id.s_value} is not found")
       end
 
+      # @rbs (Lexer::Token::Ident id) -> PatternPredication::_Pattern
+      def find_pattern!(id)
+        if (state = @state_bits.find {|s| s.name == id.s_value })
+          return PatternPredication::Pattern.new(state)
+        end
+
+        if (predication = @predications.find {|predication| predication.name == id.s_value })
+          return PatternPredication::PredicationPattern.new(predication)
+        end
+
+        raise "Pattern #{id.s_value} is not found"
+      end
+
       # @rbs (Lexer::Token::Ident id) -> PatternPredication
       def find_predication!(id)
         if (state = @state_bits.find {|s| s.name == id.s_value })

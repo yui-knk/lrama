@@ -32,7 +32,7 @@ module Lrama
         interface _Pattern
           def ==: (self other) -> bool
 
-          def match2?: (LexerState::state state) -> bool
+          def match?: (LexerState::state state) -> bool
         end
 
         attr_reader name: String

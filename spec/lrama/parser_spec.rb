@@ -2893,19 +2893,26 @@ RSpec.describe Lrama::Parser do
           expect(lexer_state.initial_state.map(&:name)).to eq(["EXPR_BEG"])
 
           # predications
-          expect(lexer_state.predications.count).to eq(3)
+          expect(lexer_state.predications.count).to eq(4)
 
           expect(lexer_state.predications[0].name).to eq("IS_BEG_ANY")
-          expect(lexer_state.predications[0].pattern.state.map(&:name)).to eq(["EXPR_BEG", "EXPR_MID", "EXPR_CLASS"])
           expect(lexer_state.predications[0].pattern.class).to eq(Lrama::Grammar::LexerState::PatternPredication::Pattern)
+          expect(lexer_state.predications[0].pattern.state.map(&:name)).to eq(["EXPR_BEG", "EXPR_MID", "EXPR_CLASS"])
 
           expect(lexer_state.predications[1].name).to eq("IS_ARG_LABELED")
-          expect(lexer_state.predications[1].pattern.state.map(&:name)).to eq(["EXPR_ARG", "EXPR_LABELED"])
           expect(lexer_state.predications[1].pattern.class).to eq(Lrama::Grammar::LexerState::PatternPredication::AllPattern)
+          expect(lexer_state.predications[1].pattern.state.map(&:name)).to eq(["EXPR_ARG", "EXPR_LABELED"])
 
-          expect(lexer_state.predications[2].name).to eq("IS_AFTER_OPERATOR")
-          expect(lexer_state.predications[2].pattern.state.map(&:name)).to eq(["EXPR_FNAME", "EXPR_DOT"])
-          expect(lexer_state.predications[2].pattern.class).to eq(Lrama::Grammar::LexerState::PatternPredication::Pattern)
+          expect(lexer_state.predications[2].name).to eq("IS_BEG")
+          expect(lexer_state.predications[2].pattern.class).to eq(Lrama::Grammar::LexerState::PatternPredication::OrPattern)
+          expect(lexer_state.predications[2].pattern.left.class).to eq(Lrama::Grammar::LexerState::PatternPredication::PredicationPattern)
+          expect(lexer_state.predications[2].pattern.left.predication.name).to eq("IS_BEG_ANY")
+          expect(lexer_state.predications[2].pattern.right.class).to eq(Lrama::Grammar::LexerState::PatternPredication::PredicationPattern)
+          expect(lexer_state.predications[2].pattern.right.predication.name).to eq("IS_ARG_LABELED")
+
+          expect(lexer_state.predications[3].name).to eq("IS_AFTER_OPERATOR")
+          expect(lexer_state.predications[3].pattern.class).to eq(Lrama::Grammar::LexerState::PatternPredication::Pattern)
+          expect(lexer_state.predications[3].pattern.state.map(&:name)).to eq(["EXPR_FNAME", "EXPR_DOT"])
 
           # transitions
           expect(lexer_state.transitions.count).to eq(4)

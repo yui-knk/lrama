@@ -4,6 +4,10 @@ class Lrama::Parser
 
   token C_DECLARATION CHARACTER IDENT_COLON IDENTIFIER INTEGER STRING TAG
 
+  preclow
+    left "||"
+  prechigh
+
 rule
 
   input: prologue_declaration* bison_declaration* "%%" rules_or_grammar_declaration+ epilogue_declaration?
@@ -311,15 +315,21 @@ rule
         }
 
   pattern:
-      pattern '|' IDENTIFIER
+      pattern '||' pattern
+        {
+          result = Grammar::LexerState::PatternPredication::OrPattern.new(val[0], val[2])
+        }
+    | pattern0
+
+  pattern0:
+    | pattern0 '|' IDENTIFIER
         {
           state_bit = @lexer_state.find_state_bit!(val[2])
           val[0].add_state_bit(state_bit)
         }
     | IDENTIFIER
         {
-          state_bit = @lexer_state.find_state_bit!(val[0])
-          result = Grammar::LexerState::PatternPredication::Pattern.new(state_bit)
+          result = @lexer_state.find_pattern!(val[0])
         }
 
   all_pattern:

@@ -39,6 +39,9 @@ module Lrama
       # @rbs (Lexer::Token::Ident id) -> StateBit
       def find_state_bit!: (Lexer::Token::Ident id) -> StateBit
 
+      # @rbs (Lexer::Token::Ident id) -> PatternPredication::_Pattern
+      def find_pattern!: (Lexer::Token::Ident id) -> PatternPredication::_Pattern
+
       # @rbs (Lexer::Token::Ident id) -> PatternPredication
       def find_predication!: (Lexer::Token::Ident id) -> PatternPredication
     end

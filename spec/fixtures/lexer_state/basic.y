@@ -25,7 +25,7 @@
 
   predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS;
   predication_all IS_ARG_LABELED = EXPR_ARG | EXPR_LABELED;
-  //predication IS_BEG = IS_BEG_ANY || IS_ARG_LABELED;
+  predication IS_BEG = IS_BEG_ANY || IS_ARG_LABELED;
   predication IS_AFTER_OPERATOR = EXPR_FNAME | EXPR_DOT;
 
   transitions {
