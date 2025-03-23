@@ -335,7 +335,9 @@ module Lrama
       end
 
       terms.each do |term|
-        # append ID transition to term if term.lexer_state_transitions.empty?
+        if term.lexer_state_transitions.empty?
+          term.lexer_state_transitions << Grammar::LexerState::IdentityTransition.new
+        end
       end
 
       nterm_dependencies = rules.each_with_object({}) do |rule, h|
@@ -356,7 +358,7 @@ module Lrama
         end
 
         if updated
-          nterm_dependencies[nterm].each do |rule|
+          nterm_dependencies[nterm]&.each do |rule|
             queue << rule.lhs
           end
         end
@@ -375,7 +377,7 @@ module Lrama
           transition.next_sym.lexer_state_transitions.each do |ls_transition|
             state.lexer_states.each do |lexer_state|
               if ls_transition.match?(lexer_state)
-                if to_state.lexer_states.add?(ls_transition.to_state)
+                if to_state.lexer_states.add?(ls_transition.to_state(lexer_state))
                   queue << to_state
                 end
               end

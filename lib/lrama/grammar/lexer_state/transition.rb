@@ -6,30 +6,42 @@ module Lrama
     class LexerState
       class Transition
         attr_reader :predication #: _Predication
-        attr_reader :to_state #: LexerState::state
+        attr_reader :_to_state #: LexerState::state
 
         # @rbs (_Predication predication, LexerState::state to_state) -> void
         def initialize(predication, to_state)
           @predication = predication
-          @to_state = to_state
+          @_to_state = to_state
         end
 
         # @rbs (Transition other) -> bool
         def ==(other)
           self.class == other.class &&
           self.predication == other.predication &&
-          self.to_state == other.to_state
+          self._to_state == other._to_state
+        end
+
+        # @rbs (LexerState::state from_state) -> LexerState::state
+        def to_state(from_state)
+          @_to_state
         end
 
         # Merge other transition to this transition then returns new transition.
         # Return `nil` if it can't merge other transition to this.
         #
-        # @rbs (Transition other) -> Transition?
+        # @rbs (_Transition other) -> Transition?
         def merge(other)
-          if other.match?(to_state)
-            Transition.new(predication, other.to_state)
+          case other
+          when IdentityTransition
+            return self
+          when Transition
+            if other.match?(@_to_state)
+              Transition.new(predication, other._to_state)
+            else
+              nil
+            end
           else
-            nil
+            raise "[BUG] Unexpected transition #{other}"
           end
         end
 

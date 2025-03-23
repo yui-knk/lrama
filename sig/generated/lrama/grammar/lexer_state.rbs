@@ -11,6 +11,16 @@ module Lrama
         def match?: (LexerState::state state) -> bool
       end
 
+      interface _Transition
+        def ==: (self other) -> bool
+
+        def to_state: (LexerState::state from_state) -> LexerState::state
+
+        def merge: (_Transition other) -> _Transition?
+
+        def match?: (LexerState::state state) -> bool
+      end
+
       type state = Set[LexerState::StateBit]
 
       attr_reader initial_state: state

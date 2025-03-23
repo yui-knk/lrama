@@ -18,7 +18,7 @@ module Lrama
         states.terms.each do |term|
           io << "    #{term.id.s_value}\n"
           term.lexer_state_transitions.each do |transition|
-            io << "      #{pattern_to_s(transition)}\n"
+            io << "      #{transition_to_s(transition)}\n"
           end
           io << "\n"
         end
@@ -26,15 +26,15 @@ module Lrama
         states.nterms.each do |nterm|
           io << "    #{nterm.id.s_value}\n"
           nterm.lexer_state_transitions.each do |transition|
-            io << "      #{pattern_to_s(transition)}\n"
+            io << "      #{transition_to_s(transition)}\n"
           end
           io << "\n"
         end
 
         states.rules.each do |rule|
-          io << "    #{rule.display_name}\n"
+          io << "    #{rule.id}: #{rule.display_name}\n\n"
           rule.merged_lexer_state_transitions.each do |transition|
-            io << "      #{pattern_to_s(transition)}\n"
+            io << "      #{transition_to_s(transition)}\n"
           end
           io << "\n"
         end
@@ -44,13 +44,20 @@ module Lrama
 
       private
 
-      # @rbs (Lrama::Grammar::LexerState::Transition transition) -> String
-      def pattern_to_s(transition)
-        case transition.predication
-        when Lrama::Grammar::LexerState::PatternPredication
-          "#{transition.predication.pattern} => #{transition.to_state.map(&:to_s).join('|')}"
-        when Lrama::Grammar::LexerState::AnyPredication
-          "* => #{transition.to_state.map(&:to_s).join('|')}"
+      # @rbs (Lrama::Grammar::LexerState::_Transition transition) -> String
+      def transition_to_s(transition)
+        case transition
+        when Lrama::Grammar::LexerState::Transition
+          case transition.predication
+          when Lrama::Grammar::LexerState::PatternPredication
+            "#{transition.predication.pattern} => #{transition._to_state.map(&:to_s).join('|')}"
+          when Lrama::Grammar::LexerState::AnyPredication
+            "* => #{transition._to_state.map(&:to_s).join('|')}"
+          else
+            ""
+          end
+        when Lrama::Grammar::LexerState::IdentityTransition
+          "* => *"
         else
           ""
         end

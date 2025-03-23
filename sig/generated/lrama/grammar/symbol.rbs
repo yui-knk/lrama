@@ -29,7 +29,7 @@ module Lrama
 
       attr_accessor first_set_bitmap: Bitmap::bitmap
 
-      attr_accessor lexer_state_transitions: Array[LexerState::Transition]
+      attr_accessor lexer_state_transitions: Array[LexerState::_Transition]
 
       attr_reader term: bool
 

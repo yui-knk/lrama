@@ -23,7 +23,7 @@ module Lrama
       attr_accessor :error_token #: ErrorToken
       attr_accessor :first_set #: Set[Grammar::Symbol]
       attr_accessor :first_set_bitmap #: Bitmap::bitmap
-      attr_accessor :lexer_state_transitions #: Array[LexerState::Transition]
+      attr_accessor :lexer_state_transitions #: Array[LexerState::_Transition]
       attr_reader :term #: bool
       attr_writer :eof_symbol #: bool
       attr_writer :error_symbol #: bool

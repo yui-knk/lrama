@@ -1,38 +1,26 @@
-# rbs_inline: enabled
-# frozen_string_literal: true
+# Generated from lib/lrama/grammar/lexer_state/identity_transition.rb with RBS::Inline
 
 module Lrama
   class Grammar
     class LexerState
       class IdentityTransition
-
         # @rbs (Transition other) -> bool
-        def ==(other)
-          self.class == other.class
-        end
+        def ==: (Transition other) -> bool
 
         # @rbs (LexerState::state from_state) -> LexerState::state
-        def to_state(from_state)
-          from_state
-        end
+        def to_state: (LexerState::state from_state) -> LexerState::state
 
         # Merge other transition to this transition then returns new transition.
         # Return `nil` if it can't merge other transition to this.
         #
         # @rbs (_Transition other) -> _Transition
-        def merge(other)
-          other
-        end
+        def merge: (_Transition other) -> _Transition
 
         # @rbs (LexerState::state state) -> bool
-        def match?(state)
-          true
-        end
+        def match?: (LexerState::state state) -> bool
 
         # @rbs () -> String
-        def to_s
-          "<IdentityTransition: * => *>"
-        end
+        def to_s: () -> String
       end
     end
   end

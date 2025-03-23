@@ -2689,20 +2689,25 @@ RSpec.describe Lrama::States do
         LexerState
 
             YYEOF
+              * => *
 
             YYerror
+              * => *
 
             YYUNDEF
+              * => *
 
             tNUMBER
               EXPR_BEG => EXPR_END
 
             tSTRING_BEG
+              * => *
 
             tSTRING_END
               * => EXPR_END
 
             tSTRING_CONTENT
+              * => *
 
             '+'
               EXPR_END => EXPR_BEG
@@ -2711,38 +2716,64 @@ RSpec.describe Lrama::States do
               EXPR_END => EXPR_BEG
 
             $accept
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
 
             program
               EXPR_BEG => EXPR_END
+              * => EXPR_END
 
             expr
               EXPR_BEG => EXPR_END
+              * => EXPR_END
 
             string
+              * => EXPR_END
 
             primary
               EXPR_BEG => EXPR_END
+              * => EXPR_END
 
-            $accept -> program YYEOF
+            0: $accept -> program YYEOF
 
-            program -> expr
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            1: program -> expr
+
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            2: expr -> expr '+' expr
+
+              EXPR_BEG => EXPR_END
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+              * => EXPR_END
+
+            3: expr -> primary '-' primary
+
+              EXPR_BEG => EXPR_END
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+              * => EXPR_END
+
+            4: expr -> primary
+
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            5: string -> tSTRING_BEG tSTRING_CONTENT tSTRING_END
+
+              * => EXPR_END
+
+            6: primary -> tNUMBER
+
               EXPR_BEG => EXPR_END
 
-            expr -> expr '+' expr
-              EXPR_BEG => EXPR_END
+            7: primary -> string
 
-            expr -> primary '-' primary
-              EXPR_BEG => EXPR_END
-
-            expr -> primary
-              EXPR_BEG => EXPR_END
-
-            string -> tSTRING_BEG tSTRING_CONTENT tSTRING_END
-
-            primary -> tNUMBER
-              EXPR_BEG => EXPR_END
-
-            primary -> string
+              * => EXPR_END
 
 
         State 0
@@ -2775,6 +2806,8 @@ RSpec.describe Lrama::States do
 
             tSTRING_CONTENT  shift, and go to state 7
 
+            EXPR_BEG
+
 
         State 3
 
@@ -2803,6 +2836,8 @@ RSpec.describe Lrama::States do
 
             $default  reduce using rule 7 (primary)
 
+            EXPR_END
+
 
         State 6
 
@@ -2822,12 +2857,16 @@ RSpec.describe Lrama::States do
 
             tSTRING_END  shift, and go to state 11
 
+            EXPR_BEG
+
 
         State 8
 
             0 $accept: program "end of file" •
 
             $default  accept
+
+            EXPR_END
 
 
         State 9
@@ -2862,6 +2901,8 @@ RSpec.describe Lrama::States do
             5 string: tSTRING_BEG tSTRING_CONTENT tSTRING_END •
 
             $default  reduce using rule 5 (string)
+
+            EXPR_END
 
 
         State 12

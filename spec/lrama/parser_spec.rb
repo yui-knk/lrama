@@ -2919,19 +2919,19 @@ RSpec.describe Lrama::Parser do
 
           expect(lexer_state.transitions["tNUMBER"].count).to eq(1)
           expect(lexer_state.transitions["tNUMBER"][0].predication.name).to eq("EXPR_BEG")
-          expect(lexer_state.transitions["tNUMBER"][0].to_state.map(&:name)).to eq(["EXPR_END"])
+          expect(lexer_state.transitions["tNUMBER"][0]._to_state.map(&:name)).to eq(["EXPR_END"])
 
           expect(lexer_state.transitions["'+'"].count).to eq(1)
           expect(lexer_state.transitions["'+'"][0].predication.name).to eq("EXPR_END")
-          expect(lexer_state.transitions["'+'"][0].to_state.map(&:name)).to eq(["EXPR_BEG"])
+          expect(lexer_state.transitions["'+'"][0]._to_state.map(&:name)).to eq(["EXPR_BEG"])
 
           expect(lexer_state.transitions["'-'"].count).to eq(1)
           expect(lexer_state.transitions["'-'"][0].predication.name).to eq("EXPR_END")
-          expect(lexer_state.transitions["'-'"][0].to_state.map(&:name)).to eq(["EXPR_BEG"])
+          expect(lexer_state.transitions["'-'"][0]._to_state.map(&:name)).to eq(["EXPR_BEG"])
 
           expect(lexer_state.transitions["tSTRING_END"].count).to eq(1)
           expect(lexer_state.transitions["tSTRING_END"][0].predication.name).to eq("*")
-          expect(lexer_state.transitions["tSTRING_END"][0].to_state.map(&:name)).to eq(["EXPR_END"])
+          expect(lexer_state.transitions["tSTRING_END"][0]._to_state.map(&:name)).to eq(["EXPR_END"])
         end
       end
     end

@@ -11,8 +11,8 @@ module Lrama
 
       private
 
-      # @rbs (Lrama::Grammar::LexerState::Transition transition) -> String
-      def pattern_to_s: (Lrama::Grammar::LexerState::Transition transition) -> String
+      # @rbs (Lrama::Grammar::LexerState::_Transition transition) -> String
+      def transition_to_s: (Lrama::Grammar::LexerState::_Transition transition) -> String
     end
   end
 end

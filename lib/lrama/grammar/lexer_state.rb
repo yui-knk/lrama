@@ -3,6 +3,7 @@
 
 require "set"
 require_relative "lexer_state/any_predication"
+require_relative "lexer_state/identity_transition"
 require_relative "lexer_state/pattern_predication"
 require_relative "lexer_state/state_bit"
 require_relative "lexer_state/transition"
@@ -15,6 +16,13 @@ module Lrama
       #   interface _Predication
       #     def name: () -> String
       #     def ==: (self other) -> bool
+      #     def match?: (LexerState::state state) -> bool
+      #   end
+      #
+      #   interface _Transition
+      #     def ==: (self other) -> bool
+      #     def to_state: (LexerState::state from_state) -> LexerState::state
+      #     def merge: (_Transition other) -> _Transition?
       #     def match?: (LexerState::state state) -> bool
       #   end
       #
