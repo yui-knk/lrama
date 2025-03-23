@@ -2697,6 +2697,13 @@ RSpec.describe Lrama::States do
             tNUMBER
               EXPR_BEG => EXPR_END
 
+            tSTRING_BEG
+
+            tSTRING_END
+              * => EXPR_END
+
+            tSTRING_CONTENT
+
             '+'
               EXPR_END => EXPR_BEG
 
@@ -2711,6 +2718,11 @@ RSpec.describe Lrama::States do
             expr
               EXPR_BEG => EXPR_END
 
+            string
+
+            primary
+              EXPR_BEG => EXPR_END
+
             $accept -> program YYEOF
 
             program -> expr
@@ -2719,100 +2731,154 @@ RSpec.describe Lrama::States do
             expr -> expr '+' expr
               EXPR_BEG => EXPR_END
 
-            expr -> tNUMBER '-' tNUMBER
+            expr -> primary '-' primary
               EXPR_BEG => EXPR_END
 
-            expr -> tNUMBER
+            expr -> primary
               EXPR_BEG => EXPR_END
+
+            string -> tSTRING_BEG tSTRING_CONTENT tSTRING_END
+
+            primary -> tNUMBER
+              EXPR_BEG => EXPR_END
+
+            primary -> string
 
 
         State 0
 
             0 $accept: • program "end of file"
 
-            tNUMBER  shift, and go to state 1
+            tNUMBER      shift, and go to state 1
+            tSTRING_BEG  shift, and go to state 2
 
-            program  go to state 2
-            expr     go to state 3
+            program  go to state 3
+            expr     go to state 4
+            string   go to state 5
+            primary  go to state 6
 
             EXPR_BEG
 
 
         State 1
 
-            3 expr: tNUMBER • '-' tNUMBER
-            4     | tNUMBER •
+            6 primary: tNUMBER •
 
-            '-'  shift, and go to state 4
-
-            $default  reduce using rule 4 (expr)
+            $default  reduce using rule 6 (primary)
 
             EXPR_END
 
 
         State 2
 
-            0 $accept: program • "end of file"
+            5 string: tSTRING_BEG • tSTRING_CONTENT tSTRING_END
 
-            "end of file"  shift, and go to state 5
-
-            EXPR_END
+            tSTRING_CONTENT  shift, and go to state 7
 
 
         State 3
 
-            1 program: expr •
-            2 expr: expr • '+' expr
+            0 $accept: program • "end of file"
 
-            '+'  shift, and go to state 6
-
-            $default  reduce using rule 1 (program)
+            "end of file"  shift, and go to state 8
 
             EXPR_END
 
 
         State 4
 
-            3 expr: tNUMBER '-' • tNUMBER
+            1 program: expr •
+            2 expr: expr • '+' expr
 
-            tNUMBER  shift, and go to state 7
+            '+'  shift, and go to state 9
 
-            EXPR_BEG
+            $default  reduce using rule 1 (program)
+
+            EXPR_END
 
 
         State 5
+
+            7 primary: string •
+
+            $default  reduce using rule 7 (primary)
+
+
+        State 6
+
+            3 expr: primary • '-' primary
+            4     | primary •
+
+            '-'  shift, and go to state 10
+
+            $default  reduce using rule 4 (expr)
+
+            EXPR_END
+
+
+        State 7
+
+            5 string: tSTRING_BEG tSTRING_CONTENT • tSTRING_END
+
+            tSTRING_END  shift, and go to state 11
+
+
+        State 8
 
             0 $accept: program "end of file" •
 
             $default  accept
 
 
-        State 6
+        State 9
 
             2 expr: expr '+' • expr
 
-            tNUMBER  shift, and go to state 1
+            tNUMBER      shift, and go to state 1
+            tSTRING_BEG  shift, and go to state 2
 
-            expr  go to state 8
+            expr     go to state 12
+            string   go to state 5
+            primary  go to state 6
 
             EXPR_BEG
 
 
-        State 7
+        State 10
 
-            3 expr: tNUMBER '-' tNUMBER •
+            3 expr: primary '-' • primary
 
-            $default  reduce using rule 3 (expr)
+            tNUMBER      shift, and go to state 1
+            tSTRING_BEG  shift, and go to state 2
 
-            EXPR_END
+            string   go to state 5
+            primary  go to state 13
+
+            EXPR_BEG
 
 
-        State 8
+        State 11
+
+            5 string: tSTRING_BEG tSTRING_CONTENT tSTRING_END •
+
+            $default  reduce using rule 5 (string)
+
+
+        State 12
 
             2 expr: expr • '+' expr
             2     | expr '+' expr •
 
             $default  reduce using rule 2 (expr)
+
+            EXPR_END
+
+
+        State 13
+
+            3 expr: primary '-' primary •
+
+            $default  reduce using rule 3 (expr)
 
             EXPR_END
 
