@@ -305,6 +305,10 @@ rule
         {
           @lexer_state.add_predication(val[1], val[3])
         }
+    | "predication_all" IDENTIFIER "=" all_pattern ";"
+        {
+          @lexer_state.add_predication(val[1], val[3])
+        }
 
   pattern:
       pattern '|' IDENTIFIER
@@ -316,6 +320,18 @@ rule
         {
           state_bit = @lexer_state.find_state_bit!(val[0])
           result = Grammar::LexerState::PatternPredication::Pattern.new(state_bit)
+        }
+
+  all_pattern:
+      all_pattern '|' IDENTIFIER
+        {
+          state_bit = @lexer_state.find_state_bit!(val[2])
+          val[0].add_state_bit(state_bit)
+        }
+    | IDENTIFIER
+        {
+          state_bit = @lexer_state.find_state_bit!(val[0])
+          result = Grammar::LexerState::PatternPredication::AllPattern.new(state_bit)
         }
 
   initial_state_declaration:

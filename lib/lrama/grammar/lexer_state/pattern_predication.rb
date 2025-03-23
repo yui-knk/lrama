@@ -1,6 +1,7 @@
 # rbs_inline: enabled
 # frozen_string_literal: true
 
+require_relative "pattern_predication/all_pattern"
 require_relative "pattern_predication/pattern"
 
 module Lrama
@@ -33,11 +34,18 @@ module Lrama
       #    };
       #
       class PatternPredication
+        # @rbs!
+        #
+        #   interface _Pattern
+        #     def ==: (self other) -> bool
+        #     def match?: (LexerState::state state) -> bool
+        #   end
+
         attr_reader :name #: String
-        attr_reader :pattern #: Pattern
+        attr_reader :pattern #: _Pattern
         attr_reader :negative #: bool
 
-        # @rbs (String name, Pattern pattern, bool negative) -> void
+        # @rbs (String name, _Pattern pattern, bool negative) -> void
         def initialize(name, pattern, negative)
           @name = name
           @pattern = pattern

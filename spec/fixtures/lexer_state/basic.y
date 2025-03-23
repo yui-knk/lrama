@@ -14,15 +14,17 @@
 %lexer-state {
   state EXPR_BEG;
   state EXPR_END;
+  state EXPR_ARG;
   state EXPR_MID;
   state EXPR_FNAME;
   state EXPR_DOT;
   state EXPR_CLASS;
+  state EXPR_LABELED;
 
   initial_state EXPR_BEG;
 
   predication IS_BEG_ANY = EXPR_BEG | EXPR_MID | EXPR_CLASS;
-  //predication_all IS_ARG_LABELED = EXPR_ARG | EXPR_LABELED;
+  predication_all IS_ARG_LABELED = EXPR_ARG | EXPR_LABELED;
   //predication IS_BEG = IS_BEG_ANY || IS_ARG_LABELED;
   predication IS_AFTER_OPERATOR = EXPR_FNAME | EXPR_DOT;
 

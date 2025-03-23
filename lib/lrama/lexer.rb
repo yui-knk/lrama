@@ -69,6 +69,7 @@ module Lrama
 
     LEXER_STATE_TOKENS = %w(
       state
+      predication_all
       predication
       initial_state
       transitions
