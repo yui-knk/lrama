@@ -319,13 +319,14 @@ rule
         {
           result = Grammar::LexerState::PatternPredication::OrPattern.new(val[0], val[2])
         }
-    | pattern0
+    | pattern_base
 
-  pattern0:
-    | pattern0 '|' IDENTIFIER
+  pattern_base:
+    | pattern_base '|' IDENTIFIER
         {
           state_bit = @lexer_state.find_state_bit!(val[2])
           val[0].add_state_bit(state_bit)
+          result = val[0]
         }
     | IDENTIFIER
         {
@@ -357,14 +358,14 @@ rule
         }
 
   transition_declaration:
-      from_state_predication "{" to_state+ "}"
+      predication "{" to_state+ "}"
         {
           val[2].each do |token, to_state|
             @lexer_state.add_transition(val[0], token, to_state)
           end
         }
 
-  from_state_predication:
+  predication:
       "*"
         {
           result = Grammar::LexerState::AnyPredication.new
