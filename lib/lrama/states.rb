@@ -381,6 +381,16 @@ module Lrama
           end
         end
       end
+
+      # Validations
+      invalid_terms = terms.select do |term|
+        term.lexer_state_transitions.empty?
+      end
+      invalid_nterms = nterms.select do |nterm|
+        nterm.lexer_state_transitions.empty?
+      end
+      raise "#{invalid_terms.map(&:id).map(&:s_value).join(', ')} have no lexer_state_transitions" if !invalid_terms.empty?
+      raise "#{invalid_nterms.map(&:id).map(&:s_value).join(', ')} have no lexer_state_transitions" if !invalid_nterms.empty?
     end
 
     # @rbs () -> void
