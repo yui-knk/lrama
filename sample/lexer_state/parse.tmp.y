@@ -2924,9 +2924,203 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
     // IS_LABEL_POSSIBLE
 
     transitions {
-        EXPR_BEG {
-          tINTEGER => EXPR_END;
+        * {
+            '\n' => EXPR_BEG;
         }
+
+        // case '*':
+        * {
+            tOP_ASGN => EXPR_BEG;
+        }
+        IS_AFTER_OPERATOR {
+            tDSTAR => EXPR_ARG;
+            tPOW   => EXPR_ARG;
+            tSTAR  => EXPR_ARG;
+            '*'    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tDSTAR => EXPR_BEG;
+            tPOW   => EXPR_BEG;
+            tSTAR  => EXPR_BEG;
+            '*'    => EXPR_BEG;
+        }
+
+        // case '!':
+        IS_AFTER_OPERATOR {
+            '!'     => EXPR_ARG;
+            tNEQ    => EXPR_ARG;
+            tNMATCH => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '!'     => EXPR_BEG;
+            tNEQ    => EXPR_BEG;
+            tNMATCH => EXPR_BEG;
+        }
+
+        // case '=':
+        IS_AFTER_OPERATOR {
+            tEQQ   => EXPR_ARG;
+            tEQ    => EXPR_ARG;
+            tMATCH => EXPR_ARG;
+            tASSOC => EXPR_ARG;
+            '='    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tEQQ   => EXPR_BEG;
+            tEQ    => EXPR_BEG;
+            tMATCH => EXPR_BEG;
+            tASSOC => EXPR_BEG;
+            '='    => EXPR_BEG;
+        }
+
+        // case '<':
+        // case '>':
+        // case '"':
+        // case '`':
+        // case '\'':
+        // case '?':
+
+        // case '&':
+        * {
+            // tOP_ASGN => EXPR_BEG;
+            tANDOP  => EXPR_BEG;
+            // tOP_ASGN => EXPR_BEG;
+            tANDDOT => EXPR_DOT;
+        }
+        IS_AFTER_OPERATOR {
+            tAMPER => EXPR_ARG;
+            '&'    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tAMPER => EXPR_BEG;
+            '&'    => EXPR_BEG;
+        }
+
+        // case '|':
+        * {
+            // tOP_ASGN => EXPR_BEG;
+            tOROP => EXPR_BEG;
+            // tOP_ASGN => EXPR_BEG;
+        }
+        EXPR_BEG {
+            '|' => EXPR_BEG;
+        }
+        IS_AFTER_OPERATOR {
+            '|' => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '|' => EXPR_BEG|EXPR_LABEL;
+        }
+
+        // case '+':
+        // * {
+        //     tOP_ASGN => EXPR_BEG;
+        // }
+        IS_AFTER_OPERATOR {
+            tUPLUS => EXPR_ARG;
+            '+'    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tUPLUS => EXPR_BEG;
+            '+'    => EXPR_BEG;
+        }
+
+        // case '-':
+        * {
+            // tOP_ASGN => EXPR_BEG;
+            tLAMBDA     => EXPR_ENDFN;
+            tUMINUS_NUM => EXPR_BEG;
+        }
+        IS_AFTER_OPERATOR {
+            tUMINUS => EXPR_ARG;
+            '-'     => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tUMINUS => EXPR_BEG;
+            '-'     => EXPR_BEG;
+        }
+
+        // case '.':
+        // parse_numeric
+
+        // case ')':
+        * {
+            ')' => EXPR_ENDFN;
+        }
+
+        // case ']':
+        * {
+            ']' => EXPR_END;
+        }
+
+        // case '}':
+        // TODO tSTRING_DEND
+        * {
+            '}' => EXPR_END;
+        }
+
+        // case ':':
+        * {
+            tCOLON3 => EXPR_BEG;
+            tCOLON2 => EXPR_DOT;
+            ':'     => EXPR_BEG;
+            tSYMBEG => EXPR_FNAME;
+        }
+
+        // case '/':
+        // TODO tREGEXP_BEG
+        // * {
+        //     tOP_ASGN => EXPR_BEG;
+        // }
+        IS_AFTER_OPERATOR {
+            '/' => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '/' => EXPR_BEG;
+        }
+
+        // case '^':
+        // * {
+        //     tOP_ASGN => EXPR_BEG;
+        // }
+        IS_AFTER_OPERATOR {
+            '^' => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '^' => EXPR_BEG;
+        }
+
+        // case ';':
+        * {
+            ';' => EXPR_BEG;
+        }
+
+        // case ',':
+        * {
+            ',' => EXPR_BEG|EXPR_LABEL;
+        }
+
+        // case '~':
+        IS_AFTER_OPERATOR {
+            '~' => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '~' => EXPR_BEG;
+        }
+
+        // case '(':
+        // case '[':
+        // case '{':
+        // case '\\':
+
+        // case '%':
+        // case '$':
+        // case '@':
+
+        // case '_':
+        // TODO END_OF_INPUT
+
+        // parser_is_identchar
     }
 }
 
