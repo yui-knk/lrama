@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Lrama::Grammar::LexerState::PatternPredication::AllPattern do
-  let(:state_bit_1) { Lrama::Grammar::LexerState::StateBit.new("EXPR_BEG") }
-  let(:state_bit_2) { Lrama::Grammar::LexerState::StateBit.new("EXPR_MID") }
-  let(:state_bit_3) { Lrama::Grammar::LexerState::StateBit.new("EXPR_END") }
+  let(:state_bit_1) { Lrama::Grammar::LexerState::StateBit.new(0, "EXPR_BEG") }
+  let(:state_bit_2) { Lrama::Grammar::LexerState::StateBit.new(1, "EXPR_MID") }
+  let(:state_bit_3) { Lrama::Grammar::LexerState::StateBit.new(2, "EXPR_END") }
   let(:pattern) do
     pattern = Lrama::Grammar::LexerState::PatternPredication::AllPattern.new(state_bit_1)
     pattern.add_state_bit(state_bit_2)

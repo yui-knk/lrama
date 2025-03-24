@@ -5,17 +5,19 @@ module Lrama
   class Grammar
     class LexerState
       class StateBit
+        attr_reader :id #: Integer
         attr_reader :name #: String
 
-        # @rbs (String name) -> void
-        def initialize(name)
+        # @rbs (Integer id, String name) -> void
+        def initialize(id, name)
+          @id = id
           @name = name
         end
 
         # @rbs (StateBit other) -> bool
         def ==(other)
           self.class == other.class &&
-          self.name == other.name
+          self.id == other.id
         end
 
         # @rbs () -> String

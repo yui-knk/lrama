@@ -49,7 +49,7 @@ module Lrama
 
       # @rbs (Lexer::Token::Ident id) -> void
       def add_state_bit(id)
-        @state_bits << StateBit.new(id.s_value)
+        @state_bits << StateBit.new(@state_bits.count, id.s_value)
       end
 
       # @rbs (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
