@@ -10,6 +10,11 @@ module Lrama
         # @rbs (AnyPredication other) -> bool
         def ==: (AnyPredication other) -> bool
 
+        alias eql? ==
+
+        # @rbs () -> Integer
+        def hash: () -> Integer
+
         # @rbs (LexerState::State state) -> bool
         def match?: (LexerState::State state) -> bool
       end

@@ -15,6 +15,13 @@ module Lrama
           self.class == other.class
         end
 
+        alias :eql? :==
+
+        # @rbs () -> Integer
+        def hash
+          self.class.object_id
+        end
+
         # @rbs (LexerState::State state) -> bool
         def match?(state)
           # AnyPredication matchs with any state

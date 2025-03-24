@@ -5,6 +5,7 @@ RSpec.describe Lrama::Grammar::LexerState::AnyPredication do
   let(:state_bit_2) { Lrama::Grammar::LexerState::StateBit.new(1, "EXPR_MID") }
   let(:state_bit_3) { Lrama::Grammar::LexerState::StateBit.new(2, "EXPR_END") }
   let(:predication) { Lrama::Grammar::LexerState::AnyPredication.new }
+  let(:predication_2) { Lrama::Grammar::LexerState::AnyPredication.new }
 
   describe "#name" do
     it "returns '*'" do
@@ -14,7 +15,16 @@ RSpec.describe Lrama::Grammar::LexerState::AnyPredication do
 
   describe "#==" do
     it "returns true if other is also AnyPredication" do
-      expect(predication == Lrama::Grammar::LexerState::AnyPredication.new).to be true
+      expect(predication == predication_2).to be true
+    end
+  end
+
+  describe "as hash key" do
+    it "works as hash key even if other instance" do
+      h = {}
+      h[predication] = true
+
+      expect(h[predication_2]).to be true
     end
   end
 
