@@ -327,19 +327,45 @@ module Lrama
       report_duration(:compute_lexer_state_for_states) { compute_lexer_state_for_states }
     end
 
+    # Compute lexer_state_transitions of terminals and nonterminals.
+    #
     # @rbs () -> void
     def compute_lexer_state_for_nonterminals
+      # Append transitions defined in grammar file to each terminal
       lexer_state.transitions.each do |token, transition|
         term = @grammar.find_term_by_s_value!(token)
         term.lexer_state_transitions += transition
       end
 
+      # If terminal has no transitions, the terminal returns lexer state
+      # passed to the terminal then append IdentityTransition.
       terms.each do |term|
         if term.lexer_state_transitions.empty?
           term.lexer_state_transitions << Grammar::LexerState::IdentityTransition.new
         end
       end
 
+      # If the rules is empty rule, the rule doesn't change lexer state
+      # then append IdentityTransition.
+      #
+      # TODO: Need to update this code once Lrama supports lexer state in rule action.
+      rules.each do |rule|
+        if rule.empty_rule?
+          nterm = rule.lhs
+          nterm.lexer_state_transitions << Grammar::LexerState::IdentityTransition.new
+        end
+      end
+
+      # Preparations for nonterminal `lexer_state_transitions` computation.
+      # Nonterminal has dependencies on other nonterminals. For example,
+      # in below case, nonterminal A state transitions depends on
+      # nonterminal B state transitions.
+      # `nterm_dependencies` tracks dependencies from rule RHS to LHS so that
+      # it's easy to detect affected nonterminals if some nonterminals
+      # `lexer_state_transitions` are updated.
+      #
+      #   A: a B c;
+      #
       nterm_dependencies = rules.each_with_object({}) do |rule, h|
         rule.rhs.select(&:nterm?).each do |nterm|
           h[nterm] ||= Set.new
@@ -347,6 +373,9 @@ module Lrama
         end
       end
       nterm_to_rules = rules.group_by(&:lhs)
+
+      # Copmpute nonterminals `lexer_state_transitions` until
+      # no changes on nonterminals `lexer_state_transitions`.
       queue = nterms.dup
 
       while (nterm = queue.shift)

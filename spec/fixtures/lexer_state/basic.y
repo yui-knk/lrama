@@ -66,7 +66,7 @@
 
 %%
 
-program: expr ;
+program: {  } expr ;
 
 expr: expr '+' expr
     | primary '-' primary
