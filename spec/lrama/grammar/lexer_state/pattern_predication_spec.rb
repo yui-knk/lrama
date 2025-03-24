@@ -9,6 +9,9 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
     pattern.add_state_bit(state_bit_2)
     pattern
   end
+  let(:pattern_2) do
+    Lrama::Grammar::LexerState::PatternPredication::Pattern.new(state_bit_1)
+  end
   let(:predication) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, false) }
   let(:n_predication) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, true) }
 
@@ -16,6 +19,19 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
     it "returns name of predication" do
       expect(predication.name).to eq("IS_BEG_ANY")
       expect(n_predication.name).to eq("IS_BEG_ANY")
+    end
+  end
+
+  describe "#==" do
+    it "returns true if pattern and negative are same otherwise returns false" do
+      predication_1 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY_2", pattern, false)
+      predication_2 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, true)
+      predication_3 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern_2, false)
+
+      expect(predication == predication).to be true
+      expect(predication == predication_1).to be true
+      expect(predication == predication_2).to be false
+      expect(predication == predication_3).to be false
     end
   end
 
