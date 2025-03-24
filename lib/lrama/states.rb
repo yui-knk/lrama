@@ -323,14 +323,14 @@ module Lrama
     # @rbs () -> void
     def compute_lexer_states
       return unless lexer_state
-      report_duration(:compute_lexer_state_for_nonterminals) { compute_lexer_state_for_nonterminals }
+      report_duration(:compute_lexer_state_transitions_for_symbols) { compute_lexer_state_transitions_for_symbols }
       report_duration(:compute_lexer_state_for_states) { compute_lexer_state_for_states }
     end
 
     # Compute lexer_state_transitions of terminals and nonterminals.
     #
     # @rbs () -> void
-    def compute_lexer_state_for_nonterminals
+    def compute_lexer_state_transitions_for_symbols
       # Append transitions defined in grammar file to each terminal
       lexer_state.transitions.each do |token, transition|
         term = @grammar.find_term_by_s_value!(token)
