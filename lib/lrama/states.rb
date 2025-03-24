@@ -332,9 +332,9 @@ module Lrama
     # @rbs () -> void
     def compute_lexer_state_transitions_for_symbols
       # Append transitions defined in grammar file to each terminal
-      lexer_state.transitions.each do |token, transition|
+      lexer_state.transitions.each do |token, transitions|
         term = @grammar.find_term_by_s_value!(token)
-        term.lexer_state_transitions += transition
+        term.lexer_state_transitions += transitions
       end
 
       # If terminal has no transitions, the terminal returns lexer state
