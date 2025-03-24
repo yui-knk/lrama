@@ -34,6 +34,30 @@ RSpec.describe Lrama::Grammar::LexerState::State do
     end
   end
 
+  describe "#<=>" do
+    it "returns -1, 0 or 1 based on bitmap" do
+      expect(state_1 <=> state_1).to eq  0
+      expect(state_1 <=> state_2).to eq -1
+      expect(state_1 <=> state_3).to eq -1
+      expect(state_1 <=> state_4).to eq -1
+
+      expect(state_2 <=> state_1).to eq  1
+      expect(state_2 <=> state_2).to eq  0
+      expect(state_2 <=> state_3).to eq -1
+      expect(state_2 <=> state_4).to eq -1
+
+      expect(state_3 <=> state_1).to eq  1
+      expect(state_3 <=> state_2).to eq  1
+      expect(state_3 <=> state_3).to eq  0
+      expect(state_3 <=> state_4).to eq -1
+
+      expect(state_4 <=> state_1).to eq 1
+      expect(state_4 <=> state_2).to eq 1
+      expect(state_4 <=> state_3).to eq 1
+      expect(state_4 <=> state_4).to eq 0
+    end
+  end
+
   describe "as hash key" do
     it "works as hash key if states have same bitmap" do
       state_1_1 = Lrama::Grammar::LexerState::State.new([])

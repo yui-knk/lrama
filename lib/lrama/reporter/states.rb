@@ -181,7 +181,7 @@ module Lrama
       def report_lexer_states(io, state)
         return if state.lexer_states.empty?
 
-        state.lexer_states.each do |lexer_state|
+        state.lexer_states.sort.each do |lexer_state|
           io << "    #{lexer_state.map(&:to_s).join('|')}\n"
         end
 

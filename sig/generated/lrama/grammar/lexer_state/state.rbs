@@ -13,8 +13,16 @@ module Lrama
         # @rbs (Array[StateBit] state_bits) -> void
         def initialize: (Array[StateBit] state_bits) -> void
 
+        # @rbs (State other) -> Integer
+        def <=>: (State other) -> Integer
+
         # @rbs (State other) -> bool
         def ==: (State other) -> bool
+
+        alias eql? ==
+
+        # @rbs () -> Integer
+        def hash: () -> Integer
 
         # @rbs (StateBit state_bit) -> void
         def <<: (StateBit state_bit) -> void

@@ -20,6 +20,11 @@ module Lrama
           @bitmap = Bitmap.from_array(state_bits.map(&:id))
         end
 
+        # @rbs (State other) -> Integer
+        def <=>(other)
+          self.bitmap <=> other.bitmap
+        end
+
         # @rbs (State other) -> bool
         def ==(other)
           self.class == other.class &&
