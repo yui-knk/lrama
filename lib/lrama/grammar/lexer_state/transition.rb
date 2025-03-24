@@ -23,6 +23,12 @@ module Lrama
           self.predication == other.predication &&
           self._to_state == other._to_state
         end
+        alias :eql? :==
+
+        # @rbs () -> Integer
+        def hash
+          [predication, _to_state].hash
+        end
 
         # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)

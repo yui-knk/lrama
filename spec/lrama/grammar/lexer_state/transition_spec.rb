@@ -14,17 +14,28 @@ RSpec.describe Lrama::Grammar::LexerState::Transition do
   let(:state_2) { Lrama::Grammar::LexerState::State.new([state_bit_2]) }
   let(:state_3) { Lrama::Grammar::LexerState::State.new([state_bit_3]) }
   let(:transition) { Lrama::Grammar::LexerState::Transition.new(predication, state_3) }
+  let(:transition_1) { Lrama::Grammar::LexerState::Transition.new(predication, state_3) }
+  let(:transition_2) { Lrama::Grammar::LexerState::Transition.new(predication, state_2) }
+  let(:transition_3) { Lrama::Grammar::LexerState::Transition.new(predication.negative_predication, state_3) }
   let(:tdentity_transition) { Lrama::Grammar::LexerState::IdentityTransition.new }
 
   describe "#==" do
     it "returns true if predication and _to_state are same otherwise returns false" do
-      transition_1 = Lrama::Grammar::LexerState::Transition.new(predication, state_3)
-      transition_2 = Lrama::Grammar::LexerState::Transition.new(predication, state_2)
-      transition_3 = Lrama::Grammar::LexerState::Transition.new(predication.negative_predication, state_3)
-
       expect(transition == transition_1).to be true
       expect(transition == transition_2).to be false
       expect(transition == transition_3).to be false
+    end
+  end
+
+  describe "as hash key" do
+    it "works as hash key even if other instance" do
+      h = {}
+      h[transition] = true
+
+      expect(h[transition]).to be true
+      expect(h[transition_1]).to be true
+      expect(h[transition_2]).to be nil
+      expect(h[transition_3]).to be nil
     end
   end
 

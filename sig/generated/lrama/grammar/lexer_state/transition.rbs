@@ -16,6 +16,11 @@ module Lrama
         # @rbs (Transition other) -> bool
         def ==: (Transition other) -> bool
 
+        alias eql? ==
+
+        # @rbs () -> Integer
+        def hash: () -> Integer
+
         # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state: (LexerState::State from_state) -> LexerState::State
 
