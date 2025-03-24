@@ -386,11 +386,19 @@ module Lrama
       invalid_terms = terms.select do |term|
         term.lexer_state_transitions.empty?
       end
+      raise "#{invalid_terms.map(&:id).map(&:s_value).join(', ')} have no lexer_state_transitions" if !invalid_terms.empty?
+
       invalid_nterms = nterms.select do |nterm|
         nterm.lexer_state_transitions.empty?
       end
-      raise "#{invalid_terms.map(&:id).map(&:s_value).join(', ')} have no lexer_state_transitions" if !invalid_terms.empty?
       raise "#{invalid_nterms.map(&:id).map(&:s_value).join(', ')} have no lexer_state_transitions" if !invalid_nterms.empty?
+
+      invalid_rules = rules.select do |rule|
+        rule.merged_lexer_state_transitions.empty?
+      end.map do |rule|
+        "#{rule.id}: #{rule.display_name}"
+      end
+      raise "#{invalid_rules.join("\n")}\n\nhave no merged_lexer_state_transitions" if !invalid_rules.empty?
     end
 
     # @rbs () -> void
@@ -413,13 +421,6 @@ module Lrama
           end
         end
       end
-
-      invalid_rules = rules.select do |rule|
-        rule.merged_lexer_state_transitions.empty?
-      end.map do |rule|
-        "#{rule.id}: #{rule.display_name}"
-      end
-      raise "#{invalid_rules.join("\n")}\n\nhave no merged_lexer_state_transitions" if !invalid_rules.empty?
     end
 
     # @rbs () -> Array[State::Action::Goto]
