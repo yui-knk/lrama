@@ -1,0 +1,38 @@
+# Generated from lib/lrama/grammar/lexer_state/state.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class LexerState
+      class State
+        include Enumerable[StateBit]
+
+        attr_reader state_bits: Array[StateBit]
+
+        attr_reader bitmap: Bitmap::bitmap
+
+        # @rbs (Array[StateBit] state_bits) -> void
+        def initialize: (Array[StateBit] state_bits) -> void
+
+        # @rbs (State other) -> bool
+        def ==: (State other) -> bool
+
+        # @rbs (StateBit state_bit) -> void
+        def <<: (StateBit state_bit) -> void
+
+        # @rbs (State other) -> bool
+        def is?: (State other) -> bool
+
+        # @rbs (State other) -> bool
+        def is_all?: (State other) -> bool
+
+        # @rbs () { (StateBit) -> void } -> self
+        #    | () -> Enumerator[StateBit, self]
+        def each: () { (StateBit) -> void } -> self
+                | () -> Enumerator[StateBit, self]
+
+        # @rbs () -> String
+        def to_s: () -> String
+      end
+    end
+  end
+end

@@ -40,7 +40,7 @@ module Lrama
         #
         #   interface _Pattern
         #     def ==: (self other) -> bool
-        #     def match?: (LexerState::state state) -> bool
+        #     def match?: (LexerState::State state) -> bool
         #   end
 
         attr_reader :name #: String
@@ -61,7 +61,7 @@ module Lrama
           self.negative == other.negative
         end
 
-        # @rbs (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
         def match?(state)
           b = @pattern.match?(state)
 

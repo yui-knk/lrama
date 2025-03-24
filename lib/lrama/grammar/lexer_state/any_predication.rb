@@ -15,7 +15,7 @@ module Lrama
           self.class == other.class
         end
 
-        # @rbs (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
         def match?(state)
           # AnyPredication matchs with any state
           true

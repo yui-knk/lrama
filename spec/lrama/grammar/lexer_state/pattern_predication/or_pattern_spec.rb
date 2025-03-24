@@ -10,13 +10,13 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication::OrPattern do
 
   describe "#match?" do
     it "returns true if left or right match with passed state" do
-      expect(or_pattern.match?(Set[state_bit_1])).to be true
-      expect(or_pattern.match?(Set[state_bit_2])).to be true
+      expect(or_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1]))).to be true
+      expect(or_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_2]))).to be true
     end
 
     it "returns true if left and right don't match with passed state" do
-      expect(or_pattern.match?(Set[])).to be false
-      expect(or_pattern.match?(Set[state_bit_3])).to be false
+      expect(or_pattern.match?(Lrama::Grammar::LexerState::State.new([]))).to be false
+      expect(or_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_3]))).to be false
     end
   end
 

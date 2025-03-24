@@ -18,8 +18,8 @@ module Lrama
           # @rbs (StateBit state_bit) -> bot
           def add_state_bit: (StateBit state_bit) -> bot
 
-          # @rbs (LexerState::state other_state) -> bool
-          def match?: (LexerState::state other_state) -> bool
+          # @rbs (LexerState::State other_state) -> bool
+          def match?: (LexerState::State other_state) -> bool
 
           # @rbs () -> String
           def to_s: () -> String

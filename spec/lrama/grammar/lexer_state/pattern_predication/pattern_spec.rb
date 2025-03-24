@@ -12,15 +12,15 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication::Pattern do
 
   describe "#match?" do
     it "returns true if passed state matchs at least one of the state bit" do
-      expect(pattern.match?(Set[state_bit_1])).to be true
-      expect(pattern.match?(Set[state_bit_2])).to be true
-      expect(pattern.match?(Set[state_bit_1, state_bit_2])).to be true
-      expect(pattern.match?(Set[state_bit_1, state_bit_3])).to be true
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1]))).to be true
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_2]))).to be true
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_2]))).to be true
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_3]))).to be true
     end
 
     it "returns false if passed state doesn't matchs any of the state bit" do
-      expect(pattern.match?(Set[])).to be false
-      expect(pattern.match?(Set[state_bit_3])).to be false
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([]))).to be false
+      expect(pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_3]))).to be false
     end
   end
 

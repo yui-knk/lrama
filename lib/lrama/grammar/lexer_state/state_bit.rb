@@ -22,7 +22,7 @@ module Lrama
 
         # @rbs () -> String
         def to_s
-          "#{@name}"
+          @name
         end
       end
     end

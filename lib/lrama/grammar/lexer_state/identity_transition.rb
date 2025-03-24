@@ -11,7 +11,7 @@ module Lrama
           self.class == other.class
         end
 
-        # @rbs (LexerState::state from_state) -> LexerState::state
+        # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)
           from_state
         end
@@ -24,7 +24,7 @@ module Lrama
           other
         end
 
-        # @rbs (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
         def match?(state)
           true
         end

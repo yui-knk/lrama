@@ -10,8 +10,8 @@ module Lrama
         # @rbs (AnyPredication other) -> bool
         def ==: (AnyPredication other) -> bool
 
-        # @rbs (LexerState::state state) -> bool
-        def match?: (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
+        def match?: (LexerState::State state) -> bool
       end
     end
   end

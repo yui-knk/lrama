@@ -7,8 +7,8 @@ module Lrama
         # @rbs (Transition other) -> bool
         def ==: (Transition other) -> bool
 
-        # @rbs (LexerState::state from_state) -> LexerState::state
-        def to_state: (LexerState::state from_state) -> LexerState::state
+        # @rbs (LexerState::State from_state) -> LexerState::State
+        def to_state: (LexerState::State from_state) -> LexerState::State
 
         # Merge other transition to this transition then returns new transition.
         # Return `nil` if it can't merge other transition to this.
@@ -16,8 +16,8 @@ module Lrama
         # @rbs (_Transition other) -> _Transition
         def merge: (_Transition other) -> _Transition
 
-        # @rbs (LexerState::state state) -> bool
-        def match?: (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
+        def match?: (LexerState::State state) -> bool
 
         # @rbs () -> String
         def to_s: () -> String

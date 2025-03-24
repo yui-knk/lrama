@@ -8,22 +8,22 @@ module Lrama
 
         def ==: (self other) -> bool
 
-        def match?: (LexerState::state state) -> bool
+        def match?: (LexerState::State state) -> bool
       end
 
       interface _Transition
         def ==: (self other) -> bool
 
-        def to_state: (LexerState::state from_state) -> LexerState::state
+        def to_state: (LexerState::State from_state) -> LexerState::State
 
         def merge: (_Transition other) -> _Transition?
 
-        def match?: (LexerState::state state) -> bool
+        def match?: (LexerState::State state) -> bool
       end
 
-      type state = Set[LexerState::StateBit]
+      @state: LexerState::State
 
-      attr_reader initial_state: state
+      attr_reader initial_state: LexerState::State
 
       attr_accessor state_bits: Array[StateBit]
 
@@ -43,8 +43,8 @@ module Lrama
       # @rbs (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
       def add_predication: (Lexer::Token::Ident id, PatternPredication::Pattern pattern) -> void
 
-      # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
-      def add_transition: (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
+      # @rbs (_Predication predication, Lexer::Token::Ident token, Array[StateBit] to_state) -> void
+      def add_transition: (_Predication predication, Lexer::Token::Ident token, Array[StateBit] to_state) -> void
 
       # @rbs (Lexer::Token::Ident id) -> StateBit
       def find_state_bit!: (Lexer::Token::Ident id) -> StateBit

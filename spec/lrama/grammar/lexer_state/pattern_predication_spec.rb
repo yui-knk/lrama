@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
   let(:state_bit_1) { Lrama::Grammar::LexerState::StateBit.new(0, "EXPR_BEG") }
   let(:state_bit_2) { Lrama::Grammar::LexerState::StateBit.new(1, "EXPR_MID") }
@@ -24,27 +22,27 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
   describe "#match?" do
     context "it's positive predication" do
       it "returns true if passed state matchs with pattern" do
-        expect(predication.match?(Set[state_bit_1])).to be true
-        expect(predication.match?(Set[state_bit_2])).to be true
-        expect(predication.match?(Set[state_bit_1, state_bit_2])).to be true
-        expect(predication.match?(Set[state_bit_1, state_bit_3])).to be true
+        expect(predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1]))).to be true
+        expect(predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_2]))).to be true
+        expect(predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_2]))).to be true
+        expect(predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_3]))).to be true
       end
 
       it "returns false if passed state doesn't matchs with pattern" do
-        expect(predication.match?(Set[state_bit_3])).to be false
+        expect(predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_3]))).to be false
       end
     end
 
     context "it's negative predication" do
       it "returns false if passed state matchs with pattern" do
-        expect(n_predication.match?(Set[state_bit_1])).to be false
-        expect(n_predication.match?(Set[state_bit_2])).to be false
-        expect(n_predication.match?(Set[state_bit_1, state_bit_2])).to be false
-        expect(n_predication.match?(Set[state_bit_1, state_bit_3])).to be false
+        expect(n_predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1]))).to be false
+        expect(n_predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_2]))).to be false
+        expect(n_predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_2]))).to be false
+        expect(n_predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_3]))).to be false
       end
 
       it "returns true if passed state doesn't matchs with pattern" do
-        expect(n_predication.match?(Set[state_bit_3])).to be true
+        expect(n_predication.match?(Lrama::Grammar::LexerState::State.new([state_bit_3]))).to be true
       end
     end
   end

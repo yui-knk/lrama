@@ -1,18 +1,19 @@
 # rbs_inline: enabled
 # frozen_string_literal: true
 
-require "set"
-
 module Lrama
   class Grammar
     class LexerState
       class PatternPredication
         class AllPattern
-          attr_reader :state #: LexerState::state
+          # @rbs!
+          #    @state: LexerState::State
+
+          attr_reader :state #: LexerState::State
 
           # @rbs (StateBit state_bit) -> void
           def initialize(state_bit)
-            @state = Set[state_bit]
+            @state = State.new([state_bit])
           end
 
           # @rbs (Pattern other) -> bool
@@ -26,9 +27,9 @@ module Lrama
             @state << state_bit
           end
 
-          # @rbs (LexerState::state other_state) -> bool
+          # @rbs (LexerState::State other_state) -> bool
           def match?(other_state)
-            (state & other_state) == state
+            state.is_all?(other_state)
           end
 
           # @rbs () -> String

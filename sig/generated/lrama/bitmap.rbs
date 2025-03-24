@@ -15,5 +15,8 @@ module Lrama
 
     # @rbs (bitmap int, Integer size) -> Array[bool]
     def self.to_bool_array: (bitmap int, Integer size) -> Array[bool]
+
+    # @rbs (bitmap bitmap, Integer int) -> bitmap
+    def self.add_integer: (bitmap bitmap, Integer int) -> bitmap
   end
 end

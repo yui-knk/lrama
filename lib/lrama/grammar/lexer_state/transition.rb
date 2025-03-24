@@ -5,10 +5,13 @@ module Lrama
   class Grammar
     class LexerState
       class Transition
-        attr_reader :predication #: _Predication
-        attr_reader :_to_state #: LexerState::state
+        # @rbs!
+        #    @_to_state: LexerState::State
 
-        # @rbs (_Predication predication, LexerState::state to_state) -> void
+        attr_reader :predication #: _Predication
+        attr_reader :_to_state #: LexerState::State
+
+        # @rbs (_Predication predication, LexerState::State to_state) -> void
         def initialize(predication, to_state)
           @predication = predication
           @_to_state = to_state
@@ -21,7 +24,7 @@ module Lrama
           self._to_state == other._to_state
         end
 
-        # @rbs (LexerState::state from_state) -> LexerState::state
+        # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)
           @_to_state
         end
@@ -45,7 +48,7 @@ module Lrama
           end
         end
 
-        # @rbs (LexerState::state state) -> bool
+        # @rbs (LexerState::State state) -> bool
         def match?(state)
           @predication.match?(state)
         end

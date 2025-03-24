@@ -49,5 +49,10 @@ module Lrama
 
       a
     end
+
+    # @rbs (bitmap bitmap, Integer int) -> bitmap
+    def self.add_integer(bitmap, int)
+      bitmap | from_integer(int)
+    end
   end
 end

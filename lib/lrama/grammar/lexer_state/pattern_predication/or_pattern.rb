@@ -1,8 +1,6 @@
 # rbs_inline: enabled
 # frozen_string_literal: true
 
-require "set"
-
 module Lrama
   class Grammar
     class LexerState
@@ -29,7 +27,7 @@ module Lrama
             raise "Can not add state_bit to OrPattern (#{self})"
           end
 
-          # @rbs (LexerState::state other_state) -> bool
+          # @rbs (LexerState::State other_state) -> bool
           def match?(other_state)
             left.match?(other_state) || right.match?(other_state)
           end

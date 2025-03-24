@@ -14,15 +14,15 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication::PredicationPatter
 
   describe "#match?" do
     it "returns true if passed state matchs with predication" do
-      expect(predication_pattern.match?(Set[state_bit_1])).to be true
-      expect(predication_pattern.match?(Set[state_bit_2])).to be true
-      expect(predication_pattern.match?(Set[state_bit_1, state_bit_2])).to be true
-      expect(predication_pattern.match?(Set[state_bit_1, state_bit_3])).to be true
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1]))).to be true
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_2]))).to be true
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_2]))).to be true
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_1, state_bit_3]))).to be true
     end
 
     it "returns false if passed state doesn't matchs with predication" do
-      expect(predication_pattern.match?(Set[])).to be false
-      expect(predication_pattern.match?(Set[state_bit_3])).to be false
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([]))).to be false
+      expect(predication_pattern.match?(Lrama::Grammar::LexerState::State.new([state_bit_3]))).to be false
     end
   end
 

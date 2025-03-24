@@ -1,10 +1,10 @@
 # rbs_inline: enabled
 # frozen_string_literal: true
 
-require "set"
 require_relative "lexer_state/any_predication"
 require_relative "lexer_state/identity_transition"
 require_relative "lexer_state/pattern_predication"
+require_relative "lexer_state/state"
 require_relative "lexer_state/state_bit"
 require_relative "lexer_state/transition"
 
@@ -16,19 +16,19 @@ module Lrama
       #   interface _Predication
       #     def name: () -> String
       #     def ==: (self other) -> bool
-      #     def match?: (LexerState::state state) -> bool
+      #     def match?: (LexerState::State state) -> bool
       #   end
       #
       #   interface _Transition
       #     def ==: (self other) -> bool
-      #     def to_state: (LexerState::state from_state) -> LexerState::state
+      #     def to_state: (LexerState::State from_state) -> LexerState::State
       #     def merge: (_Transition other) -> _Transition?
-      #     def match?: (LexerState::state state) -> bool
+      #     def match?: (LexerState::State state) -> bool
       #   end
       #
-      #   type state = Set[LexerState::StateBit]
+      #   @state: LexerState::State
 
-      attr_reader :initial_state #: state
+      attr_reader :initial_state #: LexerState::State
       attr_accessor :state_bits #: Array[StateBit]
       attr_accessor :predications #: Array[PatternPredication]
       attr_accessor :transitions #: Hash[String, Array[Transition]]
@@ -44,7 +44,7 @@ module Lrama
       # @rbs (Lexer::Token::Ident id) -> void
       def set_initial_state(id)
         state = @state_bits.find {|s| s.name == id.s_value } or raise "State #{id.s_value} is not found"
-        @initial_state = Set[state]
+        @initial_state = State.new([state])
       end
 
       # @rbs (Lexer::Token::Ident id) -> void
@@ -57,10 +57,10 @@ module Lrama
         @predications << PatternPredication.new(id.s_value, pattern, false)
       end
 
-      # @rbs (_Predication predication, Lexer::Token::Ident token, state to_state) -> void
+      # @rbs (_Predication predication, Lexer::Token::Ident token, Array[StateBit] to_state) -> void
       def add_transition(predication, token, to_state)
         @transitions[token.s_value] ||= []
-        @transitions[token.s_value] << Transition.new(predication, to_state)
+        @transitions[token.s_value] << Transition.new(predication, State.new(to_state))
       end
 
       # @rbs (Lexer::Token::Ident id) -> StateBit

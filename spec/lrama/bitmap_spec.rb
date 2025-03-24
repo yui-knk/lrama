@@ -44,4 +44,16 @@ RSpec.describe Lrama::Bitmap do
       expect(Lrama::Bitmap.to_bool_array(0b1010000, 7)).to eq([false, false, false, false, true, false, true])
     end
   end
+
+  describe '.add_integer' do
+    it 'add passed integer to bitmap' do
+      bitmap_1 = Lrama::Bitmap.from_array([])
+      bitmap_2 = Lrama::Bitmap.from_array([0])
+
+      expect(Lrama::Bitmap.add_integer(bitmap_1, 0)).to eq(0b1)
+      expect(Lrama::Bitmap.add_integer(bitmap_1, 1)).to eq(0b10)
+      expect(Lrama::Bitmap.add_integer(bitmap_2, 0)).to eq(0b1)
+      expect(Lrama::Bitmap.add_integer(bitmap_2, 1)).to eq(0b11)
+    end
+  end
 end

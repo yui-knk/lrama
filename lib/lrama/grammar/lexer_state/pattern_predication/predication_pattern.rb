@@ -24,7 +24,7 @@ module Lrama
             raise "Can not add state_bit to PredicationPattern (#{predication.name})"
           end
 
-          # @rbs (LexerState::state other_state) -> bool
+          # @rbs (LexerState::State other_state) -> bool
           def match?(other_state)
             predication.match?(other_state)
           end

@@ -5,7 +5,9 @@ module Lrama
     class LexerState
       class PatternPredication
         class AllPattern
-          attr_reader state: LexerState::state
+          @state: LexerState::State
+
+          attr_reader state: LexerState::State
 
           # @rbs (StateBit state_bit) -> void
           def initialize: (StateBit state_bit) -> void
@@ -16,8 +18,8 @@ module Lrama
           # @rbs (StateBit state_bit) -> void
           def add_state_bit: (StateBit state_bit) -> void
 
-          # @rbs (LexerState::state other_state) -> bool
-          def match?: (LexerState::state other_state) -> bool
+          # @rbs (LexerState::State other_state) -> bool
+          def match?: (LexerState::State other_state) -> bool
 
           # @rbs () -> String
           def to_s: () -> String
