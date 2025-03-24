@@ -25,6 +25,15 @@ RSpec.describe Lrama::Grammar::LexerState::IdentityTransition do
     end
   end
 
+  describe "as hash key" do
+    it "works as hash key even if other instance" do
+      h = {}
+      h[tdentity_transition] = true
+
+      expect(h[tdentity_transition_2]).to be true
+    end
+  end
+
   describe "#to_state" do
     it "returns from_state" do
       expect(tdentity_transition.to_state(state_1)).to eq state_1

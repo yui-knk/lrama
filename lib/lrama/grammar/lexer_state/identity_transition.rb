@@ -11,6 +11,13 @@ module Lrama
           self.class == other.class
         end
 
+        alias :eql? :==
+
+        # @rbs () -> Integer
+        def hash
+          self.class.object_id
+        end
+
         # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)
           from_state
