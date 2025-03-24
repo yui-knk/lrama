@@ -1,0 +1,40 @@
+# Generated from lib/lrama/unique_array.rb with RBS::Inline
+
+module Lrama
+  # @rbs generic T
+  class UniqueArray[T]
+    @ary: Array[T]
+
+    @hash: Hash[T, bool]
+
+    extend Forwardable
+
+    # @rbs [T] (Array[T] ary) -> UniqueArray[T]
+    def self.from_array: [T] (Array[T] ary) -> UniqueArray[T]
+
+    def each: () { (T item) -> void } -> self
+
+    def to_a: () -> Array[T]
+
+    def empty?: () -> bool
+
+    def product: (untyped) -> untyped
+
+    def +: (Array[T]) -> Array[T]
+
+    # @rbs () -> void
+    def initialize: () -> void
+
+    # @rbs (T elem) -> bool
+    def <<: (T elem) -> bool
+
+    # @rbs () -> T?
+    def shift: () -> T?
+
+    # @rbs () -> Array[T]
+    def to_ary: () -> Array[T]
+
+    # @rbs (T elem) -> self?
+    def add?: (T elem) -> self?
+  end
+end
