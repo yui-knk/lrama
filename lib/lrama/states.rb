@@ -366,9 +366,12 @@ module Lrama
       # Copmpute nonterminals `lexer_state_transitions` until
       # no changes on nonterminals `lexer_state_transitions`.
       queue = nterms.dup
+      iterate_count = 0
 
       while (nterm = queue.shift)
+        iterate_count += 1
         updated = false
+
         nterm_to_rules[nterm].each do |rule|
           if rule.rhs.all?(&:has_lexer_state_transitions?)
             updated ||= nterm.merge_lexer_state_transitions(rule.merged_lexer_state_transitions)
@@ -380,6 +383,10 @@ module Lrama
             queue << rule.lhs
           end
         end
+      end
+
+      if Tracer::Duration.enabled?
+        STDERR.puts sprintf("  %s", "compute_lexer_state_transitions_for_symbols #{iterate_count} iteration")
       end
 
       # Validations
