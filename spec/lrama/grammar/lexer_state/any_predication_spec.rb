@@ -12,6 +12,12 @@ RSpec.describe Lrama::Grammar::LexerState::AnyPredication do
     end
   end
 
+  describe "#==" do
+    it "returns true if other is also AnyPredication" do
+      expect(predication == Lrama::Grammar::LexerState::AnyPredication.new).to be true
+    end
+  end
+
   describe "#match?" do
     it "returns true for any state" do
       expect(predication.match?(Lrama::Grammar::LexerState::State.new([]))).to be true
