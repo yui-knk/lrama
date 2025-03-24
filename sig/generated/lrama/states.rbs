@@ -100,8 +100,10 @@ module Lrama
     # @rbs () -> void
     def compute_lexer_states: () -> void
 
+    # Compute lexer_state_transitions of terminals and nonterminals.
+    #
     # @rbs () -> void
-    def compute_lexer_state_for_nonterminals: () -> void
+    def compute_lexer_state_transitions_for_symbols: () -> void
 
     # @rbs () -> void
     def compute_lexer_state_for_states: () -> void
