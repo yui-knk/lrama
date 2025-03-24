@@ -345,17 +345,6 @@ module Lrama
         end
       end
 
-      # If the rules is empty rule, the rule doesn't change lexer state
-      # then append IdentityTransition.
-      #
-      # TODO: Need to update this code once Lrama supports lexer state in rule action.
-      rules.each do |rule|
-        if rule.empty_rule?
-          nterm = rule.lhs
-          nterm.lexer_state_transitions << Grammar::LexerState::IdentityTransition.new
-        end
-      end
-
       # Preparations for nonterminal `lexer_state_transitions` computation.
       # Nonterminal has dependencies on other nonterminals. For example,
       # in below case, nonterminal A state transitions depends on

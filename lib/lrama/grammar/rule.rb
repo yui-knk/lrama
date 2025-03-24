@@ -119,7 +119,11 @@ module Lrama
       end
 
       def merged_lexer_state_transitions
-        return [] if rhs.empty?
+        # If the rules is empty rule, the rule doesn't change lexer state
+        # then returns IdentityTransition.
+        #
+        # TODO: Need to update this code once Lrama supports lexer state in rule action.
+        return [LexerState::IdentityTransition.new] if rhs.empty?
 
         transitions_array = rhs.map do |symbol|
           symbol.lexer_state_transitions

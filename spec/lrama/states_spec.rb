@@ -2772,6 +2772,7 @@ RSpec.describe Lrama::States do
 
             1: $@1 -> ε
 
+              * => *
 
             2: program -> $@1 expr
 
