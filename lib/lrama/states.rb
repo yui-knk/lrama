@@ -421,6 +421,13 @@ module Lrama
           end
         end
       end
+
+      invalid_states = states.select do |state|
+        state.lexer_states.empty?
+      end.map do |state|
+        "State #{state.id}"
+      end
+      raise "#{invalid_states.join("\n")}\n\nhave no lexer_states" if !invalid_states.empty?
     end
 
     # @rbs () -> Array[State::Action::Goto]
