@@ -2922,6 +2922,8 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
     predication IS_AFTER_OPERATOR = EXPR_FNAME | EXPR_DOT;
     // IS_SPCARG
     // IS_LABEL_POSSIBLE
+    // predication IS_BEG_ARG_DOT = IS_BEG_ANY | IS_ARG | EXPR_DOT;
+
 
     transitions {
         * {
@@ -2974,11 +2976,61 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         }
 
         // case '<':
+        // heredoc_identifier
+        // tSTRING_BEG is "* => *"
+        // tXSTRING_BEG is "* => *"
+        // * {
+        //     tOP_ASGN => EXPR_BEG;
+        // }
+        IS_AFTER_OPERATOR {
+            tCMP   => EXPR_ARG;
+            tLEQ   => EXPR_ARG;
+            tLSHFT => EXPR_ARG;
+            '<'    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tCMP   => EXPR_BEG;
+            tLEQ   => EXPR_BEG;
+            tLSHFT => EXPR_BEG;
+            '<'    => EXPR_BEG;
+        }
+
         // case '>':
+        // * {
+        //     tOP_ASGN => EXPR_BEG;
+        // }
+        IS_AFTER_OPERATOR {
+            tGEQ   => EXPR_ARG;
+            tRSHFT => EXPR_ARG;
+            '>'    => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            tGEQ   => EXPR_BEG;
+            tRSHFT => EXPR_BEG;
+            '>'    => EXPR_BEG;
+        }
+
         // case '"':
+        // tSTRING_BEG is "* => *"
+
         // case '`':
+        EXPR_FNAME {
+            '`' => EXPR_ENDFN;
+        }
+        EXPR_DOT {
+            // TODO cmd_state is not cared
+            '`' => EXPR_CMDARG|EXPR_ARG;
+        }
+        // tXSTRING_BEG is "* => *"
+
         // case '\'':
+        // tSTRING_BEG is "* => *"
+
         // case '?':
+        * {
+            '?'   => EXPR_BEG;
+            tCHAR => EXPR_END;
+        }
 
         // case '&':
         * {
@@ -3041,7 +3093,23 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         }
 
         // case '.':
+        * {
+            // TODO tBDOT3
+            tBDOT3 => EXPR_ENDARG;
+            tBDOT3 => EXPR_BEG;
+            tDOT3  => EXPR_BEG;
+            tBDOT2 => EXPR_BEG;
+            tDOT2  => EXPR_BEG;
+            '.'    => EXPR_DOT;
+        }
+
         // parse_numeric
+        * {
+            tINTEGER   => EXPR_END;
+            tFLOAT     => EXPR_END;
+            tRATIONAL  => EXPR_END;
+            tIMAGINARY => EXPR_END;
+        }
 
         // case ')':
         * {
@@ -3054,7 +3122,7 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         }
 
         // case '}':
-        // TODO tSTRING_DEND
+        // tSTRING_DEND is "* => *"
         * {
             '}' => EXPR_END;
         }
@@ -3109,18 +3177,224 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         }
 
         // case '(':
+        * {
+            tLPAREN     => EXPR_BEG|EXPR_LABEL;
+            tLPAREN_ARG => EXPR_BEG|EXPR_LABEL;
+            '('         => EXPR_BEG|EXPR_LABEL;
+        }
+
         // case '[':
+        * {
+            tASET   => EXPR_ARG;
+            tAREF   => EXPR_ARG;
+            tLBRACK => EXPR_BEG|EXPR_LABEL;
+        }
+        IS_AFTER_OPERATOR {
+            '[' => EXPR_ARG|EXPR_LABEL;
+        }
+        !IS_AFTER_OPERATOR {
+            '[' => EXPR_BEG|EXPR_LABEL;
+        }
+
         // case '{':
+        * {
+            tLAMBEG     => EXPR_BEG;
+            tLBRACE     => EXPR_BEG|EXPR_LABEL;
+            '{'         => EXPR_BEG;
+            tLBRACE_ARG => EXPR_BEG;
+        }
+
         // case '\\':
+        // Nothing
 
         // case '%':
+        // tSTRING_BEG is * => *
+        // tWORDS_BEG is * => *
+        // tQWORDS_BEG is * => *
+        // tSYMBOLS_BEG is * => *
+        // tQSYMBOLS_BEG is * => *
+        // tXSTRING_BEG is * => *
+        // tREGEXP_BEG is * => *
+        // tOP_ASGN
+        * {
+            tSYMBEG => EXPR_FNAME|EXPR_FITEM;
+        }
+        IS_AFTER_OPERATOR {
+            '%' => EXPR_ARG;
+        }
+        !IS_AFTER_OPERATOR {
+            '%' => EXPR_BEG;
+        }
+
         // case '$':
+        * {
+            tGVAR     => EXPR_END;
+            tBACK_REF => EXPR_END;
+            tNTH_REF  => EXPR_END;
+        }
+
         // case '@':
+        EXPR_FNAME {
+            tIVAR => EXPR_ENDFN;
+            tCVAR => EXPR_ENDFN;
+        }
+        !EXPR_FNAME {
+            tIVAR => EXPR_END;
+            tCVAR => EXPR_END;
+        }
 
         // case '_':
-        // TODO END_OF_INPUT
+        // END_OF_INPUT
 
-        // parser_is_identchar
+        // parse_ident
+        // keywords
+        EXPR_FNAME {
+            keyword__ENCODING__ => EXPR_ENDFN;
+            keyword__LINE__     => EXPR_ENDFN;
+            keyword__FILE__     => EXPR_ENDFN;
+            keyword_BEGIN       => EXPR_ENDFN;
+            keyword_END         => EXPR_ENDFN;
+            keyword_alias       => EXPR_ENDFN;
+            keyword_and         => EXPR_ENDFN;
+            keyword_begin       => EXPR_ENDFN;
+            keyword_break       => EXPR_ENDFN;
+            keyword_case        => EXPR_ENDFN;
+            keyword_class       => EXPR_ENDFN;
+            keyword_def         => EXPR_ENDFN;
+            keyword_defined     => EXPR_ENDFN;
+            keyword_do          => EXPR_ENDFN;
+            keyword_else        => EXPR_ENDFN;
+            keyword_elsif       => EXPR_ENDFN;
+            keyword_end         => EXPR_ENDFN;
+            keyword_ensure      => EXPR_ENDFN;
+            keyword_false       => EXPR_ENDFN;
+            keyword_for         => EXPR_ENDFN;
+            keyword_if          => EXPR_ENDFN;
+            keyword_in          => EXPR_ENDFN;
+            keyword_module      => EXPR_ENDFN;
+            keyword_next        => EXPR_ENDFN;
+            keyword_nil         => EXPR_ENDFN;
+            keyword_not         => EXPR_ENDFN;
+            keyword_or          => EXPR_ENDFN;
+            keyword_redo        => EXPR_ENDFN;
+            keyword_rescue      => EXPR_ENDFN;
+            keyword_retry       => EXPR_ENDFN;
+            keyword_return      => EXPR_ENDFN;
+            keyword_self        => EXPR_ENDFN;
+            keyword_super       => EXPR_ENDFN;
+            keyword_then        => EXPR_ENDFN;
+            keyword_true        => EXPR_ENDFN;
+            keyword_undef       => EXPR_ENDFN;
+            keyword_unless      => EXPR_ENDFN;
+            keyword_until       => EXPR_ENDFN;
+            keyword_when        => EXPR_ENDFN;
+            keyword_while       => EXPR_ENDFN;
+            keyword_yield       => EXPR_ENDFN;
+        }
+        !EXPR_FNAME {
+            keyword__ENCODING__ => EXPR_END;
+            keyword__LINE__     => EXPR_END;
+            keyword__FILE__     => EXPR_END;
+            keyword_BEGIN       => EXPR_END;
+            keyword_END         => EXPR_END;
+            keyword_alias       => EXPR_FNAME|EXPR_FITEM;
+            keyword_and         => EXPR_BEG;
+            keyword_begin       => EXPR_BEG;
+            keyword_break       => EXPR_MID;
+            keyword_case        => EXPR_BEG;
+            keyword_class       => EXPR_CLASS;
+            keyword_def         => EXPR_FNAME;
+            keyword_defined     => EXPR_ARG;
+            keyword_do          => EXPR_BEG;
+            keyword_do_LAMBDA   => EXPR_BEG;
+            keyword_do_cond     => EXPR_BEG;
+            keyword_do_block    => EXPR_BEG;
+            keyword_else        => EXPR_BEG;
+            keyword_elsif       => EXPR_BEG;
+            keyword_end         => EXPR_END;
+            keyword_ensure      => EXPR_BEG;
+            keyword_false       => EXPR_END;
+            keyword_for         => EXPR_BEG;
+            keyword_if          => EXPR_BEG;
+            keyword_in          => EXPR_BEG;
+            keyword_module      => EXPR_BEG;
+            keyword_next        => EXPR_MID;
+            keyword_nil         => EXPR_END;
+            keyword_not         => EXPR_ARG;
+            keyword_or          => EXPR_BEG;
+            keyword_redo        => EXPR_END;
+            keyword_rescue      => EXPR_MID;
+            keyword_retry       => EXPR_END;
+            keyword_return      => EXPR_MID;
+            keyword_self        => EXPR_END;
+            keyword_super       => EXPR_ARG;
+            keyword_then        => EXPR_BEG;
+            keyword_true        => EXPR_END;
+            keyword_undef       => EXPR_FNAME|EXPR_FITEM;
+            keyword_unless      => EXPR_BEG;
+            keyword_until       => EXPR_BEG;
+            keyword_when        => EXPR_BEG;
+            keyword_while       => EXPR_BEG;
+            keyword_yield       => EXPR_ARG;
+
+            modifier_if         => EXPR_BEG|EXPR_LABEL;
+            modifier_rescue     => EXPR_BEG|EXPR_LABEL;
+            modifier_unless     => EXPR_BEG|EXPR_LABEL;
+            modifier_until      => EXPR_BEG|EXPR_LABEL;
+            modifier_while      => EXPR_BEG|EXPR_LABEL;
+        }
+        * {
+            tLABEL => EXPR_ARG|EXPR_LABELED;
+        }
+        // IS_BEG_ARG_DOT => {
+        //     tFID        => EXPR_CMDARG;
+        //     tFID        => EXPR_ARG;
+        //     tIDENTIFIER => EXPR_CMDARG;
+        //     tIDENTIFIER => EXPR_ARG;
+        //     tIDENTIFIER => EXPR_END|EXPR_LABEL;
+        //     tCONSTANT   => EXPR_CMDARG;
+        //     tCONSTANT   => EXPR_ARG;
+        // }
+        // !IS_BEG_ARG_DOT && EXPR_FNAME {
+        //     tFID        => EXPR_ENDFN;
+        //     tIDENTIFIER => EXPR_ENDFN;
+        //     tCONSTANT   => EXPR_ENDFN;
+        // }
+        // !IS_BEG_ARG_DOT && !EXPR_FNAME {
+        //     tFID        => EXPR_END;
+        //     tIDENTIFIER => EXPR_END;
+        //     tCONSTANT   => EXPR_END;
+        // }
+        // TODO see above ^^^
+        * {
+            tFID        => EXPR_CMDARG;
+            tFID        => EXPR_ARG;
+            tIDENTIFIER => EXPR_CMDARG;
+            tIDENTIFIER => EXPR_ARG;
+            tIDENTIFIER => EXPR_END|EXPR_LABEL;
+            tCONSTANT   => EXPR_CMDARG;
+            tCONSTANT   => EXPR_ARG;
+
+            tFID        => EXPR_ENDFN;
+            tIDENTIFIER => EXPR_ENDFN;
+            tCONSTANT   => EXPR_ENDFN;
+
+            tFID        => EXPR_END;
+            tIDENTIFIER => EXPR_END;
+            tCONSTANT   => EXPR_END;            
+        }
+
+        // parse_string
+        // ' '
+        // tSTRING_CONTENT
+        * {
+           tREGEXP_END => EXPR_END;
+           tSTRING_END => EXPR_END;
+           // parser_string_term
+           tREGEXP_END => EXPR_END;
+           tLABEL_END  => EXPR_ARG|EXPR_LABELED;
+           tSTRING_END => EXPR_END;
+        }
     }
 }
 
