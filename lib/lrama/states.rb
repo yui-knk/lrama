@@ -413,6 +413,13 @@ module Lrama
           end
         end
       end
+
+      invalid_rules = rules.select do |rule|
+        rule.merged_lexer_state_transitions.empty?
+      end.map do |rule|
+        "#{rule.id}: #{rule.display_name}"
+      end
+      raise "#{invalid_rules.join("\n")}\n\nhave no merged_lexer_state_transitions" if !invalid_rules.empty?
     end
 
     # @rbs () -> Array[State::Action::Goto]
