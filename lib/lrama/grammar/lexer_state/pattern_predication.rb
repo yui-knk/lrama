@@ -61,6 +61,14 @@ module Lrama
           self.negative == other.negative
         end
 
+        alias :eql? :==
+
+        # @rbs () -> Integer
+        def hash
+          # [pattern, negative].hash
+          [self.class, negative].hash
+        end
+
         # @rbs (LexerState::State state) -> bool
         def match?(state)
           b = @pattern.match?(state)

@@ -13,6 +13,9 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
     Lrama::Grammar::LexerState::PatternPredication::Pattern.new(state_bit_1)
   end
   let(:predication) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, false) }
+  let(:predication_1) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY_2", pattern, false) }
+  let(:predication_2) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, true) }
+  let(:predication_3) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern_2, false) }
   let(:n_predication) { Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, true) }
 
   describe "#name" do
@@ -24,14 +27,22 @@ RSpec.describe Lrama::Grammar::LexerState::PatternPredication do
 
   describe "#==" do
     it "returns true if pattern and negative are same otherwise returns false" do
-      predication_1 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY_2", pattern, false)
-      predication_2 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern, true)
-      predication_3 = Lrama::Grammar::LexerState::PatternPredication.new("IS_BEG_ANY", pattern_2, false)
-
       expect(predication == predication).to be true
       expect(predication == predication_1).to be true
       expect(predication == predication_2).to be false
       expect(predication == predication_3).to be false
+    end
+  end
+
+  describe "as hash key" do
+    it "works as hash key even if other instance" do
+      h = {}
+      h[predication] = true
+
+      expect(h[predication]).to be true
+      expect(h[predication_1]).to be true
+      expect(h[predication_2]).to be nil
+      expect(h[predication_3]).to be nil
     end
   end
 
