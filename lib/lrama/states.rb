@@ -363,7 +363,7 @@ module Lrama
       end
       nterm_to_rules = rules.group_by(&:lhs)
 
-      # Copmpute nonterminals `lexer_state_transitions` until
+      # Compute nonterminals `lexer_state_transitions` until
       # no changes on nonterminals `lexer_state_transitions`.
       queue = nterms.dup
       iterate_count = 0
