@@ -2797,10 +2797,6 @@ RSpec.describe Lrama::States do
             3: stmts -> stmts opt_nl stmt
 
               EXPR_BEG => EXPR_END
-              EXPR_BEG => EXPR_END
-              EXPR_BEG => EXPR_END
-              * => EXPR_END
-              * => EXPR_END
               * => EXPR_END
 
             4: stmts -> stmt
@@ -2816,15 +2812,11 @@ RSpec.describe Lrama::States do
             6: expr -> expr '+' expr
 
               EXPR_BEG => EXPR_END
-              EXPR_BEG => EXPR_END
-              * => EXPR_END
               * => EXPR_END
 
             7: expr -> primary '-' primary
 
               EXPR_BEG => EXPR_END
-              EXPR_BEG => EXPR_END
-              * => EXPR_END
               * => EXPR_END
 
             8: expr -> primary

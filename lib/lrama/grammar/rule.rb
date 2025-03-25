@@ -131,12 +131,11 @@ module Lrama
 
         products = transitions_array[0].product(*transitions_array[1..-1]) # steep:ignore
 
-        # TODO: call #uniq
         products.map do |transitions|
           transitions.reduce do |acc, transition| # steep:ignore
             acc.merge(transition) if acc
           end
-        end.compact
+        end.compact.uniq
       end
 
       private
