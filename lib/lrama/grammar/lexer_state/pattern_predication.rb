@@ -65,6 +65,7 @@ module Lrama
 
         # @rbs () -> Integer
         def hash
+          # This is conservative
           # [pattern, negative].hash
           [self.class, negative].hash
         end
