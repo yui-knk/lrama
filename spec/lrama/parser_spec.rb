@@ -2920,7 +2920,7 @@ RSpec.describe Lrama::Parser do
           expect(lexer_state.predications[3].pattern.state.map(&:name)).to eq(["EXPR_FNAME", "EXPR_DOT"])
 
           # transitions
-          expect(lexer_state.transitions.count).to eq(9)
+          expect(lexer_state.transitions.count).to eq(10)
 
           expect(lexer_state.transitions["tNUMBER"].count).to eq(1)
           expect(lexer_state.transitions["tNUMBER"][0].predication.name).to eq("EXPR_BEG")
@@ -2966,6 +2966,10 @@ RSpec.describe Lrama::Parser do
           expect(lexer_state.transitions["','"].count).to eq(1)
           expect(lexer_state.transitions["','"][0].predication.name).to eq("*")
           expect(lexer_state.transitions["','"][0]._to_state.map(&:name)).to eq(["EXPR_BEG", "EXPR_LABEL"])
+
+          expect(lexer_state.transitions["'\\n'"].count).to eq(1)
+          expect(lexer_state.transitions["'\\n'"][0].predication.name).to eq("*")
+          expect(lexer_state.transitions["'\\n'"][0]._to_state.map(&:name)).to eq(["EXPR_BEG"])
         end
       end
     end

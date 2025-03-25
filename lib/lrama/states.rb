@@ -373,8 +373,10 @@ module Lrama
         updated = false
 
         nterm_to_rules[nterm].each do |rule|
+
           if rule.rhs.all?(&:has_lexer_state_transitions?)
-            updated ||= nterm.merge_lexer_state_transitions(rule.merged_lexer_state_transitions)
+            result = nterm.merge_lexer_state_transitions(rule.merged_lexer_state_transitions)
+            updated ||= result
           end
         end
 

@@ -57,16 +57,24 @@
       tSTRING_END => EXPR_END;
       keyword_def => EXPR_FNAME;
       keyword_end => EXPR_END;
-      '(' => EXPR_BEG | EXPR_LABEL;
-      ')' => EXPR_ENDFN;
-      ',' => EXPR_BEG | EXPR_LABEL;
+      '('  => EXPR_BEG | EXPR_LABEL;
+      ')'  => EXPR_ENDFN;
+      ','  => EXPR_BEG | EXPR_LABEL;
+      '\n' => EXPR_BEG;
     }
   }
 }
 
 %%
 
-program: {  } expr ;
+program: {  } stmts ;
+
+stmts: stmts opt_nl stmt
+     | stmt
+     ;
+
+stmt: expr
+    ;
 
 expr: expr '+' expr
     | primary '-' primary
@@ -89,5 +97,9 @@ primary: tNUMBER
        | string
        | keyword_def def_name f_arglist expr keyword_end
        ;
+
+opt_nl: /* empty */
+      | '\n'
+      ;
 
 %%

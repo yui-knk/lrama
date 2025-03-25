@@ -2732,6 +2732,9 @@ RSpec.describe Lrama::States do
             keyword_end
               * => EXPR_END
 
+            '\\n'
+              * => EXPR_BEG
+
             $accept
               EXPR_BEG => EXPR_END
               * => EXPR_END
@@ -2740,6 +2743,14 @@ RSpec.describe Lrama::States do
               * => *
 
             program
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            stmts
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            stmt
               EXPR_BEG => EXPR_END
               * => EXPR_END
 
@@ -2765,6 +2776,10 @@ RSpec.describe Lrama::States do
               EXPR_BEG => EXPR_END
               * => EXPR_END
 
+            opt_nl
+              * => *
+              * => EXPR_BEG
+
             0: $accept -> program YYEOF
 
               EXPR_BEG => EXPR_END
@@ -2774,64 +2789,91 @@ RSpec.describe Lrama::States do
 
               * => *
 
-            2: program -> $@1 expr
+            2: program -> $@1 stmts
 
               EXPR_BEG => EXPR_END
               * => EXPR_END
 
-            3: expr -> expr '+' expr
+            3: stmts -> stmts opt_nl stmt
+
+              EXPR_BEG => EXPR_END
+              EXPR_BEG => EXPR_END
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+              * => EXPR_END
+              * => EXPR_END
+
+            4: stmts -> stmt
+
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            5: stmt -> expr
+
+              EXPR_BEG => EXPR_END
+              * => EXPR_END
+
+            6: expr -> expr '+' expr
 
               EXPR_BEG => EXPR_END
               EXPR_BEG => EXPR_END
               * => EXPR_END
               * => EXPR_END
 
-            4: expr -> primary '-' primary
+            7: expr -> primary '-' primary
 
               EXPR_BEG => EXPR_END
               EXPR_BEG => EXPR_END
               * => EXPR_END
               * => EXPR_END
 
-            5: expr -> primary
+            8: expr -> primary
 
               EXPR_BEG => EXPR_END
               * => EXPR_END
 
-            6: string -> tSTRING_BEG tSTRING_CONTENT tSTRING_END
+            9: string -> tSTRING_BEG tSTRING_CONTENT tSTRING_END
 
               * => EXPR_END
 
-            7: def_name -> op
+            10: def_name -> op
 
               EXPR_FNAME|EXPR_DOT => EXPR_ARG
               ! EXPR_FNAME|EXPR_DOT => EXPR_BEG
 
-            8: op -> '+'
+            11: op -> '+'
 
               EXPR_FNAME|EXPR_DOT => EXPR_ARG
               ! EXPR_FNAME|EXPR_DOT => EXPR_BEG
 
-            9: op -> '-'
+            12: op -> '-'
 
               EXPR_FNAME|EXPR_DOT => EXPR_ARG
               ! EXPR_FNAME|EXPR_DOT => EXPR_BEG
 
-            10: f_arglist -> '(' ')'
+            13: f_arglist -> '(' ')'
 
               * => EXPR_ENDFN
 
-            11: primary -> tNUMBER
+            14: primary -> tNUMBER
 
               EXPR_BEG => EXPR_END
 
-            12: primary -> string
+            15: primary -> string
 
               * => EXPR_END
 
-            13: primary -> keyword_def def_name f_arglist expr keyword_end
+            16: primary -> keyword_def def_name f_arglist expr keyword_end
 
               * => EXPR_END
+
+            17: opt_nl -> ε
+
+              * => *
+
+            18: opt_nl -> '\\n'
+
+              * => EXPR_BEG
 
 
         State 0
@@ -2848,15 +2890,17 @@ RSpec.describe Lrama::States do
 
         State 1
 
-            2 program: $@1 • expr
+            2 program: $@1 • stmts
 
             tNUMBER      shift, and go to state 3
             tSTRING_BEG  shift, and go to state 4
             keyword_def  shift, and go to state 5
 
-            expr     go to state 6
-            string   go to state 7
-            primary  go to state 8
+            stmts    go to state 6
+            stmt     go to state 7
+            expr     go to state 8
+            string   go to state 9
+            primary  go to state 10
 
             EXPR_BEG
 
@@ -2865,77 +2909,102 @@ RSpec.describe Lrama::States do
 
             0 $accept: program • "end of file"
 
-            "end of file"  shift, and go to state 9
+            "end of file"  shift, and go to state 11
 
             EXPR_END
 
 
         State 3
 
-           11 primary: tNUMBER •
+           14 primary: tNUMBER •
 
-            $default  reduce using rule 11 (primary)
+            $default  reduce using rule 14 (primary)
 
             EXPR_END
 
 
         State 4
 
-            6 string: tSTRING_BEG • tSTRING_CONTENT tSTRING_END
+            9 string: tSTRING_BEG • tSTRING_CONTENT tSTRING_END
 
-            tSTRING_CONTENT  shift, and go to state 10
+            tSTRING_CONTENT  shift, and go to state 12
 
             EXPR_BEG
+            EXPR_END
             EXPR_ENDFN
 
 
         State 5
 
-           13 primary: keyword_def • def_name f_arglist expr keyword_end
+           16 primary: keyword_def • def_name f_arglist expr keyword_end
 
-            '+'  shift, and go to state 11
-            '-'  shift, and go to state 12
+            '+'  shift, and go to state 13
+            '-'  shift, and go to state 14
 
-            def_name  go to state 13
-            op        go to state 14
+            def_name  go to state 15
+            op        go to state 16
 
             EXPR_FNAME
 
 
         State 6
 
-            2 program: $@1 expr •
-            3 expr: expr • '+' expr
+            2 program: $@1 stmts •
+            3 stmts: stmts • opt_nl stmt
 
-            '+'  shift, and go to state 15
+            '\\n'  shift, and go to state 17
 
-            $default  reduce using rule 2 (program)
+            "end of file"  reduce using rule 2 (program)
+            $default       reduce using rule 17 (opt_nl)
+
+            opt_nl  go to state 18
 
             EXPR_END
 
 
         State 7
 
-           12 primary: string •
+            4 stmts: stmt •
 
-            $default  reduce using rule 12 (primary)
+            $default  reduce using rule 4 (stmts)
 
             EXPR_END
 
 
         State 8
 
-            4 expr: primary • '-' primary
-            5     | primary •
+            5 stmt: expr •
+            6 expr: expr • '+' expr
 
-            '-'  shift, and go to state 16
+            '+'  shift, and go to state 19
 
-            $default  reduce using rule 5 (expr)
+            $default  reduce using rule 5 (stmt)
 
             EXPR_END
 
 
         State 9
+
+           15 primary: string •
+
+            $default  reduce using rule 15 (primary)
+
+            EXPR_END
+
+
+        State 10
+
+            7 expr: primary • '-' primary
+            8     | primary •
+
+            '-'  shift, and go to state 20
+
+            $default  reduce using rule 8 (expr)
+
+            EXPR_END
+
+
+        State 11
 
             0 $accept: program "end of file" •
 
@@ -2944,160 +3013,196 @@ RSpec.describe Lrama::States do
             EXPR_END
 
 
-        State 10
-
-            6 string: tSTRING_BEG tSTRING_CONTENT • tSTRING_END
-
-            tSTRING_END  shift, and go to state 17
-
-            EXPR_BEG
-            EXPR_ENDFN
-
-
-        State 11
-
-            8 op: '+' •
-
-            $default  reduce using rule 8 (op)
-
-            EXPR_ARG
-
-
         State 12
 
-            9 op: '-' •
+            9 string: tSTRING_BEG tSTRING_CONTENT • tSTRING_END
 
-            $default  reduce using rule 9 (op)
+            tSTRING_END  shift, and go to state 21
 
-            EXPR_ARG
+            EXPR_BEG
+            EXPR_END
+            EXPR_ENDFN
 
 
         State 13
 
-           13 primary: keyword_def def_name • f_arglist expr keyword_end
+           11 op: '+' •
 
-            '('  shift, and go to state 18
-
-            f_arglist  go to state 19
+            $default  reduce using rule 11 (op)
 
             EXPR_ARG
 
 
         State 14
 
-            7 def_name: op •
+           12 op: '-' •
 
-            $default  reduce using rule 7 (def_name)
+            $default  reduce using rule 12 (op)
 
             EXPR_ARG
 
 
         State 15
 
-            3 expr: expr '+' • expr
+           16 primary: keyword_def def_name • f_arglist expr keyword_end
 
-            tNUMBER      shift, and go to state 3
-            tSTRING_BEG  shift, and go to state 4
-            keyword_def  shift, and go to state 5
+            '('  shift, and go to state 22
 
-            expr     go to state 20
-            string   go to state 7
-            primary  go to state 8
+            f_arglist  go to state 23
 
-            EXPR_BEG
+            EXPR_ARG
 
 
         State 16
 
-            4 expr: primary '-' • primary
+           10 def_name: op •
 
-            tNUMBER      shift, and go to state 3
-            tSTRING_BEG  shift, and go to state 4
-            keyword_def  shift, and go to state 5
+            $default  reduce using rule 10 (def_name)
 
-            string   go to state 7
-            primary  go to state 21
-
-            EXPR_BEG
+            EXPR_ARG
 
 
         State 17
 
-            6 string: tSTRING_BEG tSTRING_CONTENT tSTRING_END •
+           18 opt_nl: '\\n' •
 
-            $default  reduce using rule 6 (string)
+            $default  reduce using rule 18 (opt_nl)
 
-            EXPR_END
+            EXPR_BEG
 
 
         State 18
 
-           10 f_arglist: '(' • ')'
-
-            ')'  shift, and go to state 22
-
-            EXPR_BEG|EXPR_LABEL
-
-
-        State 19
-
-           13 primary: keyword_def def_name f_arglist • expr keyword_end
+            3 stmts: stmts opt_nl • stmt
 
             tNUMBER      shift, and go to state 3
             tSTRING_BEG  shift, and go to state 4
             keyword_def  shift, and go to state 5
 
-            expr     go to state 23
-            string   go to state 7
-            primary  go to state 8
+            stmt     go to state 24
+            expr     go to state 8
+            string   go to state 9
+            primary  go to state 10
 
-            EXPR_ENDFN
+            EXPR_BEG
+            EXPR_END
+
+
+        State 19
+
+            6 expr: expr '+' • expr
+
+            tNUMBER      shift, and go to state 3
+            tSTRING_BEG  shift, and go to state 4
+            keyword_def  shift, and go to state 5
+
+            expr     go to state 25
+            string   go to state 9
+            primary  go to state 10
+
+            EXPR_BEG
 
 
         State 20
 
-            3 expr: expr • '+' expr
-            3     | expr '+' expr •
+            7 expr: primary '-' • primary
 
-            $default  reduce using rule 3 (expr)
+            tNUMBER      shift, and go to state 3
+            tSTRING_BEG  shift, and go to state 4
+            keyword_def  shift, and go to state 5
 
-            EXPR_END
+            string   go to state 9
+            primary  go to state 26
+
+            EXPR_BEG
 
 
         State 21
 
-            4 expr: primary '-' primary •
+            9 string: tSTRING_BEG tSTRING_CONTENT tSTRING_END •
 
-            $default  reduce using rule 4 (expr)
+            $default  reduce using rule 9 (string)
 
             EXPR_END
 
 
         State 22
 
-           10 f_arglist: '(' ')' •
+           13 f_arglist: '(' • ')'
 
-            $default  reduce using rule 10 (f_arglist)
+            ')'  shift, and go to state 27
 
-            EXPR_ENDFN
+            EXPR_BEG|EXPR_LABEL
 
 
         State 23
 
-            3 expr: expr • '+' expr
-           13 primary: keyword_def def_name f_arglist expr • keyword_end
+           16 primary: keyword_def def_name f_arglist • expr keyword_end
 
-            '+'          shift, and go to state 15
-            keyword_end  shift, and go to state 24
+            tNUMBER      shift, and go to state 3
+            tSTRING_BEG  shift, and go to state 4
+            keyword_def  shift, and go to state 5
 
-            EXPR_END
+            expr     go to state 28
+            string   go to state 9
+            primary  go to state 10
+
+            EXPR_ENDFN
 
 
         State 24
 
-           13 primary: keyword_def def_name f_arglist expr keyword_end •
+            3 stmts: stmts opt_nl stmt •
 
-            $default  reduce using rule 13 (primary)
+            $default  reduce using rule 3 (stmts)
+
+            EXPR_END
+
+
+        State 25
+
+            6 expr: expr • '+' expr
+            6     | expr '+' expr •
+
+            $default  reduce using rule 6 (expr)
+
+            EXPR_END
+
+
+        State 26
+
+            7 expr: primary '-' primary •
+
+            $default  reduce using rule 7 (expr)
+
+            EXPR_END
+
+
+        State 27
+
+           13 f_arglist: '(' ')' •
+
+            $default  reduce using rule 13 (f_arglist)
+
+            EXPR_ENDFN
+
+
+        State 28
+
+            6 expr: expr • '+' expr
+           16 primary: keyword_def def_name f_arglist expr • keyword_end
+
+            '+'          shift, and go to state 19
+            keyword_end  shift, and go to state 29
+
+            EXPR_END
+
+
+        State 29
+
+           16 primary: keyword_def def_name f_arglist expr keyword_end •
+
+            $default  reduce using rule 16 (primary)
 
             EXPR_END
 
