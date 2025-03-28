@@ -129,13 +129,13 @@ module Lrama
           symbol.lexer_state_transitions
         end
 
-        products = transitions_array[0].product(*transitions_array[1..-1]) # steep:ignore
-
-        products.map do |transitions|
-          transitions.reduce do |acc, transition| # steep:ignore
-            acc.merge(transition) if acc
-          end
-        end.compact.uniq
+        transitions_array.reduce do |acc, transitions|
+          acc.product(transitions).map do |transitions_2|
+            transitions_2.reduce do |acc_2, transition|
+              acc_2.merge(transition) if acc_2
+            end
+          end.compact.uniq
+        end
       end
 
       private
