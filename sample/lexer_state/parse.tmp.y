@@ -3381,7 +3381,7 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
 
             tFID        => EXPR_END;
             tIDENTIFIER => EXPR_END;
-            tCONSTANT   => EXPR_END;            
+            tCONSTANT   => EXPR_END;
         }
 
         * {
