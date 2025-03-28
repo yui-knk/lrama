@@ -3384,6 +3384,11 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
             tCONSTANT   => EXPR_END;            
         }
 
+        * {
+            // TODO: This should be represented as an action.
+            tSTRING_DBEG => EXPR_BEG;
+        }
+
         // parse_string
         // ' '
         // tSTRING_CONTENT
@@ -3394,6 +3399,10 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
            tREGEXP_END => EXPR_END;
            tLABEL_END  => EXPR_ARG|EXPR_LABELED;
            tSTRING_END => EXPR_END;
+        }
+
+        * {
+            tDUMNY_END => EXPR_END;
         }
     }
 }
