@@ -3393,12 +3393,12 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         // ' '
         // tSTRING_CONTENT
         * {
-           tREGEXP_END => EXPR_END;
-           tSTRING_END => EXPR_END;
-           // parser_string_term
-           tREGEXP_END => EXPR_END;
-           tLABEL_END  => EXPR_ARG|EXPR_LABELED;
-           tSTRING_END => EXPR_END;
+            tREGEXP_END => EXPR_END;
+            tSTRING_END => EXPR_END;
+            // parser_string_term
+            tREGEXP_END => EXPR_END;
+            tLABEL_END  => EXPR_ARG|EXPR_LABELED;
+            tSTRING_END => EXPR_END;
         }
 
         * {
