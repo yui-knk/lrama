@@ -131,7 +131,7 @@ module Lrama
 
         transitions_array.reduce do |acc, transitions|
           acc.product(transitions).map do |transitions_2|
-            transitions_2.reduce do |acc_2, transition|
+            transitions_2.reduce do |acc_2, transition| # steep:ignore
               acc_2.merge(transition) if acc_2
             end
           end.compact.uniq
