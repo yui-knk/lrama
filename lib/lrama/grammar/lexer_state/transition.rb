@@ -30,6 +30,11 @@ module Lrama
           [predication, _to_state].hash
         end
 
+        # @rbs (Transition other) -> Integer
+        def <=>(other)
+          self._to_state <=> other._to_state
+        end
+
         # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)
           @_to_state

@@ -18,6 +18,11 @@ module Lrama
           self.class.object_id
         end
 
+        # @rbs (IdentityTransition other) -> Integer
+        def <=>(other)
+          1
+        end
+
         # @rbs (LexerState::State from_state) -> LexerState::State
         def to_state(from_state)
           from_state
