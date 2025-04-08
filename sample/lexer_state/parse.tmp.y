@@ -2922,7 +2922,9 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
     predication IS_AFTER_OPERATOR = EXPR_FNAME | EXPR_DOT;
     // IS_SPCARG
     // IS_LABEL_POSSIBLE
-    // predication IS_BEG_ARG_DOT = IS_BEG_ANY | IS_ARG | EXPR_DOT;
+    predication IS_BEG_ANY__ARG__DOT = IS_BEG_ANY || IS_ARG || EXPR_DOT;
+    predication NOT_IS_BEG_ANY__ARG__DOT____FNAME = !IS_BEG_ANY__ARG__DOT && EXPR_FNAME;
+    predication NOT_IS_BEG_ANY__ARG__DOT____NOT_FNAME = !IS_BEG_ANY__ARG__DOT && !EXPR_FNAME;
 
 
     transitions {
@@ -3346,7 +3348,28 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         * {
             tLABEL => EXPR_ARG|EXPR_LABELED;
         }
-        // IS_BEG_ARG_DOT => {
+
+        IS_BEG_ANY__ARG__DOT {
+            tFID        => EXPR_CMDARG;
+            tFID        => EXPR_ARG;
+            tIDENTIFIER => EXPR_CMDARG;
+            tIDENTIFIER => EXPR_ARG;
+            tIDENTIFIER => EXPR_END|EXPR_LABEL;
+            tCONSTANT   => EXPR_CMDARG;
+            tCONSTANT   => EXPR_ARG;
+        }
+        NOT_IS_BEG_ANY__ARG__DOT____FNAME {
+            tFID        => EXPR_ENDFN;
+            tIDENTIFIER => EXPR_ENDFN;
+            tCONSTANT   => EXPR_ENDFN;
+        }
+        NOT_IS_BEG_ANY__ARG__DOT____NOT_FNAME {
+            tFID        => EXPR_END;
+            tIDENTIFIER => EXPR_END;
+            tCONSTANT   => EXPR_END;
+        }
+
+        // IS_BEG_ARG_DOT {
         //     tFID        => EXPR_CMDARG;
         //     tFID        => EXPR_ARG;
         //     tIDENTIFIER => EXPR_CMDARG;
@@ -3366,23 +3389,23 @@ rb_parser_ary_free(rb_parser_t *p, rb_parser_ary_t *ary)
         //     tCONSTANT   => EXPR_END;
         // }
         // TODO see above ^^^
-        * {
-            tFID        => EXPR_CMDARG;
-            tFID        => EXPR_ARG;
-            tIDENTIFIER => EXPR_CMDARG;
-            tIDENTIFIER => EXPR_ARG;
-            tIDENTIFIER => EXPR_END|EXPR_LABEL;
-            tCONSTANT   => EXPR_CMDARG;
-            tCONSTANT   => EXPR_ARG;
+        // * {
+        //     tFID        => EXPR_CMDARG;
+        //     tFID        => EXPR_ARG;
+        //     tIDENTIFIER => EXPR_CMDARG;
+        //     tIDENTIFIER => EXPR_ARG;
+        //     tIDENTIFIER => EXPR_END|EXPR_LABEL;
+        //     tCONSTANT   => EXPR_CMDARG;
+        //     tCONSTANT   => EXPR_ARG;
 
-            tFID        => EXPR_ENDFN;
-            tIDENTIFIER => EXPR_ENDFN;
-            tCONSTANT   => EXPR_ENDFN;
+        //     tFID        => EXPR_ENDFN;
+        //     tIDENTIFIER => EXPR_ENDFN;
+        //     tCONSTANT   => EXPR_ENDFN;
 
-            tFID        => EXPR_END;
-            tIDENTIFIER => EXPR_END;
-            tCONSTANT   => EXPR_END;
-        }
+        //     tFID        => EXPR_END;
+        //     tIDENTIFIER => EXPR_END;
+        //     tCONSTANT   => EXPR_END;
+        // }
 
         * {
             // TODO: This should be represented as an action.
@@ -3757,7 +3780,7 @@ k_END		: keyword_END lex_ctxt
                     /*% ripper: $:2 %*/
                     };
 
-stmt		: keyword_alias fitem {SET_LEX_STATE(EXPR_FNAME|EXPR_FITEM);} fitem
+stmt		: keyword_alias fitem {SET_LEX_STATE(EXPR_FNAME|EXPR_FITEM);} %ls{ EXPR_FNAME|EXPR_FITEM } fitem
                     {
                         $$ = NEW_ALIAS($2, $4, &@$, &@1);
                     /*% ripper: alias!($:2, $:4) %*/
@@ -3982,6 +4005,7 @@ defs_head	: k_def singleton dot_or_colon
                     {
                         SET_LEX_STATE(EXPR_FNAME);
                     }
+                    %ls{ EXPR_FNAME }
                   def_name
                     {
                         SET_LEX_STATE(EXPR_ENDFN|EXPR_LABEL); /* force for args */
@@ -3990,6 +4014,7 @@ defs_head	: k_def singleton dot_or_colon
                         $$->nd_def = NEW_DEFS($singleton, $def_name, 0, &@$);
                     /*% ripper: [$:singleton, $:dot_or_colon, $:def_name] %*/
                     }
+                    %ls{ EXPR_ENDFN|EXPR_LABEL }
                 ;
 
 expr_value	: value_expr(expr)
@@ -4311,6 +4336,7 @@ fname		: operation
                         SET_LEX_STATE(EXPR_ENDFN);
                         $$ = $1;
                     }
+                    %ls{ EXPR_ENDFN }
                 | reswords
                 ;
 
@@ -4327,7 +4353,7 @@ undef_list	: fitem
                         $$ = NEW_UNDEF($1, &@$);
                     /*% ripper: rb_ary_new3(1, $:1) %*/
                     }
-                | undef_list ',' {SET_LEX_STATE(EXPR_FNAME|EXPR_FITEM);} fitem
+                | undef_list ',' {SET_LEX_STATE(EXPR_FNAME|EXPR_FITEM);} %ls{ EXPR_FNAME|EXPR_FITEM } fitem
                     {
                         nd_set_last_loc($1, @4.end_pos);
                         rb_parser_ary_push_node(p, RNODE_UNDEF($1)->nd_undefs, $4);
@@ -4397,18 +4423,18 @@ arg		: asgn(lhs, arg_rhs)
                         $$ = NEW_DOT3($1, $3, &@$, &@2);
                     /*% ripper: dot3!($:1, $:3) %*/
                     }
-                | arg tDOT2
-                    {
-                        value_expr($1);
-                        $$ = NEW_DOT2($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
-                    /*% ripper: dot2!($:1, Qnil) %*/
-                    }
-                | arg tDOT3
-                    {
-                        value_expr($1);
-                        $$ = NEW_DOT3($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
-                    /*% ripper: dot3!($:1, Qnil) %*/
-                    }
+                // | arg tDOT2
+                //     {
+                //         value_expr($1);
+                //         $$ = NEW_DOT2($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
+                //     /*% ripper: dot2!($:1, Qnil) %*/
+                //     }
+                // | arg tDOT3
+                //     {
+                //         value_expr($1);
+                //         $$ = NEW_DOT3($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
+                //     /*% ripper: dot3!($:1, Qnil) %*/
+                //     }
                 | tBDOT2 arg
                     {
                         value_expr($2);
@@ -4873,7 +4899,7 @@ primary         : inline_primary
                         nd_set_line($$, @1.end_pos.lineno);
                     /*% ripper: begin!($:3) %*/
                     }
-                | tLPAREN_ARG compstmt(stmts) {SET_LEX_STATE(EXPR_ENDARG);} ')'
+                | tLPAREN_ARG compstmt(stmts) {SET_LEX_STATE(EXPR_ENDARG);} %ls{ EXPR_ENDARG } ')'
                     {
                         if (nd_type_p($2, NODE_SELF)) RNODE_SELF($2)->nd_state = 0;
                         $$ = $2;
@@ -5891,6 +5917,7 @@ p_in_kwarg	:   {
                         p->command_start = FALSE;
                         p->ctxt.in_kwarg = 1;
                     }
+                    %ls{ EXPR_BEG|EXPR_LABEL }
                 ;
 
 p_case_body	: keyword_in
@@ -6608,6 +6635,7 @@ string_content	: tSTRING_CONTENT
                         p->lex.strterm = 0;
                         SET_LEX_STATE(EXPR_BEG);
                     }<strterm>
+                    %ls{ EXPR_BEG }
                   string_dvar
                     {
                         p->lex.strterm = $2;
@@ -6624,6 +6652,7 @@ string_content	: tSTRING_CONTENT
                         p->lex.strterm = 0;
                         SET_LEX_STATE(EXPR_BEG);
                     }[term]<strterm>
+                    %ls{ EXPR_BEG }
                     {
                         $$ = p->lex.brace_nest;
                         p->lex.brace_nest = 0;
@@ -6677,6 +6706,7 @@ ssym		: tSYMBEG sym
                         $$ = NEW_SYM(str, &@$);
                     /*% ripper: symbol_literal!(symbol!($:2)) %*/
                     }
+                    %ls{ EXPR_END }
                 ;
 
 sym		: fname
@@ -6689,6 +6719,7 @@ dsym		: tSYMBEG string_contents tSTRING_END
                         $$ = dsym_node(p, $2, &@$);
                     /*% ripper: dyna_symbol!($:2) %*/
                     }
+                    %ls{ EXPR_END }
                 ;
 
 numeric 	: simple_numeric
@@ -6757,6 +6788,7 @@ superclass	: '<'
                         SET_LEX_STATE(EXPR_BEG);
                         p->command_start = TRUE;
                     }
+                    %ls{ EXPR_BEG }
                   expr_value term
                     {
                         $$ = $3;
@@ -6783,6 +6815,7 @@ f_paren_args	: '(' f_args rparen
                         p->command_start = TRUE;
                         p->ctxt.in_argdef = 0;
                     }
+                    %ls{ EXPR_BEG }
                 ;
 
 f_arglist	: f_paren_args
@@ -6801,6 +6834,7 @@ f_arglist	: f_paren_args
                         p->command_start = TRUE;
                     /*% ripper: $:2 %*/
                     }
+                    %ls{ EXPR_BEG }
                 ;
 
 args_tail	: args_tail_basic(arg_value)
@@ -7128,6 +7162,7 @@ singleton_expr	: var_ref
                         SET_LEX_STATE(EXPR_BEG);
                         p->ctxt.in_argdef = 0;
                     }
+                    %ls{ EXPR_BEG }
                   expr rparen
                     {
                         p->ctxt.in_argdef = 1;
