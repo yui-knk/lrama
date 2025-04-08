@@ -32,7 +32,7 @@ module Lrama
     attr_accessor :status #: :initial | :c_declaration | :lexer_state
     attr_accessor :end_symbol #: String?
 
-    SYMBOLS = ['%{', '%}', '%%', '{', '}', '\[', '\]', '\(', '\)', '\,', ':', '\|\|', '\|', ';', '!', '=>', '='].freeze #: Array[String]
+    SYMBOLS = ['%{', '%}', '%%', '{', '}', '\[', '\]', '\(', '\)', '\,', ':', '\|\|', '\|', ';', '!', '=>', '=', '&&', '%ls{'].freeze #: Array[String]
     PERCENT_TOKENS = %w(
       %union
       %token

@@ -6,6 +6,8 @@ class Lrama::Parser
 
   preclow
     left "||"
+    left "&&"
+    right "!"
   prechigh
 
 rule
@@ -319,6 +321,14 @@ rule
         {
           result = Grammar::LexerState::PatternPredication::OrPattern.new(val[0], val[2])
         }
+    | pattern '&&' pattern
+        {
+          result = Grammar::LexerState::PatternPredication::AndPattern.new(val[0], val[2])
+        }
+    | "!" pattern
+        {
+          result = Grammar::LexerState::PatternPredication::NotPattern.new(val[1])
+        }
     | pattern_base
 
   pattern_base:
@@ -499,11 +509,12 @@ rule
           builder.line = val[1].first_line
           result = builder
         }
-    | rhs midrule_action named_ref? TAG?
+    | rhs midrule_action named_ref? TAG? lexer_state_action?
         {
           user_code = val[1]
           user_code.alias_name = val[2]
           user_code.tag = val[3]
+          user_code.lexer_state_action = val[4]
           builder = val[0]
           builder.user_code = user_code
           result = builder
@@ -515,6 +526,12 @@ rule
           builder = val[0]
           builder.precedence_sym = sym
           result = builder
+        }
+
+  lexer_state_action:
+      "%ls{" pattern_base "}"
+        {
+          result = val[1]
         }
 
   parameterized_suffix:

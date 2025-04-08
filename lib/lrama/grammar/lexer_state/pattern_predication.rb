@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 require_relative "pattern_predication/all_pattern"
+require_relative "pattern_predication/and_pattern"
+require_relative "pattern_predication/not_pattern"
 require_relative "pattern_predication/or_pattern"
 require_relative "pattern_predication/pattern"
 require_relative "pattern_predication/predication_pattern"
