@@ -126,6 +126,30 @@ module Lrama
       report_duration(:compute_conflicts) { compute_conflicts }
 
       report_duration(:compute_default_reduction) { compute_default_reduction }
+
+      ss = states.select do |state|
+        lexer_state = state.lexer_states.any? do |ls|
+          ls.state_bits.any? do |bit|
+            bit.name == "EXPR_BEG"
+          end
+        end
+
+        shift = state.term_transitions.any? do |shift|
+          shift.next_sym.id.s_value == "'\\n'"
+        end
+        reduce = state.reduces.any? do |reduce|
+          reduce.look_ahead&.any? do |la|
+            la.id.s_value == "'\\n'"
+          end
+        end
+
+        # p [lexer_state, shift, reduce]
+        lexer_state && (shift || reduce)
+      end
+      # binding.irb
+      ss.each do |s|
+        p s.id
+      end
     end
 
     # @rbs () -> void
