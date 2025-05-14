@@ -127,7 +127,23 @@ module Lrama
 
       report_duration(:compute_default_reduction) { compute_default_reduction }
 
-      ss = states.select do |state|
+      ss1 = states.select do |state|
+        lexer_state = state.lexer_states.any? do |ls|
+          ls.state_bits.any? do |bit|
+            bit.name == "EXPR_BEG"
+          end
+        end
+
+        reduce = state.reduces.any? do |reduce|
+          reduce.look_ahead&.any? do |la|
+            la.id.s_value == "'\\n'"
+          end
+        end
+
+        lexer_state && reduce
+      end
+
+      ss2 = states.select do |state|
         lexer_state = state.lexer_states.any? do |ls|
           ls.state_bits.any? do |bit|
             bit.name == "EXPR_BEG"
@@ -137,19 +153,40 @@ module Lrama
         shift = state.term_transitions.any? do |shift|
           shift.next_sym.id.s_value == "'\\n'"
         end
+
+        lexer_state && shift
+      end
+
+      ss3 = states.select do |state|
+        lexer_state = state.lexer_states.any? do |ls|
+          ls.state_bits.any? do |bit|
+            bit.name == "EXPR_BEG" || bit.name == "EXPR_CLASS" || bit.name == "EXPR_DOT"
+          end
+        end
+
+        shift = state.term_transitions.any? do |shift|
+          shift.next_sym.id.s_value == "'\\n'"
+        end
+
         reduce = state.reduces.any? do |reduce|
           reduce.look_ahead&.any? do |la|
             la.id.s_value == "'\\n'"
           end
         end
 
-        # p [lexer_state, shift, reduce]
-        lexer_state && (shift || reduce)
+        default = state.default_reduction_rule
+
+        !lexer_state && !shift && !reduce && !default
       end
-      # binding.irb
-      ss.each do |s|
-        p s.id
-      end
+
+      p "----------- ss1 -----------"
+      ss1.each {|s| p s.id }
+
+      p "----------- ss2 -----------"
+      ss2.each {|s| p s.id }
+
+      p "----------- ss3 -----------"
+      ss3.each {|s| p s.id }
     end
 
     # @rbs () -> void

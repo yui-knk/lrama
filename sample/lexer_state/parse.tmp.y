@@ -4423,18 +4423,18 @@ arg		: asgn(lhs, arg_rhs)
                         $$ = NEW_DOT3($1, $3, &@$, &@2);
                     /*% ripper: dot3!($:1, $:3) %*/
                     }
-                // | arg tDOT2
-                //     {
-                //         value_expr($1);
-                //         $$ = NEW_DOT2($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
-                //     /*% ripper: dot2!($:1, Qnil) %*/
-                //     }
-                // | arg tDOT3
-                //     {
-                //         value_expr($1);
-                //         $$ = NEW_DOT3($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
-                //     /*% ripper: dot3!($:1, Qnil) %*/
-                //     }
+                | arg tDOT2
+                    {
+                        value_expr($1);
+                        $$ = NEW_DOT2($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
+                    /*% ripper: dot2!($:1, Qnil) %*/
+                    }
+                | arg tDOT3
+                    {
+                        value_expr($1);
+                        $$ = NEW_DOT3($1, new_nil_at(p, &@2.end_pos), &@$, &@2);
+                    /*% ripper: dot3!($:1, Qnil) %*/
+                    }
                 | tBDOT2 arg
                     {
                         value_expr($2);

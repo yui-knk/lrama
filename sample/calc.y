@@ -33,23 +33,21 @@ static int yyerror(YYLTYPE *loc, const char *str);
 
 %locations
 
-%rule %inline op    : '+' { + }
-                    | '-' { - }
-                    | '*' { * }
-                    | '/' { / }
-                    ;
-
 %%
 
 list : /* empty */
      | list LF
      | list expr LF { printf("=> %d\n", $2); }
      ;
+
 expr : NUM
-     | expr op expr { $$ = $1 $2 $3; }
+     | expr op expr { $$ = $1  $3; }
      | '(' expr ')'  { $$ = $2; }
      ;
 
+op   : '+'
+     | '-'
+     ;
 %%
 
 static int yylex(YYSTYPE *yylval, YYLTYPE *loc) {
