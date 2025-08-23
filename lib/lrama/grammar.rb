@@ -336,7 +336,7 @@ module Lrama
             if find_term_by_s_value(sym.id.s_value)
               raise ParseError, sym.id.location.generate_error_message("symbol #{sym.id.s_value} redeclared as a nonterminal") # steep:ignore UnknownConstant
             else
-              add_type(id: sym.id, tag: sym.tag)  
+              add_type(id: sym.id, tag: sym.tag)
             end
           end
         when Node::PrecedenceDecl

@@ -321,7 +321,7 @@ rule
             Grammar::Node::Symbol.new(
               id: id, tag: val[1],
               location: id.loc
-            )            
+            )
           end
           result = val[0].concat(syms)
         }
