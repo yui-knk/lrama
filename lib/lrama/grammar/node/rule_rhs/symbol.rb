@@ -16,6 +16,7 @@ module Lrama
             super(location: location)
           end
 
+          # @rbs () -> String
           def s_value
             @token.s_value
           end

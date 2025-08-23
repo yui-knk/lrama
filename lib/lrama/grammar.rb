@@ -69,6 +69,7 @@ module Lrama
     #   @union: Union
     #   @precedences: Array[Precedence]
     #   @start_nterm: Lrama::Lexer::Token::Base?
+    #   @nodes: Array[Node::Base]
 
     extend Forwardable
 
@@ -101,7 +102,7 @@ module Lrama
     attr_accessor :locations #: bool
     attr_accessor :define #: Hash[String, String]
     attr_accessor :required #: bool
-    attr_accessor :nodes
+    attr_accessor :nodes #: Array[Node::Base]
 
     def_delegators "@symbols_resolver", :symbols, :nterms, :terms, :add_nterm, :add_term, :find_term_by_s_value,
                                         :find_symbol_by_number!, :find_symbol_by_id!, :token_to_symbol,
