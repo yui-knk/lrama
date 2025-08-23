@@ -11,9 +11,10 @@ module Lrama
 
           attr_reader alias_name: String?
 
-          attr_reader lhs_tag: Lexer::Token::Tag
+          attr_reader lhs_tag: Lexer::Token::Tag?
 
-          def initialize: (s_value: untyped, args: untyped, location: untyped, ?alias_name: untyped, ?lhs_tag: untyped) -> untyped
+          # @rbs (s_value: String, args: Array[Lexer::Token::Base], ?alias_name: String?, ?lhs_tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
+          def initialize: (s_value: String, args: Array[Lexer::Token::Base], location: Lexer::Location, ?alias_name: String?, ?lhs_tag: Lexer::Token::Tag?) -> void
         end
       end
     end

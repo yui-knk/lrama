@@ -11,7 +11,8 @@ module Lrama
 
           attr_reader tag: Lexer::Token::Tag?
 
-          def initialize: (code: untyped, location: untyped, ?alias_name: untyped, ?tag: untyped) -> untyped
+          # @rbs (code: Lexer::Token::UserCode, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
+          def initialize: (code: Lexer::Token::UserCode, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
         end
       end
     end

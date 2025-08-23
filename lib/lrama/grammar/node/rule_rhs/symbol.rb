@@ -9,6 +9,7 @@ module Lrama
           attr_reader :token #: Lexer::Token::Base
           attr_reader :alias_name #: String?
 
+          # @rbs (token: Lexer::Token::Base, ?alias_name: String?, location: Lexer::Location) -> void
           def initialize(token:, alias_name: nil, location:)
             @token = token
             @alias_name = alias_name

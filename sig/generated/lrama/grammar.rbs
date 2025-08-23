@@ -141,7 +141,8 @@ module Lrama
     # @rbs (Counter rule_counter, bool locations, Hash[String, String] define) -> void
     def initialize: (Counter rule_counter, bool locations, Hash[String, String] define) -> void
 
-    def evaluate_nodes: () -> untyped
+    # @rbs () -> void
+    def evaluate_nodes: () -> void
 
     # @rbs (Counter rule_counter, Counter midrule_action_counter) -> RuleBuilder
     def create_rule_builder: (Counter rule_counter, Counter midrule_action_counter) -> RuleBuilder

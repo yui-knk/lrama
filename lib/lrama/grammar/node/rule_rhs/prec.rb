@@ -8,6 +8,7 @@ module Lrama
         class Prec < Node::Base
           attr_reader :token #: Lexer::Token::Base
 
+          # @rbs (token: Lexer::Token::Base, location: Lexer::Location) -> void
           def initialize(token:, location:)
             @token = token
             super(location: location)

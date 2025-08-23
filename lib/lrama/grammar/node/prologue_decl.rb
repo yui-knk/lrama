@@ -5,7 +5,7 @@ module Lrama
   class Grammar
     module Node
       class PrologueDecl < Base
-        attr_reader :code
+        attr_reader :code #: Lexer::Token::UserCode
 
         # @rbs (code: Lexer::Token::UserCode, location: Lexer::Location) -> void
         def initialize(code:, location:)

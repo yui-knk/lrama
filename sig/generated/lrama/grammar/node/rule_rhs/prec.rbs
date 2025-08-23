@@ -7,7 +7,8 @@ module Lrama
         class Prec < Node::Base
           attr_reader token: Lexer::Token::Base
 
-          def initialize: (token: untyped, location: untyped) -> untyped
+          # @rbs (token: Lexer::Token::Base, location: Lexer::Location) -> void
+          def initialize: (token: Lexer::Token::Base, location: Lexer::Location) -> void
         end
       end
     end

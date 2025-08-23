@@ -141,6 +141,7 @@ module Lrama
       append_special_symbols
     end
 
+    # @rbs () -> void
     def evaluate_nodes
       _evaluate_nodes
     end
