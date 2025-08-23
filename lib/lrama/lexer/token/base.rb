@@ -20,6 +20,8 @@ module Lrama
           @errors = []
         end
 
+        alias :loc :location
+
         # @rbs () -> String
         def to_s
           "value: `#{s_value}`, location: #{location}"

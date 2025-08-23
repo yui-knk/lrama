@@ -7,6 +7,12 @@ class Lrama::Parser
 rule
 
   input: prologue_declaration* bison_declaration* "%%" rules_or_grammar_declaration+ epilogue_declaration?
+        {
+          ary = []
+          ary.concat(val[0]) if val[0]
+          binding.irb
+          result = ary
+        }
 
   prologue_declaration:
       "%{"
@@ -19,12 +25,11 @@ rule
         }
       "%}"
         {
-          @grammar.prologue_first_lineno = val[0].first_line
-          @grammar.prologue = val[2].s_value
+          result = Grammar::Node::PrologueDecl.new(code: val[2], location: merge_locations(val[0].loc, val[4].loc))
         }
     | "%require" STRING
         {
-          @grammar.required = true
+          result = Grammar::Node::RequireDecl.new(location: merge_locations(val[0].loc, val[1].loc))
         }
 
   bison_declaration:
@@ -521,7 +526,9 @@ def parse
     @grammar = Lrama::Grammar.new(@rule_counter, @locations, @define)
     @precedence_number = 0
     reset_precs
-    do_parse
+    nodes = do_parse
+    @grammar.nodes = nodes
+    @grammar.evaluate_nodes
     @grammar
   end
 end
@@ -586,3 +593,14 @@ end
 def raise_parse_error(error_message, location)
   raise ParseError, location.generate_error_message(error_message)
 end
+
+def merge_locations(starting_location, ending_location)
+  Lexer::Location.new(
+    grammar_file: starting_location.grammar_file,
+    first_line: starting_location.first_line,
+    first_column: starting_location.first_column,
+    last_line: ending_location.last_line,
+    last_column: ending_location.last_column
+  )
+end
+

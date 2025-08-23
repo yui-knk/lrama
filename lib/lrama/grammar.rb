@@ -9,6 +9,7 @@ require_relative "grammar/counter"
 require_relative "grammar/destructor"
 require_relative "grammar/error_token"
 require_relative "grammar/inline"
+require_relative "grammar/node"
 require_relative "grammar/parameterized"
 require_relative "grammar/percent_code"
 require_relative "grammar/precedence"
@@ -100,6 +101,7 @@ module Lrama
     attr_accessor :locations #: bool
     attr_accessor :define #: Hash[String, String]
     attr_accessor :required #: bool
+    attr_accessor :nodes
 
     def_delegators "@symbols_resolver", :symbols, :nterms, :terms, :add_nterm, :add_term, :find_term_by_s_value,
                                         :find_symbol_by_number!, :find_symbol_by_id!, :token_to_symbol,
@@ -133,8 +135,13 @@ module Lrama
       @required = false
       @precedences = []
       @start_nterm = nil
+      @nodes = nil
 
       append_special_symbols
+    end
+
+    def evaluate_nodes
+      _evaluate_nodes
     end
 
     # @rbs (Counter rule_counter, Counter midrule_action_counter) -> RuleBuilder
@@ -305,6 +312,21 @@ module Lrama
     end
 
     private
+
+    # @rbs () -> void
+    def _evaluate_nodes
+      @nodes.each do |node|
+        case node
+        when Node::PrologueDecl
+          self.prologue_first_lineno = node.location.first_line
+          self.prologue = node.code.s_value
+        when Node::RequireDecl
+          @required = true
+        else
+          # raise "Unknown Node: #{node}"
+        end
+      end
+    end
 
     # @rbs () -> void
     def sort_precedence
