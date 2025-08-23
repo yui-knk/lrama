@@ -3,6 +3,7 @@
 
 require_relative "node/base"
 require_relative "node/nterm_decl"
+require_relative "node/parameterized_rule"
 require_relative "node/precedence_decl"
 require_relative "node/prologue_decl"
 require_relative "node/require_decl"

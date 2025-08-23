@@ -220,20 +220,29 @@ rule
   rule_declaration:
       "%rule" IDENTIFIER "(" rule_args ")" TAG? ":" rule_rhs_list
         {
-          rule = Grammar::Parameterized::Rule.new(val[1].s_value, val[3], val[7], tag: val[5])
-          @grammar.add_parameterized_rule(rule)
+          result = Grammar::Node::ParameterizedRule.new(
+            name: val[1].s_value, parameters: val[3], tag: val[5],
+            rhs_list: val[7], is_inline: false,
+            location: merge_locations(val[0].loc, val[6].loc, *val[7].flatten.map(&:loc))
+          )
         }
 
   inline_declaration:
       "%rule" "%inline" IDENT_COLON ":" rule_rhs_list
         {
-          rule = Grammar::Parameterized::Rule.new(val[2].s_value, [], val[4], is_inline: true)
-          @grammar.add_parameterized_rule(rule)
+          result = Grammar::Node::ParameterizedRule.new(
+            name: val[2].s_value, parameters: [],
+            rhs_list: val[4], is_inline: true,
+            location: merge_locations(val[0].loc, val[3].loc, *val[4].flatten.map(&:loc))
+          )
         }
     | "%rule" "%inline" IDENTIFIER "(" rule_args ")" ":" rule_rhs_list
         {
-          rule = Grammar::Parameterized::Rule.new(val[2].s_value, val[4], val[7], is_inline: true)
-          @grammar.add_parameterized_rule(rule)
+          result = Grammar::Node::ParameterizedRule.new(
+            name: val[2].s_value, parameters: val[4],
+            rhs_list: val[7], is_inline: true,
+            location: merge_locations(val[0].loc, val[6].loc, *val[7].flatten.map(&:loc))
+          )
         }
 
   rule_args:
@@ -243,64 +252,73 @@ rule
   rule_rhs_list:
       rule_rhs
         {
-          builder = val[0]
-          result = [builder]
+          result = [val[0]]
         }
     | rule_rhs_list "|" rule_rhs
         {
-          builder = val[2]
-          result = val[0].append(builder)
+          result = val[0].append(val[2])
         }
 
   rule_rhs:
       "%empty"?
         {
           reset_precs
-          result = Grammar::Parameterized::Rhs.new
+          result = []
         }
     | rule_rhs symbol named_ref?
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          token = val[1]
-          token.alias_name = val[2]
-          builder = val[0]
-          builder.symbols << token
-          result = builder
+          node = Grammar::Node::RuleRhs::Symbol.new(
+            token: val[1], alias_name: val[2],
+            location: val[1].loc
+          )
+          result.append(node)
         }
     | rule_rhs symbol parameterized_suffix
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          builder = val[0]
-          builder.symbols << Lrama::Lexer::Token::InstantiateRule.new(s_value: val[2], location: @lexer.location, args: [val[1]])
-          result = builder
+          node = Grammar::Node::RuleRhs::InstantiateRule.new(
+            s_value: val[2], args: [val[1]],
+            location: val[1].loc
+          )
+          result.append(node)
         }
     | rule_rhs IDENTIFIER "(" parameterized_args ")" TAG?
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          builder = val[0]
-          builder.symbols << Lrama::Lexer::Token::InstantiateRule.new(s_value: val[1].s_value, location: @lexer.location, args: val[3], lhs_tag: val[5])
-          result = builder
+          node = Grammar::Node::RuleRhs::InstantiateRule.new(
+            s_value: val[1].s_value, args: val[3],
+            lhs_tag: val[5],
+            location: merge_locations(val[1].loc, val[4], val[5]&.loc)
+          )
+          result.append(node)
+        }
+    | rule_rhs IDENTIFIER "(" parameterized_args ")" TAG?
+        {
+          node = Grammar::Node::RuleRhs::InstantiateRule.new(
+            s_value: val[1].s_value, args: val[3],
+            lhs_tag: val[5],
+            location: merge_locations(val[1].loc, val[4], val[5]&.loc)
+          )
+          result.append(node)
         }
     | rule_rhs action named_ref?
         {
-          user_code = val[1]
-          user_code.alias_name = val[2]
-          builder = val[0]
-          builder.user_code = user_code
-          result = builder
+          node = Grammar::Node::RuleRhs::Action.new(
+            code: val[1], alias_name: val[2],
+            location: val[1].loc
+          )
+          result.append(node)
         }
     | rule_rhs "%prec" symbol
         {
           on_action_error("multiple %prec in a rule", val[0]) if prec_seen?
-          sym = @grammar.find_symbol_by_id!(val[2])
-          if val[0].rhs.empty?
-            @opening_prec_seen = true
-          else
-            @trailing_prec_seen = true
-          end
-          builder = val[0]
-          builder.precedence_sym = sym
-          result = builder
+          @prec_seen = true
+          node = Grammar::Node::RuleRhs::Prec.new(
+            token: val[2],
+            location: val[2].loc
+          )
+          result.append(node)
         }
 
   alias: string_as_id?
@@ -347,7 +365,6 @@ rule
   token_declarations_for_precedence:
       id+
         {
-          # result = [{tag: nil, tokens: val[0]}]
           result = val[0].map do |id|
             Grammar::Node::Token.new(
               id: id,
@@ -357,7 +374,6 @@ rule
         }
     | (TAG id+)+
         {
-          # result = val[0].map {|tag, ids| {tag: tag, tokens: ids} }
           result = val[0].flat_map do |tag, ids|
             ids.map do |id|
               Grammar::Node::Token.new(

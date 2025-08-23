@@ -394,6 +394,41 @@ module Lrama
 
           builder.complete_input
           add_rule_builder(builder)
+        when Grammar::Node::ParameterizedRule
+          rhs_list = node.rhs_list.map do |rhs|
+            builder = Grammar::Parameterized::Rhs.new
+
+            rhs.each do |rhs_node|
+              case rhs_node
+              when Node::RuleRhs::Empty
+              when Node::RuleRhs::Symbol
+                token = rhs_node.token
+                token.alias_name = rhs_node.alias_name
+                builder.symbols << token
+              when Node::RuleRhs::InstantiateRule
+                token = Lrama::Lexer::Token::InstantiateRule.new(
+                  s_value: rhs_node.s_value,
+                  args: rhs_node.args, lhs_tag: rhs_node.lhs_tag,
+                  location: rhs_node.location
+                )
+                builder.symbols << token
+              when Node::RuleRhs::Action
+                user_code = rhs_node.code
+                user_code.alias_name = rhs_node.alias_name
+                builder.user_code = user_code
+              when Node::RuleRhs::Prec
+                sym = find_symbol_by_id!(rhs_node.token)
+                builder.precedence_sym = sym
+              else
+                raise "Unknown Node: #{rhs_node}"
+              end
+            end
+
+            builder
+          end
+
+          rule = Grammar::Parameterized::Rule.new(node.name, node.parameters, rhs_list, tag: node.tag, is_inline: node.is_inline)
+          add_parameterized_rule(rule)
         else
           # raise "Unknown Node: #{node}"
         end
