@@ -66,7 +66,7 @@ module Lrama
 
     @locations: bool
 
-    @define: Hash[String, String]
+    @define: Hash[String, String?]
 
     @required: bool
 
@@ -134,14 +134,14 @@ module Lrama
 
     attr_accessor locations: bool
 
-    attr_accessor define: Hash[String, String]
+    attr_accessor define: Hash[String, String?]
 
     attr_accessor required: bool
 
     attr_accessor nodes: Array[Node::Base]
 
-    # @rbs (Counter rule_counter, bool locations, Hash[String, String] define) -> void
-    def initialize: (Counter rule_counter, bool locations, Hash[String, String] define) -> void
+    # @rbs (Counter rule_counter, bool locations, Hash[String, String?] define) -> void
+    def initialize: (Counter rule_counter, bool locations, Hash[String, String?] define) -> void
 
     # @rbs () -> void
     def evaluate_nodes: () -> void

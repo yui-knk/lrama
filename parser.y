@@ -41,44 +41,68 @@ rule
   parser_option:
       "%expect" INTEGER
         {
-          @grammar.expect = val[1].s_value
+          result = Grammar::Node::ExpectDecl.new(
+            number: val[1].s_value,
+            location: merge_locations(val[0], val[1])
+          )
         }
     | "%define" variable value
         {
-          @grammar.define[val[1].s_value] = val[2]&.s_value
+          result = Grammar::Node::DefineDecl.new(
+            variable: val[1].s_value,
+            value: val[2]&.s_value,
+            location: merge_locations(val[0].loc, val[1].loc, val[2]&.loc)
+          )
         }
     | "%define" variable "{" value "}"
         {
-          @grammar.define[val[1].s_value] = val[3]&.s_value
+          result = Grammar::Node::DefineDecl.new(
+            variable: val[1].s_value,
+            value: val[3]&.s_value,
+            location: merge_locations(val[0].loc, val[4].loc)
+          )
         }
     | "%param" param+
     | "%lex-param" param+
         {
-          val[1].each {|token|
-            @grammar.lex_param = Grammar::Code::NoReferenceCode.new(type: :lex_param, token_code: token).token_code.s_value
-          }
+          result = Grammar::Node::LexParamDecl.new(
+            params: val[1],
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
         }
     | "%parse-param" param+
         {
-          val[1].each {|token|
-            @grammar.parse_param = Grammar::Code::NoReferenceCode.new(type: :parse_param, token_code: token).token_code.s_value
-          }
+          result = Grammar::Node::ParseParamDecl.new(
+            params: val[1],
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
         }
     | "%code" IDENTIFIER param
         {
-          @grammar.add_percent_code(id: val[1], code: val[2])
+          result = Grammar::Node::CodeDecl.new(
+            id: val[1],
+            code: val[2],
+            location: merge_locations(val[0].loc, val[2].loc)
+          )
         }
     | "%initial-action" param
         {
-          @grammar.initial_action = Grammar::Code::InitialActionCode.new(type: :initial_action, token_code: val[1])
+          result = Grammar::Node::InitialActionDecl.new(
+            code: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
     | "%no-stdlib"
         {
-          @grammar.no_stdlib = true
+          result = Grammar::Node::NoStdlibDecl.new(
+            location: val[0].loc
+          )
         }
     | "%locations"
         {
-          @grammar.locations = true
+          result = Grammar::Node::LocationsDecl.new(
+            location: val[0].loc
+          )
         }
 
   grammar_declaration:
@@ -118,23 +142,38 @@ rule
         }
     | "%after-shift" IDENTIFIER
         {
-          @grammar.after_shift = val[1]
+          result = Grammar::Node::AfterShiftDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
     | "%before-reduce" IDENTIFIER
         {
-          @grammar.before_reduce = val[1]
+          result = Grammar::Node::BeforeReduceDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
     | "%after-reduce" IDENTIFIER
         {
-          @grammar.after_reduce = val[1]
+          result = Grammar::Node::AfterReduceDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
     | "%after-shift-error-token" IDENTIFIER
         {
-          @grammar.after_shift_error_token = val[1]
+          result = Grammar::Node::AfterShiftErrorTokenDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
     | "%after-pop-stack" IDENTIFIER
         {
-          @grammar.after_pop_stack = val[1]
+          result = Grammar::Node::AfterPopStackDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
 
   symbol_declaration:
@@ -547,8 +586,7 @@ rule
       C_DECLARATION
         {
           end_c_declaration
-          @grammar.epilogue_first_lineno = val[0].first_line + 1
-          @grammar.epilogue = val[2].s_value
+          result = Grammar::Node::EpilogueDecl.new(code: val[2], location: merge_locations(val[0].loc, val[2].loc))
         }
 
   variable: id

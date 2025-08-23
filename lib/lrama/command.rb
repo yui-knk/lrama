@@ -51,7 +51,7 @@ module Lrama
       prepare_grammar(grammar)
       grammar
     rescue => e
-      raise e #if @options.debug
+      raise e if @options.debug
       abort format_error_message(e.message)
     end
 

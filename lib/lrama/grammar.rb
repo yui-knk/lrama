@@ -64,7 +64,7 @@ module Lrama
     #   @aux: Auxiliary
     #   @no_stdlib: bool
     #   @locations: bool
-    #   @define: Hash[String, String]
+    #   @define: Hash[String, String?]
     #   @required: bool
     #   @union: Union
     #   @precedences: Array[Precedence]
@@ -100,7 +100,7 @@ module Lrama
     attr_accessor :sym_to_rules #: Hash[Integer, Array[Rule]]
     attr_accessor :no_stdlib #: bool
     attr_accessor :locations #: bool
-    attr_accessor :define #: Hash[String, String]
+    attr_accessor :define #: Hash[String, String?]
     attr_accessor :required #: bool
     attr_accessor :nodes #: Array[Node::Base]
 
@@ -109,7 +109,7 @@ module Lrama
                                         :find_symbol_by_s_value!, :fill_symbol_number, :fill_nterm_type,
                                         :fill_printer, :fill_destructor, :fill_error_token, :sort_by_number!
 
-    # @rbs (Counter rule_counter, bool locations, Hash[String, String] define) -> void
+    # @rbs (Counter rule_counter, bool locations, Hash[String, String?] define) -> void
     def initialize(rule_counter, midrule_action_counter, locations, define = {})
       @rule_counter = rule_counter
       @midrule_action_counter = midrule_action_counter
@@ -320,11 +320,44 @@ module Lrama
     def _evaluate_nodes
       @nodes.each do |node|
         case node
+        when Node::DefineDecl
+          self.define[node.variable] = node.value
+        when Node::ExpectDecl
+          self.expect = node.number
         when Node::PrologueDecl
           self.prologue_first_lineno = node.location.first_line
           self.prologue = node.code.s_value
+        when Node::EpilogueDecl
+          self.epilogue_first_lineno = node.location.first_line + 1
+          self.epilogue = node.code.s_value
         when Node::RequireDecl
           @required = true
+        when Node::LexParamDecl
+          node.params.each do |param|
+            self.lex_param = Grammar::Code::NoReferenceCode.new(type: :lex_param, token_code: param).token_code.s_value
+          end
+        when Node::ParseParamDecl
+          node.params.each do |param|
+            self.parse_param = Grammar::Code::NoReferenceCode.new(type: :parse_param, token_code: param).token_code.s_value
+          end
+        when Node::CodeDecl
+          add_percent_code(id: node.id, code: node.code)
+        when Node::InitialActionDecl
+          self.initial_action = Grammar::Code::InitialActionCode.new(type: :initial_action, token_code: node.code)
+        when Node::NoStdlibDecl
+          self.no_stdlib = true
+        when Node::LocationsDecl
+          self.locations = true
+        when Node::AfterShiftDecl
+          self.after_shift = node.id
+        when Node::BeforeReduceDecl
+          self.before_reduce = node.id
+        when Node::AfterReduceDecl
+          self.after_reduce = node.id
+        when Node::AfterShiftErrorTokenDecl
+          self.after_shift_error_token = node.id
+        when Node::AfterPopStackDecl
+          self.after_pop_stack = node.id
         when Node::TokenDecl
           node.tokens.each do |token|
             add_term(id: token.id, alias_name: token.alias_name, token_id: token.token_id, tag: token.tag, replace: true)
