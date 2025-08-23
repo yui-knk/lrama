@@ -1,0 +1,15 @@
+# Generated from lib/lrama/grammar/node/rule_rhs/prec.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    module Node
+      module RuleRhs
+        class Prec < Node::Base
+          attr_reader token: Lexer::Token::Base
+
+          def initialize: (token: untyped, location: untyped) -> untyped
+        end
+      end
+    end
+  end
+end

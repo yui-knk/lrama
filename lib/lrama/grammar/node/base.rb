@@ -11,6 +11,8 @@ module Lrama
         def initialize(location:)
           @location = location
         end
+
+        alias :loc :location
       end
     end
   end

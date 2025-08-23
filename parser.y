@@ -10,7 +10,9 @@ rule
         {
           ary = []
           ary.concat(val[0]) if val[0]
-          binding.irb
+          ary.concat(val[1]) if val[1]
+          ary.concat(val[3].flatten)
+          ary.append(val[4]) if val[4]
           result = ary
         }
 
@@ -137,6 +139,9 @@ rule
 
   symbol_declaration:
       "%token" token_declarations
+        {
+          result = Grammar::Node::TokenDecl.new(tokens: val[1], location: merge_locations(val[0].loc, val[1].last.loc))
+        }
     | "%type" symbol_declarations
         {
           val[1].each {|hash|
@@ -159,42 +164,34 @@ rule
         }
     | "%left" token_declarations_for_precedence
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              sym = @grammar.add_term(id: id, tag: hash[:tag])
-              @grammar.add_left(sym, @precedence_number, id.s_value, id.first_line)
-            }
-          }
+          result = Grammar::Node::PrecedenceDecl.new(
+            type: :left, tokens: val[1], number: @precedence_number,
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
           @precedence_number += 1
         }
     | "%right" token_declarations_for_precedence
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              sym = @grammar.add_term(id: id, tag: hash[:tag])
-              @grammar.add_right(sym, @precedence_number, id.s_value, id.first_line)
-            }
-          }
+          result = Grammar::Node::PrecedenceDecl.new(
+            type: :right, tokens: val[1], number: @precedence_number,
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
           @precedence_number += 1
         }
     | "%precedence" token_declarations_for_precedence
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              sym = @grammar.add_term(id: id, tag: hash[:tag])
-              @grammar.add_precedence(sym, @precedence_number, id.s_value, id.first_line)
-            }
-          }
+          result = Grammar::Node::PrecedenceDecl.new(
+            type: :precedence, tokens: val[1], number: @precedence_number,
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
           @precedence_number += 1
         }
     | "%nonassoc" token_declarations_for_precedence
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              sym = @grammar.add_term(id: id, tag: hash[:tag])
-              @grammar.add_nonassoc(sym, @precedence_number, id.s_value, id.first_line)
-            }
-          }
+          result = Grammar::Node::PrecedenceDecl.new(
+            type: :nonassoc, tokens: val[1], number: @precedence_number,
+            location: merge_locations(val[0].loc, val[1].last.loc)
+          )
           @precedence_number += 1
         }
     | "%start" IDENTIFIER
@@ -205,18 +202,26 @@ rule
   token_declarations:
       TAG? token_declaration+
         {
-          val[1].each {|token_declaration|
-            @grammar.add_term(id: token_declaration[0], alias_name: token_declaration[2], token_id: token_declaration[1]&.s_value, tag: val[0], replace: true)
+          val[1].each {|token|
+            token.tag = val[0]
           }
+          result = val[1]
         }
     | token_declarations TAG token_declaration+
         {
-          val[2].each {|token_declaration|
-            @grammar.add_term(id: token_declaration[0], alias_name: token_declaration[2], token_id: token_declaration[1]&.s_value, tag: val[1], replace: true)
+          val[2].each {|token|
+            token.tag = val[1]
           }
+          result = val[0].concat(val[2])
         }
 
-  token_declaration: id INTEGER? alias { result = val }
+  token_declaration: id INTEGER? alias
+        {
+          result = Grammar::Node::Token.new(
+            id: val[0], token_id: val[1]&.s_value, alias_name: val[2]&.s_value,
+            location: merge_locations(val[0].loc, val[1]&.loc, val[2]&.loc)
+          )
+        }
 
   rule_declaration:
       "%rule" IDENTIFIER "(" rule_args ")" TAG? ":" rule_rhs_list
@@ -304,7 +309,7 @@ rule
           result = builder
         }
 
-  alias: string_as_id? { result = val[0].s_value if val[0] }
+  alias: string_as_id?
 
   symbol_declarations:
       TAG? symbol+
@@ -336,9 +341,45 @@ rule
         }
 
   token_declarations_for_precedence:
-      id+ { result = [{tag: nil, tokens: val[0]}] }
-    | (TAG id+)+ { result = val[0].map {|tag, ids| {tag: tag, tokens: ids} } }
-    | id+ TAG id+ { result = [{tag: nil, tokens: val[0]}, {tag: val[1], tokens: val[2]}] }
+      id+
+        {
+          # result = [{tag: nil, tokens: val[0]}]
+          result = val[0].map do |id|
+            Grammar::Node::Token.new(
+              id: id,
+              location: id.loc
+            )
+          end
+        }
+    | (TAG id+)+
+        {
+          # result = val[0].map {|tag, ids| {tag: tag, tokens: ids} }
+          result = val[0].flat_map do |tag, ids|
+            ids.map do |id|
+              Grammar::Node::Token.new(
+                id: id,
+                tag: tag,
+                location: id.loc
+              )
+            end
+          end
+        }
+    | id+ TAG id+
+        {
+          # result = [{tag: nil, tokens: val[0]}, {tag: val[1], tokens: val[2]}]
+          result = val[0].map do |id|
+            Grammar::Node::Token.new(
+              id: id,
+              location: id.loc
+            )
+            end + val[2].map do |id|
+            Grammar::Node::Token.new(
+              id: id,
+              tag: val[1],
+              location: id.loc
+            )
+            end
+        }
 
   id:
       IDENTIFIER
@@ -351,99 +392,102 @@ rule
   rules:
       IDENT_COLON named_ref? ":" rhs_list
         {
-          lhs = val[0]
-          lhs.alias_name = val[1]
-          val[3].each do |builder|
-            builder.lhs = lhs
-            builder.complete_input
-            @grammar.add_rule_builder(builder)
-          end
+          # lhs = val[0]
+          # lhs.alias_name = val[1]
+          # val[3].each do |builder|
+          #   builder.lhs = lhs
+          #   builder.complete_input
+          #   @grammar.add_rule_builder(builder)
+          # end
+
+          result = val[3].map do |rhs|
+            Grammar::Node::Rule.new(
+              id: val[0],
+              alias_name: val[1],
+              rhs: rhs,
+              location: val[0]
+            )
+           end
         }
 
   rhs_list:
       rhs
         {
-          if val[0].rhs.count > 1
-            empties = val[0].rhs.select { |sym| sym.is_a?(Lrama::Lexer::Token::Empty) }
+          if val[0].count > 1
+            empties = val[0].select { |sym| sym.is_a?(Grammar::Node::RuleRhs::Empty) }
             empties.each do |empty|
               on_action_error("%empty on non-empty rule", empty)
             end
           end
-          builder = val[0]
-          if !builder.line
-            builder.line = @lexer.line - 1
-          end
-          result = [builder]
+          result = [val[0]]
         }
     | rhs_list "|" rhs
         {
-          builder = val[2]
-          if !builder.line
-            builder.line = @lexer.line - 1
-          end
-          result = val[0].append(builder)
+          result = val[0].append(val[2])
         }
 
   rhs:
       /* empty */
         {
           reset_precs
-          result = @grammar.create_rule_builder(@rule_counter, @midrule_action_counter)
+          result = []
         }
     | rhs "%empty"
         {
-          builder = val[0]
-          builder.add_rhs(Lrama::Lexer::Token::Empty.new(location: @lexer.location))
-          result = builder
+          node = Grammar::Node::RuleRhs::Empty.new(location: val[1].loc)
+          result.append(node)
         }
     | rhs symbol named_ref?
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          token = val[1]
-          token.alias_name = val[2]
-          builder = val[0]
-          builder.add_rhs(token)
-          result = builder
+          node = Grammar::Node::RuleRhs::Symbol.new(
+            token: val[1], alias_name: val[2],
+            location: val[1].loc
+          )
+          result.append(node)
         }
     | rhs symbol parameterized_suffix named_ref? TAG?
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          token = Lrama::Lexer::Token::InstantiateRule.new(s_value: val[2], alias_name: val[3], location: @lexer.location, args: [val[1]], lhs_tag: val[4])
-          builder = val[0]
-          builder.add_rhs(token)
-          builder.line = val[1].first_line
-          result = builder
+          node = Grammar::Node::RuleRhs::InstantiateRule.new(
+            s_value: val[2], args: [val[1]],
+            alias_name: val[3], lhs_tag: val[4],
+            location: merge_locations(val[1].loc, val[4]&.loc)
+          )
+          result.append(node)
         }
     | rhs IDENTIFIER "(" parameterized_args ")" named_ref? TAG?
         {
           on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
-          token = Lrama::Lexer::Token::InstantiateRule.new(s_value: val[1].s_value, alias_name: val[5], location: @lexer.location, args: val[3], lhs_tag: val[6])
-          builder = val[0]
-          builder.add_rhs(token)
-          builder.line = val[1].first_line
-          result = builder
+          node = Grammar::Node::RuleRhs::InstantiateRule.new(
+            s_value: val[1].s_value, args: val[3],
+            alias_name: val[5], lhs_tag: val[6],
+            location: merge_locations(val[1].loc, val[6]&.loc)
+          )
+          result.append(node)
         }
     | rhs action named_ref? TAG?
         {
-          user_code = val[1]
-          user_code.alias_name = val[2]
-          user_code.tag = val[3]
-          builder = val[0]
-          builder.user_code = user_code
-          result = builder
+          node = Grammar::Node::RuleRhs::Action.new(
+            code: val[1], alias_name: val[2], tag: val[3],
+            location: val[1].loc
+          )
+          result.append(node)
         }
     | rhs "%prec" symbol
         {
           on_action_error("multiple %prec in a rule", val[0]) if prec_seen?
-          sym = @grammar.find_symbol_by_id!(val[2])
-          if val[0].rhs.empty?
+          if val[0].empty?
             @opening_prec_seen = true
           else
             @trailing_prec_seen = true
           end
-          builder = val[0]
-          builder.precedence_sym = sym
-          result = builder
+
+          node = Grammar::Node::RuleRhs::Prec.new(
+            token: val[2],
+            location: val[2].loc
+          )
+          result.append(node)
         }
 
   parameterized_suffix:
@@ -502,7 +546,7 @@ rule
        | STRING
        | "{...}"
 
-  string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0].s_value) }
+  string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0].s_value, location: val[0].loc) }
 end
 
 ---- inner
@@ -523,7 +567,7 @@ def parse
   message = "parse '#{File.basename(@path)}'"
   report_duration(message) do
     @lexer = Lrama::Lexer.new(@grammar_file)
-    @grammar = Lrama::Grammar.new(@rule_counter, @locations, @define)
+    @grammar = Lrama::Grammar.new(@rule_counter, @midrule_action_counter, @locations, @define)
     @precedence_number = 0
     reset_precs
     nodes = do_parse
@@ -559,7 +603,10 @@ def on_error(error_token_id, error_value, value_stack)
 end
 
 def on_action_error(error_message, error_value)
-  if error_value.is_a?(Lrama::Lexer::Token::Base)
+  case error_value
+  when Lrama::Lexer::Token::Base
+    location = error_value.location
+  when Lrama::Grammar::Node::Base
     location = error_value.location
   else
     location = @lexer.location
@@ -594,13 +641,16 @@ def raise_parse_error(error_message, location)
   raise ParseError, location.generate_error_message(error_message)
 end
 
-def merge_locations(starting_location, ending_location)
+def merge_locations(*locations)
+  locations = locations.compact
+  first = locations.first
+  last = locations.last
+
   Lexer::Location.new(
-    grammar_file: starting_location.grammar_file,
-    first_line: starting_location.first_line,
-    first_column: starting_location.first_column,
-    last_line: ending_location.last_line,
-    last_column: ending_location.last_column
+    grammar_file: @grammar_file,
+    first_line: first.first_line,
+    first_column: first.first_column,
+    last_line: last.last_line,
+    last_column: last.last_column
   )
 end
-

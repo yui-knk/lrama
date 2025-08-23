@@ -104,6 +104,7 @@ module Lrama
       a = [0]
 
       @states.rules.each do |rule|
+        p [rule.lineno, rule.lhs] if !rule.lineno
         a << rule.lineno
       end
 

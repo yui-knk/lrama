@@ -136,8 +136,12 @@ module Lrama
 
     attr_accessor required: bool
 
+    attr_accessor nodes: untyped
+
     # @rbs (Counter rule_counter, bool locations, Hash[String, String] define) -> void
     def initialize: (Counter rule_counter, bool locations, Hash[String, String] define) -> void
+
+    def evaluate_nodes: () -> untyped
 
     # @rbs (Counter rule_counter, Counter midrule_action_counter) -> RuleBuilder
     def create_rule_builder: (Counter rule_counter, Counter midrule_action_counter) -> RuleBuilder
@@ -228,6 +232,9 @@ module Lrama
     def ielr_defined?: () -> bool
 
     private
+
+    # @rbs () -> void
+    def _evaluate_nodes: () -> void
 
     # @rbs () -> void
     def sort_precedence: () -> void

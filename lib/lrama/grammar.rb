@@ -109,8 +109,9 @@ module Lrama
                                         :fill_printer, :fill_destructor, :fill_error_token, :sort_by_number!
 
     # @rbs (Counter rule_counter, bool locations, Hash[String, String] define) -> void
-    def initialize(rule_counter, locations, define = {})
+    def initialize(rule_counter, midrule_action_counter, locations, define = {})
       @rule_counter = rule_counter
+      @midrule_action_counter = midrule_action_counter
 
       # Code defined by "%code"
       @percent_codes = []
@@ -322,6 +323,65 @@ module Lrama
           self.prologue = node.code.s_value
         when Node::RequireDecl
           @required = true
+        when Node::TokenDecl
+          node.tokens.each do |token|
+            add_term(id: token.id, alias_name: token.alias_name, token_id: token.token_id, tag: token.tag, replace: true)
+          end
+        when Node::PrecedenceDecl
+          node.tokens.each do |token|
+            sym = add_term(id: token.id, tag: token.tag)
+
+            case node.type
+            when :left
+              add_left(sym, node.number, token.id.s_value, token.loc.first_line)
+            when :right
+              add_right(sym, node.number, token.id.s_value, token.loc.first_line)
+            when :precedence
+              add_precedence(sym, node.number, token.id.s_value, token.loc.first_line)
+            when :nonassoc
+              add_nonassoc(sym, node.number, token.id.s_value, token.loc.first_line)
+            else
+              raise "Unknown precedence type: #{node.type}, Node: #{node}"
+            end
+          end
+        when Node::Rule
+          builder = create_rule_builder(@rule_counter, @midrule_action_counter)
+          builder.line = (node.rhs.first || node).location.first_line
+          lhs = node.id
+          lhs.alias_name = node.alias_name
+          builder.lhs = lhs
+
+          node.rhs.each do |rhs_node|
+            case rhs_node
+            when Node::RuleRhs::Empty
+              builder.line = rhs_node.location.first_line
+            when Node::RuleRhs::Symbol
+              token = rhs_node.token
+              token.alias_name = rhs_node.alias_name
+              builder.add_rhs(token)
+            when Node::RuleRhs::InstantiateRule
+              token = Lrama::Lexer::Token::InstantiateRule.new(
+                s_value: rhs_node.s_value, alias_name: rhs_node.alias_name,
+                args: rhs_node.args, lhs_tag: rhs_node.lhs_tag,
+                location: rhs_node.location
+              )
+              builder.add_rhs(token)
+              builder.line = rhs_node.location.first_line
+            when Node::RuleRhs::Action
+              user_code = rhs_node.code
+              user_code.alias_name = rhs_node.alias_name
+              user_code.tag = rhs_node.tag
+              builder.user_code = user_code
+            when Node::RuleRhs::Prec
+              sym = find_symbol_by_id!(rhs_node.token)
+              builder.precedence_sym = sym
+            else
+              raise "Unknown Node: #{rhs_node}"
+            end
+          end
+
+          builder.complete_input
+          add_rule_builder(builder)
         else
           # raise "Unknown Node: #{node}"
         end
