@@ -144,23 +144,17 @@ rule
         }
     | "%type" symbol_declarations
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              @grammar.add_type(id: id, tag: hash[:tag])
-            }
-          }
+          result = Grammar::Node::TypeDecl.new(
+            symbols: val[1],
+            location: merge_locations(*val[1].map(&:loc))
+          )
         }
     | "%nterm" symbol_declarations
         {
-          val[1].each {|hash|
-            hash[:tokens].each {|id|
-              if @grammar.find_term_by_s_value(id.s_value)
-                on_action_error("symbol #{id.s_value} redeclared as a nonterminal", id)
-              else
-                @grammar.add_type(id: id, tag: hash[:tag])
-              end
-            }
-          }
+          result = Grammar::Node::NtermDecl.new(
+            symbols: val[1],
+            location: merge_locations(*val[1].map(&:loc))
+          )
         }
     | "%left" token_declarations_for_precedence
         {
@@ -314,13 +308,23 @@ rule
   symbol_declarations:
       TAG? symbol+
         {
-          result = if val[0]
-            [{tag: val[0], tokens: val[1]}]
-          else
-            [{tag: nil, tokens: val[1]}]
+          result = val[1].map do |id|
+            Grammar::Node::Symbol.new(
+              id: id, tag: val[0],
+              location: id.loc
+            )
           end
         }
-    | symbol_declarations TAG symbol+ { result = val[0].append({tag: val[1], tokens: val[2]}) }
+    | symbol_declarations TAG symbol+
+        {
+          syms = val[2].map do |id|
+            Grammar::Node::Symbol.new(
+              id: id, tag: val[1],
+              location: id.loc
+            )            
+          end
+          result = val[0].concat(syms)
+        }
 
   symbol:
       id
@@ -392,14 +396,6 @@ rule
   rules:
       IDENT_COLON named_ref? ":" rhs_list
         {
-          # lhs = val[0]
-          # lhs.alias_name = val[1]
-          # val[3].each do |builder|
-          #   builder.lhs = lhs
-          #   builder.complete_input
-          #   @grammar.add_rule_builder(builder)
-          # end
-
           result = val[3].map do |rhs|
             Grammar::Node::Rule.new(
               id: val[0],

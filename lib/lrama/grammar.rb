@@ -170,7 +170,7 @@ module Lrama
       @error_tokens << ErrorToken.new(ident_or_tags: ident_or_tags, token_code: token_code, lineno: lineno)
     end
 
-    # @rbs (id: Lexer::Token::Base, tag: Lexer::Token::Tag) -> Array[Type]
+    # @rbs (id: Lexer::Token::Base, tag: Lexer::Token::Tag?) -> Array[Type]
     def add_type(id:, tag:)
       @types << Type.new(id: id, tag: tag)
     end
@@ -326,6 +326,18 @@ module Lrama
         when Node::TokenDecl
           node.tokens.each do |token|
             add_term(id: token.id, alias_name: token.alias_name, token_id: token.token_id, tag: token.tag, replace: true)
+          end
+        when Node::TypeDecl
+          node.symbols.each do |sym|
+            add_type(id: sym.id, tag: sym.tag)
+          end
+        when Node::NtermDecl
+          node.symbols.each do |sym|
+            if find_term_by_s_value(sym.id.s_value)
+              raise ParseError, sym.id.location.generate_error_message("symbol #{sym.id.s_value} redeclared as a nonterminal") # steep:ignore UnknownConstant
+            else
+              add_type(id: sym.id, tag: sym.tag)  
+            end
           end
         when Node::PrecedenceDecl
           node.tokens.each do |token|
