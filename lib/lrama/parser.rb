@@ -1561,10 +1561,10 @@ module_eval(<<'.,.,', 'parser.y', 113)
 
 module_eval(<<'.,.,', 'parser.y', 120)
   def _reduce_38(val, _values, result)
-              @grammar.add_destructor(
+              result = Grammar::Node::DestructorDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
 
     result
@@ -1573,10 +1573,10 @@ module_eval(<<'.,.,', 'parser.y', 120)
 
 module_eval(<<'.,.,', 'parser.y', 128)
   def _reduce_39(val, _values, result)
-              @grammar.add_printer(
+              result = Grammar::Node::PrinterDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
 
     result
@@ -1585,10 +1585,10 @@ module_eval(<<'.,.,', 'parser.y', 128)
 
 module_eval(<<'.,.,', 'parser.y', 136)
   def _reduce_40(val, _values, result)
-              @grammar.add_error_token(
+              result = Grammar::Node::ErrorTokenDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
 
     result

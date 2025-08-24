@@ -345,6 +345,24 @@ module Lrama
             Grammar::Code::NoReferenceCode.new(type: :union, token_code: node.code),
             node.loc.first_line
           )
+        when Node::DestructorDecl
+          self.add_destructor(
+            ident_or_tags: node.ident_or_tags,
+            token_code: node.code,
+            lineno: node.location.first_line
+          )
+        when Node::PrinterDecl
+          self.add_printer(
+            ident_or_tags: node.ident_or_tags,
+            token_code: node.code,
+            lineno: node.location.first_line
+          )
+        when Node::ErrorTokenDecl
+          self.add_error_token(
+            ident_or_tags: node.ident_or_tags,
+            token_code: node.code,
+            lineno: node.location.first_line
+          )
         when Node::StartDecl
           self.set_start_nterm(node.id)
         when Node::CodeDecl

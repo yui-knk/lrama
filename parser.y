@@ -118,26 +118,26 @@ rule
         }
     | "%destructor" param (symbol | TAG)+
         {
-          @grammar.add_destructor(
+          result = Grammar::Node::DestructorDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
         }
     | "%printer" param (symbol | TAG)+
         {
-          @grammar.add_printer(
+          result = Grammar::Node::PrinterDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
         }
     | "%error-token" param (symbol | TAG)+
         {
-          @grammar.add_error_token(
+          result = Grammar::Node::ErrorTokenDecl.new(
             ident_or_tags: val[2].flatten,
-            token_code: val[1],
-            lineno: val[1].line
+            code: val[1],
+            location: val[1].loc
           )
         }
     | "%after-shift" IDENTIFIER
