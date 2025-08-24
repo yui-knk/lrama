@@ -111,9 +111,9 @@ rule
     | inline_declaration
     | "%union" param
         {
-          @grammar.set_union(
-            Grammar::Code::NoReferenceCode.new(type: :union, token_code: val[1]),
-            val[1].line
+          result = Grammar::Node::UnionDecl.new(
+            code: val[1],
+            location: val[1].loc
           )
         }
     | "%destructor" param (symbol | TAG)+
@@ -229,7 +229,10 @@ rule
         }
     | "%start" IDENTIFIER
         {
-          @grammar.set_start_nterm(val[1])
+          result = Grammar::Node::StartDecl.new(
+            id: val[1],
+            location: merge_locations(val[0].loc, val[1].loc)
+          )
         }
 
   token_declarations:

@@ -1,8 +1,2 @@
 # Generated from lib/lrama/grammar/node.rb with RBS::Inline
 
-module Lrama
-  class Grammar
-    module Node
-    end
-  end
-end

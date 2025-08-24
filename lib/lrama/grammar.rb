@@ -340,6 +340,13 @@ module Lrama
           node.params.each do |param|
             self.parse_param = Grammar::Code::NoReferenceCode.new(type: :parse_param, token_code: param).token_code.s_value
           end
+        when Node::UnionDecl
+          self.set_union(
+            Grammar::Code::NoReferenceCode.new(type: :union, token_code: node.code),
+            node.loc.first_line
+          )
+        when Node::StartDecl
+          self.set_start_nterm(node.id)
         when Node::CodeDecl
           add_percent_code(id: node.id, code: node.code)
         when Node::InitialActionDecl
