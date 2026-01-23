@@ -467,7 +467,7 @@ rule
   rhs_list:
       rhs
         {
-          if val[0].count > 1
+          if val[0].reject {|sym| sym.is_a?(Grammar::Node::RuleRhs::Action) || sym.is_a?(Grammar::Node::RuleRhs::Prec) }.count > 1
             empties = val[0].select { |sym| sym.is_a?(Grammar::Node::RuleRhs::Empty) }
             empties.each do |empty|
               on_action_error("%empty on non-empty rule", empty)

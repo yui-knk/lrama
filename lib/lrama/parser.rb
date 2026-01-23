@@ -2154,7 +2154,7 @@ module_eval(<<'.,.,', 'parser.y', 456)
 
 module_eval(<<'.,.,', 'parser.y', 469)
   def _reduce_108(val, _values, result)
-              if val[0].count > 1
+              if val[0].reject {|sym| sym.is_a?(Grammar::Node::RuleRhs::Action) || sym.is_a?(Grammar::Node::RuleRhs::Prec) }.count > 1
             empties = val[0].select { |sym| sym.is_a?(Grammar::Node::RuleRhs::Empty) }
             empties.each do |empty|
               on_action_error("%empty on non-empty rule", empty)
