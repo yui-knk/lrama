@@ -427,6 +427,7 @@ module Lrama
             case rhs_node
             when Node::RuleRhs::Empty
               builder.line = rhs_node.location.first_line
+              builder.add_rhs(Lrama::Lexer::Token::Empty.new(location: rhs_node.location))
             when Node::RuleRhs::Symbol
               token = rhs_node.token
               token.alias_name = rhs_node.alias_name
