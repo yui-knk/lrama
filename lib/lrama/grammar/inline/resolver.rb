@@ -27,7 +27,7 @@ module Lrama
 
         private
 
-        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Lrama::Lexer::Token token, Integer index, Lrama::Grammar::Parameterized::Rule rule) -> Lrama::Grammar::RuleBuilder
+        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Lrama::Lexer::Token::Base | Node::RuleRhs::InstantiateRule token, Integer index, Lrama::Grammar::Parameterized::Rule rule) -> Lrama::Grammar::RuleBuilder
         def build_rule(rhs, token, index, rule)
           builder = RuleBuilder.new(
             @rule_builder.rule_counter,
@@ -43,12 +43,12 @@ module Lrama
           builder
         end
 
-        # @rbs (Lrama::Grammar::RuleBuilder builder, Lrama::Grammar::Parameterized::Rhs rhs, Integer index, Lrama::Lexer::Token token, Lrama::Grammar::Parameterized::Rule rule) -> void
+        # @rbs (Lrama::Grammar::RuleBuilder builder, Lrama::Grammar::Parameterized::Rhs rhs, Integer index, Lrama::Lexer::Token::Base | Node::RuleRhs::InstantiateRule token, Lrama::Grammar::Parameterized::Rule rule) -> void
         def resolve_rhs(builder, rhs, index, token, rule)
           @rule_builder.rhs.each_with_index do |tok, i|
             if i == index
               rhs.symbols.each do |sym|
-                if token.is_a?(Lexer::Token::InstantiateRule)
+                if token.is_a?(Node::RuleRhs::InstantiateRule)
                   bindings = Binding.new(rule.parameters, token.args)
                   builder.add_rhs(bindings.resolve_symbol(sym))
                 else

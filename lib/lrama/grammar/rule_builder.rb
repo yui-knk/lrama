@@ -24,7 +24,7 @@ module Lrama
       attr_reader :midrule_action_counter #: Counter
       attr_reader :parameterized_resolver #: Grammar::Parameterized::Resolver
       attr_reader :lhs_tag #: Lexer::Token::Tag?
-      attr_reader :rhs #: Array[Lexer::Token::Base]
+      attr_reader :rhs #: Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]
       attr_reader :user_code #: Lexer::Token::UserCode?
       attr_reader :precedence_sym #: Grammar::Symbol?
 
@@ -49,9 +49,9 @@ module Lrama
         @midrule_action_rules = []
       end
 
-      # @rbs (Lexer::Token::Base rhs) -> void
+      # @rbs (Lexer::Token::Base | Node::RuleRhs::InstantiateRule rhs) -> void
       def add_rhs(rhs)
-        @line ||= rhs.line
+        @line ||= rhs.location.first_line
 
         flush_user_code
 
@@ -130,8 +130,8 @@ module Lrama
         end
       end
 
-      # rhs is a mixture of variety type of tokens like `Ident`, `InstantiateRule`, `UserCode` and so on.
-      # `#process_rhs` replaces some kind of tokens to `Ident` so that all `@replaced_rhs` are `Ident` or `Char`.
+      # rhs is a mixture of tokens and parameterized rule nodes.
+      # `#process_rhs` replaces parameterized rule nodes and some tokens with `Ident` so that all `@replaced_rhs` are `Ident` or `Char`.
       #
       # @rbs () -> void
       def process_rhs
@@ -145,7 +145,7 @@ module Lrama
             replaced_rhs << token
           when Lrama::Lexer::Token::Ident
             replaced_rhs << token
-          when Lrama::Lexer::Token::InstantiateRule
+          when Node::RuleRhs::InstantiateRule
             parameterized_rule = @parameterized_resolver.find_rule(token)
             raise "Unexpected token. #{token}" unless parameterized_rule
 
@@ -221,8 +221,8 @@ module Lrama
                 ref.name = '$'
               else
                 candidates = ([lhs] + rhs).each_with_index.select do |token, _i|
-                  # @type var token: Lexer::Token::Base
-                  token.referred_by?(ref_name)
+                  # @type var token: Lexer::Token::Base | Node::RuleRhs::InstantiateRule
+                  [token.s_value, token.alias_name].compact.include?(ref_name)
                 end
 
                 if candidates.size >= 2
@@ -252,7 +252,8 @@ module Lrama
               # TODO: Prohibit $0 even so Bison allows it?
               # See: https://www.gnu.org/software/bison/manual/html_node/Actions.html
               token.invalid_ref(ref, "Can not refer following component. #{ref.index} >= #{i}.") if ref.index >= i
-              rhs[ref.index - 1].referred = true
+              referenced_rhs = rhs[ref.index - 1]
+              referenced_rhs.referred = true if referenced_rhs.is_a?(Lexer::Token::Base)
             end
           end
         end

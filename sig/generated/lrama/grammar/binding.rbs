@@ -3,38 +3,38 @@
 module Lrama
   class Grammar
     class Binding
-      @actual_args: Array[Lexer::Token::Base]
+      @actual_args: Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]
 
-      @param_to_arg: Hash[String, Lexer::Token::Base]
+      @param_to_arg: Hash[String, Lexer::Token::Base | Node::RuleRhs::InstantiateRule]
 
-      # @rbs (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base] actual_args) -> void
-      def initialize: (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base] actual_args) -> void
+      # @rbs (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule] actual_args) -> void
+      def initialize: (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule] actual_args) -> void
 
-      # @rbs (Lexer::Token::Base sym) -> Lexer::Token::Base
-      def resolve_symbol: (Lexer::Token::Base sym) -> Lexer::Token::Base
+      # @rbs (Lexer::Token::Base | Node::RuleRhs::InstantiateRule sym) -> (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)
+      def resolve_symbol: (Lexer::Token::Base | Node::RuleRhs::InstantiateRule sym) -> (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)
 
-      # @rbs (Lexer::Token::InstantiateRule token) -> String
-      def concatenated_args_str: (Lexer::Token::InstantiateRule token) -> String
+      # @rbs (Node::RuleRhs::InstantiateRule token) -> String
+      def concatenated_args_str: (Node::RuleRhs::InstantiateRule token) -> String
 
       private
 
-      # @rbs (Lexer::Token::InstantiateRule sym) -> Lexer::Token::InstantiateRule
-      def create_instantiate_rule: (Lexer::Token::InstantiateRule sym) -> Lexer::Token::InstantiateRule
+      # @rbs (Node::RuleRhs::InstantiateRule sym) -> Node::RuleRhs::InstantiateRule
+      def resolve_instantiate_rule: (Node::RuleRhs::InstantiateRule sym) -> Node::RuleRhs::InstantiateRule
 
-      # @rbs (Array[Lexer::Token::Base]) -> Array[Lexer::Token::Base]
-      def resolve_args: (Array[Lexer::Token::Base]) -> Array[Lexer::Token::Base]
+      # @rbs (Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]) -> Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]
+      def resolve_args: (Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]) -> Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule]
 
-      # @rbs (Lexer::Token::Base sym) -> Lexer::Token::Base
-      def find_arg_for_param: (Lexer::Token::Base sym) -> Lexer::Token::Base
+      # @rbs (Lexer::Token::Base sym) -> (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)
+      def find_arg_for_param: (Lexer::Token::Base sym) -> (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)
 
-      # @rbs (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base] actual_args) -> Hash[String, Lexer::Token::Base?]
-      def build_param_to_arg: (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base] actual_args) -> Hash[String, Lexer::Token::Base?]
+      # @rbs (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule] actual_args) -> Hash[String, (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)?]
+      def build_param_to_arg: (Array[Lexer::Token::Base] params, Array[Lexer::Token::Base | Node::RuleRhs::InstantiateRule] actual_args) -> Hash[String, (Lexer::Token::Base | Node::RuleRhs::InstantiateRule)?]
 
-      # @rbs (Lexer::Token::InstantiateRule token) -> String
-      def format_args: (Lexer::Token::InstantiateRule token) -> String
+      # @rbs (Node::RuleRhs::InstantiateRule token) -> String
+      def format_args: (Node::RuleRhs::InstantiateRule token) -> String
 
-      # @rbs (Lexer::Token::InstantiateRule token) -> Array[String]
-      def token_to_args_s_values: (Lexer::Token::InstantiateRule token) -> Array[String]
+      # @rbs (Node::RuleRhs::InstantiateRule token) -> Array[String]
+      def token_to_args_s_values: (Node::RuleRhs::InstantiateRule token) -> Array[String]
     end
   end
 end

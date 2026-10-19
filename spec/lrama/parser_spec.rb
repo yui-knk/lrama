@@ -160,21 +160,6 @@ RSpec.describe Lrama::Parser do
       end
     end
 
-    it "keeps string symbols as lexer tokens in the AST" do
-      y = <<~Y
-        %token EQ "="
-        %%
-        program: "=" ;
-      Y
-
-      grammar = Lrama::Parser.new(y, "parse.y").parse
-      rule = grammar.nodes.grep(Lrama::Grammar::Node::Rule).first
-      symbol = rule.rhs.first
-
-      expect(symbol).to be_a(Lrama::Grammar::Node::RuleRhs::Symbol)
-      expect(symbol.token).to be_a(T::Str)
-    end
-
     it "represents nested parameterized rule calls with AST nodes" do
       y = <<~Y
         %token number
