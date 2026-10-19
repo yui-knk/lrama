@@ -24,9 +24,14 @@ module Lrama
           select_rules(@rules, token).last
         end
 
-        # @rbs (Lexer::Token::Base | Node::RuleRhs::InstantiateRule token) -> Rule?
-        def find_inline(token)
-          @rules.reverse.find { |rule| rule.name == token.s_value && rule.inline? }
+        # @rbs (Node::RuleRhs::value node) -> Rule?
+        def find_inline(node)
+          find_inline_by_name(node.s_value)
+        end
+
+        # @rbs (String name) -> Rule?
+        def find_inline_by_name(name)
+          @rules.reverse.find { |rule| rule.name == name && rule.inline? }
         end
 
         # @rbs (String lhs_s_value) -> Lexer::Token::Base?

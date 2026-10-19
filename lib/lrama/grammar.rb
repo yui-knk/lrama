@@ -427,11 +427,9 @@ module Lrama
             case rhs_node
             when Node::RuleRhs::Empty
               builder.line = rhs_node.location.first_line
-              builder.add_rhs(Lrama::Lexer::Token::Empty.new(location: rhs_node.location))
+              builder.add_rhs(rhs_node)
             when Node::RuleRhs::Symbol
-              token = rhs_node.token
-              token.alias_name = rhs_node.alias_name
-              builder.add_rhs(token)
+              builder.add_rhs(rhs_node)
             when Node::RuleRhs::InstantiateRule
               builder.add_rhs(rhs_node)
               builder.line = rhs_node.location.first_line
@@ -458,9 +456,7 @@ module Lrama
               case rhs_node
               when Node::RuleRhs::Empty
               when Node::RuleRhs::Symbol
-                token = rhs_node.token
-                token.alias_name = rhs_node.alias_name
-                builder.symbols << token
+                builder.symbols << rhs_node
               when Node::RuleRhs::InstantiateRule
                 builder.symbols << rhs_node
               when Node::RuleRhs::Action
