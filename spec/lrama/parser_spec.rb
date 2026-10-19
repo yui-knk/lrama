@@ -160,6 +160,39 @@ RSpec.describe Lrama::Parser do
       end
     end
 
+    it "keeps string symbols as lexer tokens in the AST" do
+      y = <<~Y
+        %token EQ "="
+        %%
+        program: "=" ;
+      Y
+
+      grammar = Lrama::Parser.new(y, "parse.y").parse
+      rule = grammar.nodes.grep(Lrama::Grammar::Node::Rule).first
+      symbol = rule.rhs.first
+
+      expect(symbol).to be_a(Lrama::Grammar::Node::RuleRhs::Symbol)
+      expect(symbol.token).to be_a(T::Str)
+    end
+
+    it "represents nested parameterized rule calls with AST nodes" do
+      y = <<~Y
+        %token number
+        %rule option(X): %empty | X
+        %rule pair(X, Y): X | Y
+        %%
+        program: pair(option(number), number) ;
+      Y
+
+      grammar = Lrama::Parser.new(y, "parse.y").parse
+      rule = grammar.nodes.grep(Lrama::Grammar::Node::Rule).first
+      call = rule.rhs.first
+
+      expect(call).to be_a(Lrama::Grammar::Node::RuleRhs::InstantiateRule)
+      expect(call.args.first).to be_a(Lrama::Grammar::Node::RuleRhs::InstantiateRule)
+      expect(call.args.first.args).to all(be_a(T::Base))
+    end
+
     it "no_union" do
       path = "common/no_union.y"
       y = File.read(fixture_path(path))
@@ -1013,7 +1046,7 @@ RSpec.describe Lrama::Parser do
 
             it "preserves each suffixed argument's source range" do
               args = grammar.nodes.last.rhs.first.args
-              expect(args.map { |arg| [arg.first_line, arg.first_column, arg.last_line, arg.last_column] }).to eq([
+              expect(args.map { |arg| [arg.location.first_line, arg.location.first_column, arg.location.last_line, arg.location.last_column] }).to eq([
                 [5, 16, 5, 18],
                 [5, 20, 5, 22],
                 [5, 24, 5, 28],
@@ -1057,7 +1090,7 @@ RSpec.describe Lrama::Parser do
 
         it "preserves each nested call's source range" do
           args = grammar.nodes.last.rhs.first.args
-          expect(args.map { |arg| [arg.first_line, arg.first_column, arg.last_line, arg.last_column] }).to eq([
+          expect(args.map { |arg| [arg.location.first_line, arg.location.first_column, arg.location.last_line, arg.location.last_column] }).to eq([
             [5, 2, 5, 11],
             [6, 2, 8, 3],
             [9, 2, 9, 13],

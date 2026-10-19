@@ -553,14 +553,14 @@ rule
       symbol
     | symbol parameterized_suffix
         {
-          result = Lrama::Lexer::Token::InstantiateRule.new(
+          result = Grammar::Node::RuleRhs::InstantiateRule.new(
             s_value: val[1].s_value, args: [val[0]],
             location: merge_locations(val[0].loc, val[1].loc)
           )
         }
     | IDENTIFIER "(" parameterized_args ")"
         {
-          result = Lrama::Lexer::Token::InstantiateRule.new(
+          result = Grammar::Node::RuleRhs::InstantiateRule.new(
             s_value: val[0].s_value, args: val[2],
             location: merge_locations(val[0].loc, val[3].loc)
           )
@@ -604,7 +604,7 @@ rule
        | STRING
        | "{...}"
 
-  string_as_id: STRING { result = Lrama::Lexer::Token::Ident.new(s_value: val[0].s_value, location: val[0].location) }
+  string_as_id: STRING
 end
 
 ---- inner

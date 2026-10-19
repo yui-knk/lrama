@@ -347,19 +347,19 @@ module Lrama
           )
         when Node::DestructorDecl
           self.add_destructor(
-            ident_or_tags: node.ident_or_tags,
+            ident_or_tags: node.ident_or_tags.map { |value| ident_or_tag_from_value(value) },
             token_code: node.code,
             lineno: node.location.first_line
           )
         when Node::PrinterDecl
           self.add_printer(
-            ident_or_tags: node.ident_or_tags,
+            ident_or_tags: node.ident_or_tags.map { |value| ident_or_tag_from_value(value) },
             token_code: node.code,
             lineno: node.location.first_line
           )
         when Node::ErrorTokenDecl
           self.add_error_token(
-            ident_or_tags: node.ident_or_tags,
+            ident_or_tags: node.ident_or_tags.map { |value| ident_or_tag_from_value(value) },
             token_code: node.code,
             lineno: node.location.first_line
           )
@@ -389,14 +389,14 @@ module Lrama
           end
         when Node::TypeDecl
           node.symbols.each do |sym|
-            add_type(id: sym.id, tag: sym.tag)
+            add_type(id: token_from_value(sym.id), tag: sym.tag)
           end
         when Node::NtermDecl
           node.symbols.each do |sym|
             if find_term_by_s_value(sym.id.s_value)
               raise ParseError, sym.id.location.generate_error_message("symbol #{sym.id.s_value} redeclared as a nonterminal") # steep:ignore UnknownConstant
             else
-              add_type(id: sym.id, tag: sym.tag)
+              add_type(id: token_from_value(sym.id), tag: sym.tag)
             end
           end
         when Node::PrecedenceDecl
@@ -429,15 +429,11 @@ module Lrama
               builder.line = rhs_node.location.first_line
               builder.add_rhs(Lrama::Lexer::Token::Empty.new(location: rhs_node.location))
             when Node::RuleRhs::Symbol
-              token = rhs_node.token
+              token = token_from_value(rhs_node.token)
               token.alias_name = rhs_node.alias_name
               builder.add_rhs(token)
             when Node::RuleRhs::InstantiateRule
-              token = Lrama::Lexer::Token::InstantiateRule.new(
-                s_value: rhs_node.s_value, alias_name: rhs_node.alias_name,
-                args: rhs_node.args, lhs_tag: rhs_node.lhs_tag,
-                location: rhs_node.location
-              )
+              token = token_from_value(rhs_node)
               builder.add_rhs(token)
               builder.line = rhs_node.location.first_line
             when Node::RuleRhs::Action
@@ -446,7 +442,7 @@ module Lrama
               user_code.tag = rhs_node.tag
               builder.user_code = user_code
             when Node::RuleRhs::Prec
-              sym = find_symbol_by_id!(rhs_node.token)
+              sym = find_symbol_by_id!(token_from_value(rhs_node.token))
               builder.precedence_sym = sym
             else
               raise "Unknown Node: #{rhs_node}"
@@ -463,22 +459,18 @@ module Lrama
               case rhs_node
               when Node::RuleRhs::Empty
               when Node::RuleRhs::Symbol
-                token = rhs_node.token
+                token = token_from_value(rhs_node.token)
                 token.alias_name = rhs_node.alias_name
                 builder.symbols << token
               when Node::RuleRhs::InstantiateRule
-                token = Lrama::Lexer::Token::InstantiateRule.new(
-                  s_value: rhs_node.s_value, alias_name: rhs_node.alias_name,
-                  args: rhs_node.args, lhs_tag: rhs_node.lhs_tag,
-                  location: rhs_node.location
-                )
+                token = token_from_value(rhs_node)
                 builder.symbols << token
               when Node::RuleRhs::Action
                 user_code = rhs_node.code
                 user_code.alias_name = rhs_node.alias_name
                 builder.user_code = user_code
               when Node::RuleRhs::Prec
-                sym = find_symbol_by_id!(rhs_node.token)
+                sym = find_symbol_by_id!(token_from_value(rhs_node.token))
                 builder.precedence_sym = sym
               else
                 raise "Unknown Node: #{rhs_node}"
@@ -493,6 +485,36 @@ module Lrama
         else
           raise "Unknown Node: #{node}"
         end
+      end
+    end
+
+    # @rbs (Lexer::Token::Base | Node::RuleRhs::InstantiateRule value) -> Lexer::Token::Base
+    def token_from_value(value)
+      case value
+      when Lexer::Token::Str
+        Lexer::Token::Ident.new(s_value: value.s_value, location: value.location)
+      when Node::RuleRhs::InstantiateRule
+        Lexer::Token::InstantiateRule.new(
+          s_value: value.s_value,
+          alias_name: value.alias_name,
+          location: value.location,
+          args: value.args.map { |arg| token_from_value(arg) },
+          lhs_tag: value.lhs_tag
+        )
+      when Lexer::Token::Base
+        value
+      else
+        raise "Unknown value: #{value}"
+      end
+    end
+
+    # @rbs (Lexer::Token::Ident | Lexer::Token::Str | Lexer::Token::Tag value) -> (Lexer::Token::Ident | Lexer::Token::Tag)
+    def ident_or_tag_from_value(value)
+      case value
+      when Lexer::Token::Str
+        Lexer::Token::Ident.new(s_value: value.s_value, location: value.location)
+      else
+        value
       end
     end
 

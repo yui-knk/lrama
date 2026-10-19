@@ -239,6 +239,12 @@ module Lrama
     # @rbs () -> void
     def _evaluate_nodes: () -> void
 
+    # @rbs (Lexer::Token::Base | Node::RuleRhs::InstantiateRule value) -> Lexer::Token::Base
+    def token_from_value: (Lexer::Token::Base | Node::RuleRhs::InstantiateRule value) -> Lexer::Token::Base
+
+    # @rbs (Lexer::Token::Ident | Lexer::Token::Str | Lexer::Token::Tag value) -> (Lexer::Token::Ident | Lexer::Token::Tag)
+    def ident_or_tag_from_value: (Lexer::Token::Ident | Lexer::Token::Str | Lexer::Token::Tag value) -> (Lexer::Token::Ident | Lexer::Token::Tag)
+
     # @rbs () -> void
     def sort_precedence: () -> void
 

@@ -1075,7 +1075,7 @@ racc_reduce_table = [
   1, 74, :_reduce_none,
   1, 74, :_reduce_none,
   1, 74, :_reduce_none,
-  1, 101, :_reduce_135 ]
+  1, 101, :_reduce_none ]
 
 racc_reduce_n = 136
 
@@ -2294,7 +2294,7 @@ module_eval(<<'.,.,', 'parser.y', 549)
 
 module_eval(<<'.,.,', 'parser.y', 555)
   def _reduce_122(val, _values, result)
-              result = Lrama::Lexer::Token::InstantiateRule.new(
+              result = Grammar::Node::RuleRhs::InstantiateRule.new(
             s_value: val[1].s_value, args: [val[0]],
             location: merge_locations(val[0].loc, val[1].loc)
           )
@@ -2305,7 +2305,7 @@ module_eval(<<'.,.,', 'parser.y', 555)
 
 module_eval(<<'.,.,', 'parser.y', 562)
   def _reduce_123(val, _values, result)
-              result = Lrama::Lexer::Token::InstantiateRule.new(
+              result = Grammar::Node::RuleRhs::InstantiateRule.new(
             s_value: val[0].s_value, args: val[2],
             location: merge_locations(val[0].loc, val[3].loc)
           )
@@ -2376,12 +2376,7 @@ module_eval(<<'.,.,', 'parser.y', 595)
 
 # reduce 134 omitted
 
-module_eval(<<'.,.,', 'parser.y', 606)
-  def _reduce_135(val, _values, result)
-     result = Lrama::Lexer::Token::Ident.new(s_value: val[0].s_value, location: val[0].location)
-    result
-  end
-.,.,
+# reduce 135 omitted
 
 def _reduce_none(val, _values, result)
   val[0]
