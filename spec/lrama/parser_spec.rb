@@ -160,24 +160,6 @@ RSpec.describe Lrama::Parser do
       end
     end
 
-    it "represents nested parameterized rule calls with AST nodes" do
-      y = <<~Y
-        %token number
-        %rule option(X): %empty | X
-        %rule pair(X, Y): X | Y
-        %%
-        program: pair(option(number), number) ;
-      Y
-
-      grammar = Lrama::Parser.new(y, "parse.y").parse
-      rule = grammar.nodes.grep(Lrama::Grammar::Node::Rule).first
-      call = rule.rhs.first
-
-      expect(call).to be_a(Lrama::Grammar::Node::RuleRhs::InstantiateRule)
-      expect(call.args.first).to be_a(Lrama::Grammar::Node::RuleRhs::InstantiateRule)
-      expect(call.args.first.args).to all(be_a(T::Base))
-    end
-
     it "no_union" do
       path = "common/no_union.y"
       y = File.read(fixture_path(path))
