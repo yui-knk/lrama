@@ -19,7 +19,6 @@ module Lrama
             @lhs_tag = lhs_tag
             super(location: location)
           end
-
         end
       end
     end

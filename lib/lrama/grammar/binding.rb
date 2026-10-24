@@ -4,18 +4,20 @@
 module Lrama
   class Grammar
     class Binding
-      # @rbs @param_to_arg: Hash[String, Node::RuleRhs::value]
+      # @rbs @actual_args: Array[Node::RuleRhs::value]
+      # @rbs @param_to_arg: Hash[String, Node::RuleRhs::value?]
 
       # @rbs (Array[Lexer::Token::Base] params, Array[Node::RuleRhs::value] actual_args) -> void
       def initialize(params, actual_args)
-        @param_to_arg = build_param_to_arg(params, actual_args)
+        @actual_args = actual_args
+        @param_to_arg = build_param_to_arg(params, @actual_args)
       end
 
       # @rbs (Node::RuleRhs::value sym) -> Node::RuleRhs::value
       def resolve_symbol(sym)
         case sym
         when Node::RuleRhs::InstantiateRule
-          resolve_instantiate_rule(sym)
+          create_instantiate_rule(sym)
         when Node::RuleRhs::Symbol
           find_arg_for_param(sym)
         else
@@ -31,7 +33,7 @@ module Lrama
       private
 
       # @rbs (Node::RuleRhs::InstantiateRule sym) -> Node::RuleRhs::InstantiateRule
-      def resolve_instantiate_rule(sym)
+      def create_instantiate_rule(sym)
         Node::RuleRhs::InstantiateRule.new(
           s_value: sym.s_value,
           alias_name: sym.alias_name,
@@ -72,11 +74,11 @@ module Lrama
         end
       end
 
-      # @rbs (Array[Lexer::Token::Base] params, Array[Node::RuleRhs::value] actual_args) -> Hash[String, Node::RuleRhs::value]
+      # @rbs (Array[Lexer::Token::Base] params, Array[Node::RuleRhs::value] actual_args) -> Hash[String, Node::RuleRhs::value?]
       def build_param_to_arg(params, actual_args)
-        params.each_with_index.to_h do |param, index|
-          [param.s_value, actual_args.fetch(index)]
-        end
+        params.zip(actual_args).map do |param, arg|
+          [param.s_value, arg]
+        end.to_h
       end
 
       # @rbs (Node::RuleRhs::InstantiateRule token) -> String
