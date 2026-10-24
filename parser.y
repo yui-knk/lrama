@@ -322,8 +322,14 @@ rule
           argument = Grammar::Node::RuleRhs::Symbol.new(
             token: val[1], location: val[1].loc
           )
+          rule_name = case val[2].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[2].s_value}"
+                      end
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[2]), args: [argument],
+            s_value: rule_name, args: [argument],
             location: val[1].loc
           )
           result.append(node)
@@ -505,8 +511,14 @@ rule
           argument = Grammar::Node::RuleRhs::Symbol.new(
             token: val[1], location: val[1].loc
           )
+          rule_name = case val[2].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[2].s_value}"
+                      end
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[2]), args: [argument],
+            s_value: rule_name, args: [argument],
             alias_name: val[3], lhs_tag: val[4],
             location: merge_locations(val[1].loc, val[4]&.loc)
           )
@@ -567,8 +579,14 @@ rule
           symbol = Grammar::Node::RuleRhs::Symbol.new(
             token: val[0], location: val[0].loc
           )
+          rule_name = case val[1].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[1].s_value}"
+                      end
           result = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[1]), args: [symbol],
+            s_value: rule_name, args: [symbol],
             location: merge_locations(val[0].loc, val[1].loc)
           )
         }
@@ -711,15 +729,6 @@ end
 
 def raise_parse_error(error_message, location)
   raise ParseError, location.generate_error_message(error_message)
-end
-
-def parameterized_rule_name(suffix)
-  case suffix.s_value
-  when "?" then "option"
-  when "+" then "nonempty_list"
-  when "*" then "list"
-  else raise "Unexpected parameterized suffix: #{suffix.s_value}"
-  end
 end
 
 def merge_locations(*locations)

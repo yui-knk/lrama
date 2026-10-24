@@ -655,7 +655,7 @@ end
 module Lrama
   class Parser < Racc::Parser
 
-module_eval(<<'...end parser.y/module_eval...', 'parser.y', 625)
+module_eval(<<'...end parser.y/module_eval...', 'parser.y', 643)
 
 include Lrama::Tracer::Duration
 
@@ -745,15 +745,6 @@ end
 
 def raise_parse_error(error_message, location)
   raise ParseError, location.generate_error_message(error_message)
-end
-
-def parameterized_rule_name(suffix)
-  case suffix.s_value
-  when "?" then "option"
-  when "+" then "nonempty_list"
-  when "*" then "list"
-  else raise "Unexpected parameterized suffix: #{suffix.s_value}"
-  end
 end
 
 def merge_locations(*locations)
@@ -1904,8 +1895,14 @@ module_eval(<<'.,.,', 'parser.y', 320)
           argument = Grammar::Node::RuleRhs::Symbol.new(
             token: val[1], location: val[1].loc
           )
+          rule_name = case val[2].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[2].s_value}"
+                      end
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[2]), args: [argument],
+            s_value: rule_name, args: [argument],
             location: val[1].loc
           )
           result.append(node)
@@ -1914,7 +1911,7 @@ module_eval(<<'.,.,', 'parser.y', 320)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 332)
+module_eval(<<'.,.,', 'parser.y', 338)
   def _reduce_77(val, _values, result)
               on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
@@ -1928,7 +1925,7 @@ module_eval(<<'.,.,', 'parser.y', 332)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 342)
+module_eval(<<'.,.,', 'parser.y', 348)
   def _reduce_78(val, _values, result)
               node = Grammar::Node::RuleRhs::Action.new(
             code: val[1], alias_name: val[2],
@@ -1940,7 +1937,7 @@ module_eval(<<'.,.,', 'parser.y', 342)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 350)
+module_eval(<<'.,.,', 'parser.y', 356)
   def _reduce_79(val, _values, result)
               on_action_error("multiple %prec in a rule", val[0]) if prec_seen?
           if val[0].empty?
@@ -1965,21 +1962,21 @@ module_eval(<<'.,.,', 'parser.y', 350)
 
 # reduce 82 omitted
 
-module_eval(<<'.,.,', 'parser.y', 388)
+module_eval(<<'.,.,', 'parser.y', 394)
   def _reduce_83(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 388)
+module_eval(<<'.,.,', 'parser.y', 394)
   def _reduce_84(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 369)
+module_eval(<<'.,.,', 'parser.y', 375)
   def _reduce_85(val, _values, result)
               result = val[1].map do |id|
             Grammar::Node::Symbol.new(
@@ -1992,7 +1989,7 @@ module_eval(<<'.,.,', 'parser.y', 369)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 378)
+module_eval(<<'.,.,', 'parser.y', 384)
   def _reduce_86(val, _values, result)
               syms = val[2].map do |id|
             Grammar::Node::Symbol.new(
@@ -2010,7 +2007,7 @@ module_eval(<<'.,.,', 'parser.y', 378)
 
 # reduce 88 omitted
 
-module_eval(<<'.,.,', 'parser.y', 394)
+module_eval(<<'.,.,', 'parser.y', 400)
   def _reduce_89(val, _values, result)
               begin_c_declaration("}")
 
@@ -2018,7 +2015,7 @@ module_eval(<<'.,.,', 'parser.y', 394)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 398)
+module_eval(<<'.,.,', 'parser.y', 404)
   def _reduce_90(val, _values, result)
               end_c_declaration
 
@@ -2026,7 +2023,7 @@ module_eval(<<'.,.,', 'parser.y', 398)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 402)
+module_eval(<<'.,.,', 'parser.y', 408)
   def _reduce_91(val, _values, result)
               result = val[2]
 
@@ -2034,42 +2031,42 @@ module_eval(<<'.,.,', 'parser.y', 402)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 445)
+module_eval(<<'.,.,', 'parser.y', 451)
   def _reduce_92(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 445)
+module_eval(<<'.,.,', 'parser.y', 451)
   def _reduce_93(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 445)
+module_eval(<<'.,.,', 'parser.y', 451)
   def _reduce_94(val, _values, result)
     result = val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 445)
+module_eval(<<'.,.,', 'parser.y', 451)
   def _reduce_95(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 445)
+module_eval(<<'.,.,', 'parser.y', 451)
   def _reduce_96(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 408)
+module_eval(<<'.,.,', 'parser.y', 414)
   def _reduce_97(val, _values, result)
               result = val[0].map do |id|
             Grammar::Node::Token.new(
@@ -2082,7 +2079,7 @@ module_eval(<<'.,.,', 'parser.y', 408)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 417)
+module_eval(<<'.,.,', 'parser.y', 423)
   def _reduce_98(val, _values, result)
               result = val[0].flat_map do |tag, ids|
             ids.map do |id|
@@ -2098,7 +2095,7 @@ module_eval(<<'.,.,', 'parser.y', 417)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 429)
+module_eval(<<'.,.,', 'parser.y', 435)
   def _reduce_99(val, _values, result)
               # result = [{tag: nil, tokens: val[0]}, {tag: val[1], tokens: val[2]}]
           result = val[0].map do |id|
@@ -2122,14 +2119,14 @@ module_eval(<<'.,.,', 'parser.y', 429)
 
 # reduce 101 omitted
 
-module_eval(<<'.,.,', 'parser.y', 453)
+module_eval(<<'.,.,', 'parser.y', 459)
   def _reduce_102(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 453)
+module_eval(<<'.,.,', 'parser.y', 459)
   def _reduce_103(val, _values, result)
     result = val[1] ? val[1].unshift(val[0]) : val
     result
@@ -2140,7 +2137,7 @@ module_eval(<<'.,.,', 'parser.y', 453)
 
 # reduce 105 omitted
 
-module_eval(<<'.,.,', 'parser.y', 455)
+module_eval(<<'.,.,', 'parser.y', 461)
   def _reduce_106(val, _values, result)
               result = val[3].map do |rhs|
             if rhs.reject {|sym| sym.is_a?(Grammar::Node::RuleRhs::Action) || sym.is_a?(Grammar::Node::RuleRhs::Prec) }.count > 1
@@ -2161,7 +2158,7 @@ module_eval(<<'.,.,', 'parser.y', 455)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 474)
+module_eval(<<'.,.,', 'parser.y', 480)
   def _reduce_107(val, _values, result)
               result = [val[0]]
 
@@ -2169,7 +2166,7 @@ module_eval(<<'.,.,', 'parser.y', 474)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 478)
+module_eval(<<'.,.,', 'parser.y', 484)
   def _reduce_108(val, _values, result)
               result = val[0].append(val[2])
 
@@ -2177,7 +2174,7 @@ module_eval(<<'.,.,', 'parser.y', 478)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 484)
+module_eval(<<'.,.,', 'parser.y', 490)
   def _reduce_109(val, _values, result)
               reset_precs
           result = []
@@ -2186,7 +2183,7 @@ module_eval(<<'.,.,', 'parser.y', 484)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 489)
+module_eval(<<'.,.,', 'parser.y', 495)
   def _reduce_110(val, _values, result)
               node = Grammar::Node::RuleRhs::Empty.new(location: val[1].loc)
           result.append(node)
@@ -2195,7 +2192,7 @@ module_eval(<<'.,.,', 'parser.y', 489)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 494)
+module_eval(<<'.,.,', 'parser.y', 500)
   def _reduce_111(val, _values, result)
               on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
           node = Grammar::Node::RuleRhs::Symbol.new(
@@ -2208,14 +2205,20 @@ module_eval(<<'.,.,', 'parser.y', 494)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 503)
+module_eval(<<'.,.,', 'parser.y', 509)
   def _reduce_112(val, _values, result)
               on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
           argument = Grammar::Node::RuleRhs::Symbol.new(
             token: val[1], location: val[1].loc
           )
+          rule_name = case val[2].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[2].s_value}"
+                      end
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[2]), args: [argument],
+            s_value: rule_name, args: [argument],
             alias_name: val[3], lhs_tag: val[4],
             location: merge_locations(val[1].loc, val[4]&.loc)
           )
@@ -2225,7 +2228,7 @@ module_eval(<<'.,.,', 'parser.y', 503)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 516)
+module_eval(<<'.,.,', 'parser.y', 528)
   def _reduce_113(val, _values, result)
               on_action_error("intermediate %prec in a rule", val[1]) if @trailing_prec_seen
           node = Grammar::Node::RuleRhs::InstantiateRule.new(
@@ -2239,7 +2242,7 @@ module_eval(<<'.,.,', 'parser.y', 516)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 526)
+module_eval(<<'.,.,', 'parser.y', 538)
   def _reduce_114(val, _values, result)
               node = Grammar::Node::RuleRhs::Action.new(
             code: val[1], alias_name: val[2], tag: val[3],
@@ -2251,7 +2254,7 @@ module_eval(<<'.,.,', 'parser.y', 526)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 534)
+module_eval(<<'.,.,', 'parser.y', 546)
   def _reduce_115(val, _values, result)
               on_action_error("multiple %prec in a rule", val[0]) if prec_seen?
           if val[0].empty?
@@ -2276,21 +2279,21 @@ module_eval(<<'.,.,', 'parser.y', 534)
 
 # reduce 118 omitted
 
-module_eval(<<'.,.,', 'parser.y', 554)
+module_eval(<<'.,.,', 'parser.y', 566)
   def _reduce_119(val, _values, result)
      result = [val[0]]
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 555)
+module_eval(<<'.,.,', 'parser.y', 567)
   def _reduce_120(val, _values, result)
      result = val[0].append(val[2])
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 560)
+module_eval(<<'.,.,', 'parser.y', 572)
   def _reduce_121(val, _values, result)
               result = Grammar::Node::RuleRhs::Symbol.new(
             token: val[0], location: val[0].loc
@@ -2300,13 +2303,19 @@ module_eval(<<'.,.,', 'parser.y', 560)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 566)
+module_eval(<<'.,.,', 'parser.y', 578)
   def _reduce_122(val, _values, result)
               symbol = Grammar::Node::RuleRhs::Symbol.new(
             token: val[0], location: val[0].loc
           )
+          rule_name = case val[1].s_value
+                      when "?" then "option"
+                      when "+" then "nonempty_list"
+                      when "*" then "list"
+                      else raise "Unexpected parameterized suffix: #{val[1].s_value}"
+                      end
           result = Grammar::Node::RuleRhs::InstantiateRule.new(
-            s_value: parameterized_rule_name(val[1]), args: [symbol],
+            s_value: rule_name, args: [symbol],
             location: merge_locations(val[0].loc, val[1].loc)
           )
 
@@ -2314,7 +2323,7 @@ module_eval(<<'.,.,', 'parser.y', 566)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 576)
+module_eval(<<'.,.,', 'parser.y', 594)
   def _reduce_123(val, _values, result)
               result = Grammar::Node::RuleRhs::InstantiateRule.new(
             s_value: val[0].s_value, args: val[2],
@@ -2325,7 +2334,7 @@ module_eval(<<'.,.,', 'parser.y', 576)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 585)
+module_eval(<<'.,.,', 'parser.y', 603)
   def _reduce_124(val, _values, result)
               if prec_seen?
             on_action_error("multiple User_code after %prec", val[0]) if @code_after_prec
@@ -2337,7 +2346,7 @@ module_eval(<<'.,.,', 'parser.y', 585)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 593)
+module_eval(<<'.,.,', 'parser.y', 611)
   def _reduce_125(val, _values, result)
               end_c_declaration
 
@@ -2345,7 +2354,7 @@ module_eval(<<'.,.,', 'parser.y', 593)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 597)
+module_eval(<<'.,.,', 'parser.y', 615)
   def _reduce_126(val, _values, result)
               result = val[2]
 
@@ -2353,14 +2362,14 @@ module_eval(<<'.,.,', 'parser.y', 597)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 600)
+module_eval(<<'.,.,', 'parser.y', 618)
   def _reduce_127(val, _values, result)
      result = val[1].s_value
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 605)
+module_eval(<<'.,.,', 'parser.y', 623)
   def _reduce_128(val, _values, result)
               begin_c_declaration('\Z')
 
@@ -2368,7 +2377,7 @@ module_eval(<<'.,.,', 'parser.y', 605)
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 609)
+module_eval(<<'.,.,', 'parser.y', 627)
   def _reduce_129(val, _values, result)
               end_c_declaration
           result = Grammar::Node::EpilogueDecl.new(code: val[2], location: merge_locations(val[0].loc, val[2].loc))
@@ -2387,7 +2396,7 @@ module_eval(<<'.,.,', 'parser.y', 609)
 
 # reduce 134 omitted
 
-module_eval(<<'.,.,', 'parser.y', 620)
+module_eval(<<'.,.,', 'parser.y', 638)
   def _reduce_135(val, _values, result)
      result = Lrama::Lexer::Token::Ident.new(s_value: val[0].s_value, location: val[0].location)
     result
