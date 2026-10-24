@@ -115,7 +115,7 @@ module Lrama
       # @rbs () -> void
       def build_rules
         tokens = @replaced_rhs #: Array[Lexer::Token::Base]
-        return if tokens.any? { |token| @parameterized_resolver.find_inline_by_name(token.s_value) }
+        return if has_inline_rules?
 
         rule = Rule.new(
           id: @rule_counter.increment, _lhs: lhs, _rhs: tokens, lhs_tag: lhs_tag, token_code: user_code,

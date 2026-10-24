@@ -26,12 +26,7 @@ module Lrama
 
         # @rbs (Node::RuleRhs::value node) -> Rule?
         def find_inline(node)
-          find_inline_by_name(node.s_value)
-        end
-
-        # @rbs (String name) -> Rule?
-        def find_inline_by_name(name)
-          @rules.reverse.find { |rule| rule.name == name && rule.inline? }
+          @rules.reverse.find { |rule| rule.name == node.s_value && rule.inline? }
         end
 
         # @rbs (String lhs_s_value) -> Lexer::Token::Base?

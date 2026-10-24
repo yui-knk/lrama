@@ -20,9 +20,6 @@ module Lrama
         # @rbs (Node::RuleRhs::value node) -> Rule?
         def find_inline: (Node::RuleRhs::value node) -> Rule?
 
-        # @rbs (String name) -> Rule?
-        def find_inline_by_name: (String name) -> Rule?
-
         # @rbs (String lhs_s_value) -> Lexer::Token::Base?
         def created_lhs: (String lhs_s_value) -> Lexer::Token::Base?
 
