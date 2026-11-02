@@ -29,6 +29,7 @@ module Lrama
       attr_reader :lhs_tag #: Lexer::Token::Tag?
       attr_reader :rhs #: Array[Node::RuleRhs::rhs]
       attr_reader :user_code #: Lexer::Token::UserCode?
+      attr_writer :user_code_references #: Array[Grammar::Reference]?
       attr_reader :precedence_sym #: Grammar::Symbol?
 
       # @rbs (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?, ?skip_preprocess_references: bool) -> void
@@ -45,6 +46,7 @@ module Lrama
         @lhs_tag = lhs_tag
         @rhs = []
         @user_code = nil
+        @user_code_references = nil
         @precedence_sym = nil
         @line = nil
         @rules = []
@@ -70,6 +72,12 @@ module Lrama
         flush_user_code
 
         @user_code = user_code
+        @user_code_references = nil
+      end
+
+      # @rbs () -> Array[Grammar::Reference]
+      def user_code_references
+        @user_code_references || user_code&.references || []
       end
 
       # @rbs (Grammar::Symbol? precedence_sym) -> void
@@ -128,7 +136,7 @@ module Lrama
           _lhs: lhs,
           _rhs: symbols,
           _lhs_location: lhs_location, _rhs_locations: locations,
-          lhs_tag: lhs_tag, token_code: user_code,
+          lhs_tag: lhs_tag, token_code: user_code, references: user_code_references,
           position_in_original_rule_rhs: @position_in_original_rule_rhs, precedence_sym: precedence_sym, lineno: line
         )
         @rules = [rule]
@@ -177,7 +185,8 @@ module Lrama
                 r.symbols.each { |sym| rule_builder.add_rhs(bindings.resolve_symbol(sym)) }
                 rule_builder.line = line
                 rule_builder.precedence_sym = r.precedence_sym
-                rule_builder.user_code = r.resolve_user_code(bindings)
+                rule_builder.user_code = r.user_code
+                rule_builder.user_code_references = r.resolve_references(bindings)
                 rule_builder.complete_input
                 rule_builder.setup_rules
                 @rule_builders_for_parameterized << rule_builder
@@ -195,6 +204,7 @@ module Lrama
             rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, @parameterized_resolver, i, lhs_tag: tag, skip_preprocess_references: true)
             rule_builder.lhs = lhs_id
             rule_builder.user_code = token
+            rule_builder.user_code_references = node.references
             rule_builder.complete_input
             rule_builder.setup_rules
 
@@ -232,7 +242,8 @@ module Lrama
           token = node.is_a?(Node::RuleRhs::Action) ? node.code : node
           next unless token.is_a?(Lrama::Lexer::Token::UserCode)
 
-          token.references.each do |ref|
+          references = node.is_a?(Node::RuleRhs::Action) ? node.references : user_code_references
+          references.each do |ref|
             ref_name = ref.name
 
             if ref_name
@@ -304,9 +315,11 @@ module Lrama
             code: c,
             alias_name: c.alias_name,
             tag: c.tag,
+            references: @user_code_references,
             location: c.location
           )
           @user_code = nil
+          @user_code_references = nil
         end
       end
     end

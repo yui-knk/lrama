@@ -39,7 +39,7 @@ module Lrama
 
           original_rule = rule.original_rule || rule
           usage = (grouped_usage[original_rule] ||= { positional: false, named: false })
-          classify_references(token_code.references, token_code.s_value, usage)
+          classify_references(rule.references, token_code.s_value, usage)
         end
 
         grouped_usage

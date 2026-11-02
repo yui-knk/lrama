@@ -5,6 +5,8 @@ module Lrama
     # _rhs holds original RHS element. Use rhs to refer to Symbol.
     # _rhs_locations holds the source location of each corresponding _rhs ID.
     class Rule
+      @references: Array[Grammar::Reference]?
+
       interface _DelegatedMethods
         def lhs: () -> Grammar::Symbol
 
@@ -42,8 +44,14 @@ module Lrama
       # @rbs (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?,
       #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
-      #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
-      def initialize: (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?, ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?, ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?, ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
+      #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?,
+      #      ?references: Array[Grammar::Reference]?) -> void
+      def initialize: (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?, ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?, ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?, ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?, ?references: Array[Grammar::Reference]?) -> void
+
+      # References can be resolved per rule while token_code retains the source token.
+      #
+      # @rbs () -> Array[Grammar::Reference]
+      def references: () -> Array[Grammar::Reference]
 
       # @rbs (Rule other) -> bool
       def ==: (Rule other) -> bool

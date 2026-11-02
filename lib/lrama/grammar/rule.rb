@@ -7,6 +7,7 @@ module Lrama
     # _rhs_locations holds the source location of each corresponding _rhs ID.
     class Rule
       # @rbs!
+      #   @references: Array[Grammar::Reference]?
       #
       #   interface _DelegatedMethods
       #     def lhs: -> Grammar::Symbol
@@ -31,10 +32,11 @@ module Lrama
       # @rbs (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?,
       #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
-      #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
+      #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?,
+      #      ?references: Array[Grammar::Reference]?) -> void
       def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, token_code: nil,
                      position_in_original_rule_rhs: nil, nullable: nil, precedence_sym: nil, lineno: nil,
-                     _lhs_location: nil, _rhs_locations: nil)
+                     _lhs_location: nil, _rhs_locations: nil, references: nil)
         @id = id
         @_lhs = _lhs
         @lhs = lhs
@@ -48,6 +50,14 @@ module Lrama
         @lineno = lineno
         @_lhs_location = _lhs_location
         @_rhs_locations = _rhs_locations
+        @references = references
+      end
+
+      # References can be resolved per rule while token_code retains the source token.
+      #
+      # @rbs () -> Array[Grammar::Reference]
+      def references
+        @references || token_code&.references || []
       end
 
       # @rbs (Rule other) -> bool
@@ -133,7 +143,7 @@ module Lrama
       def contains_at_reference?
         return false unless token_code
 
-        token_code.references.any? {|r| r.type == :at }
+        references.any? {|r| r.type == :at }
       end
 
       private

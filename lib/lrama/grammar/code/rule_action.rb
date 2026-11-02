@@ -20,6 +20,11 @@ module Lrama
           @grammar = grammar
         end
 
+        # @rbs () -> Array[Grammar::Reference]
+        def references
+          @rule.references
+        end
+
         private
 
         # * ($$) yyval

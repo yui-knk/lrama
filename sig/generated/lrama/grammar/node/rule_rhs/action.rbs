@@ -5,14 +5,19 @@ module Lrama
     module Node
       module RuleRhs
         class Action < Node::Base
+          @references: Array[Grammar::Reference]?
+
           attr_reader code: Lexer::Token::UserCode
 
           attr_reader alias_name: String?
 
           attr_reader tag: Lexer::Token::Tag?
 
-          # @rbs (code: Lexer::Token::UserCode, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
-          def initialize: (code: Lexer::Token::UserCode, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
+          # @rbs (code: Lexer::Token::UserCode, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?references: Array[Grammar::Reference]?, location: Lexer::Location) -> void
+          def initialize: (code: Lexer::Token::UserCode, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?references: Array[Grammar::Reference]?) -> void
+
+          # @rbs () -> Array[Grammar::Reference]
+          def references: () -> Array[Grammar::Reference]
         end
       end
     end

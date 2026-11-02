@@ -13,8 +13,8 @@ module Lrama
         # @rbs () -> void
         def initialize: () -> void
 
-        # @rbs (Grammar::Binding bindings) -> Lexer::Token::UserCode?
-        def resolve_user_code: (Grammar::Binding bindings) -> Lexer::Token::UserCode?
+        # @rbs (Grammar::Binding bindings) -> Array[Grammar::Reference]?
+        def resolve_references: (Grammar::Binding bindings) -> Array[Grammar::Reference]?
       end
     end
   end

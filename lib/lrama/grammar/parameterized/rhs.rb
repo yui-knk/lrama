@@ -16,11 +16,11 @@ module Lrama
           @precedence_sym = nil
         end
 
-        # @rbs (Grammar::Binding bindings) -> Lexer::Token::UserCode?
-        def resolve_user_code(bindings)
+        # @rbs (Grammar::Binding bindings) -> Array[Grammar::Reference]?
+        def resolve_references(bindings)
           return unless user_code
 
-          resolved = Lexer::Token::UserCode.new(s_value: user_code.s_value, location: user_code.location)
+          resolved = user_code.references.map(&:dup)
           var_to_arg = {} #: Hash[String, String]
           symbols.each do |sym|
             resolved_sym = bindings.resolve_symbol(sym)
@@ -30,7 +30,7 @@ module Lrama
           end
 
           var_to_arg.each do |var, arg|
-            resolved.references.each do |ref|
+            resolved.each do |ref|
               if ref.name == var
                 ref.name = arg
               end

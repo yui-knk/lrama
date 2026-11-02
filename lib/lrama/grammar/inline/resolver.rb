@@ -43,7 +43,11 @@ module Lrama
           builder.lhs_alias_name = @rule_builder.lhs_alias_name
           builder.line = @rule_builder.line
           builder.precedence_sym = @rule_builder.precedence_sym
-          builder.user_code = replace_user_code(rhs, index)
+          user_code = replace_user_code(rhs, index)
+          builder.user_code = user_code
+          if user_code.equal?(@rule_builder.user_code)
+            builder.user_code_references = @rule_builder.user_code_references.map(&:dup)
+          end
           builder
         end
 
@@ -74,7 +78,7 @@ module Lrama
           index_offset = rhs.symbols.count - 1
           code = user_code.s_value.dup
 
-          user_code.references.reverse_each do |ref|
+          @rule_builder.user_code_references.reverse_each do |ref|
             next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
 
             reference = code[ref.first_column...ref.last_column]
