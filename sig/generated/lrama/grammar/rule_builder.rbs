@@ -41,6 +41,8 @@ module Lrama
 
       attr_reader user_code: Lexer::Token::UserCode?
 
+      attr_writer user_code_text: String?
+
       attr_writer user_code_references: Array[Grammar::Reference]?
 
       attr_reader precedence_sym: Grammar::Symbol?
@@ -53,6 +55,9 @@ module Lrama
 
       # @rbs (Lexer::Token::UserCode? user_code) -> void
       def user_code=: (Lexer::Token::UserCode? user_code) -> void
+
+      # @rbs () -> String?
+      def user_code_text: () -> String?
 
       # @rbs () -> Array[Grammar::Reference]
       def user_code_references: () -> Array[Grammar::Reference]

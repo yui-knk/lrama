@@ -7,6 +7,8 @@ module Lrama
     class Rule
       @references: Array[Grammar::Reference]?
 
+      @user_code_text: String?
+
       interface _DelegatedMethods
         def lhs: () -> Grammar::Symbol
 
@@ -45,8 +47,11 @@ module Lrama
       #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
       #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?,
-      #      ?references: Array[Grammar::Reference]?) -> void
-      def initialize: (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?, ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?, ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?, ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?, ?references: Array[Grammar::Reference]?) -> void
+      #      ?references: Array[Grammar::Reference]?, ?user_code_text: String?) -> void
+      def initialize: (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?, ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?, ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?, ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?, ?references: Array[Grammar::Reference]?, ?user_code_text: String?) -> void
+
+      # @rbs () -> String?
+      def user_code_text: () -> String?
 
       # References can be resolved per rule while token_code retains the source token.
       #

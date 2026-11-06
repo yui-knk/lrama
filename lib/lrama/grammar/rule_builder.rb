@@ -29,6 +29,7 @@ module Lrama
       attr_reader :lhs_tag #: Lexer::Token::Tag?
       attr_reader :rhs #: Array[Node::RuleRhs::rhs]
       attr_reader :user_code #: Lexer::Token::UserCode?
+      attr_writer :user_code_text #: String?
       attr_writer :user_code_references #: Array[Grammar::Reference]?
       attr_reader :precedence_sym #: Grammar::Symbol?
 
@@ -46,6 +47,7 @@ module Lrama
         @lhs_tag = lhs_tag
         @rhs = []
         @user_code = nil
+        @user_code_text = nil
         @user_code_references = nil
         @precedence_sym = nil
         @line = nil
@@ -72,7 +74,13 @@ module Lrama
         flush_user_code
 
         @user_code = user_code
+        @user_code_text = nil
         @user_code_references = nil
+      end
+
+      # @rbs () -> String?
+      def user_code_text
+        @user_code_text || user_code&.s_value
       end
 
       # @rbs () -> Array[Grammar::Reference]
@@ -136,7 +144,7 @@ module Lrama
           _lhs: lhs,
           _rhs: symbols,
           _lhs_location: lhs_location, _rhs_locations: locations,
-          lhs_tag: lhs_tag, token_code: user_code, references: user_code_references,
+          lhs_tag: lhs_tag, token_code: user_code, user_code_text: user_code_text, references: user_code_references,
           position_in_original_rule_rhs: @position_in_original_rule_rhs, precedence_sym: precedence_sym, lineno: line
         )
         @rules = [rule]
@@ -204,6 +212,7 @@ module Lrama
             rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, @parameterized_resolver, i, lhs_tag: tag, skip_preprocess_references: true)
             rule_builder.lhs = lhs_id
             rule_builder.user_code = token
+            rule_builder.user_code_text = node.text
             rule_builder.user_code_references = node.references
             rule_builder.complete_input
             rule_builder.setup_rules
@@ -295,7 +304,7 @@ module Lrama
         when Node::RuleRhs::Symbol, Node::RuleRhs::InstantiateRule
           [node.name, node.alias_name].compact.include?(name)
         when Node::RuleRhs::Action
-          [node.code.s_value, node.alias_name].compact.include?(name)
+          [node.text, node.alias_name].compact.include?(name)
         else
           false
         end
@@ -315,10 +324,12 @@ module Lrama
             code: c,
             alias_name: c.alias_name,
             tag: c.tag,
+            text: @user_code_text,
             references: @user_code_references,
             location: c.location
           )
           @user_code = nil
+          @user_code_text = nil
           @user_code_references = nil
         end
       end

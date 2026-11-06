@@ -8,6 +8,7 @@ module Lrama
     class Rule
       # @rbs!
       #   @references: Array[Grammar::Reference]?
+      #   @user_code_text: String?
       #
       #   interface _DelegatedMethods
       #     def lhs: -> Grammar::Symbol
@@ -33,10 +34,10 @@ module Lrama
       #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
       #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?,
-      #      ?references: Array[Grammar::Reference]?) -> void
+      #      ?references: Array[Grammar::Reference]?, ?user_code_text: String?) -> void
       def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, token_code: nil,
                      position_in_original_rule_rhs: nil, nullable: nil, precedence_sym: nil, lineno: nil,
-                     _lhs_location: nil, _rhs_locations: nil, references: nil)
+                     _lhs_location: nil, _rhs_locations: nil, references: nil, user_code_text: nil)
         @id = id
         @_lhs = _lhs
         @lhs = lhs
@@ -51,6 +52,12 @@ module Lrama
         @_lhs_location = _lhs_location
         @_rhs_locations = _rhs_locations
         @references = references
+        @user_code_text = user_code_text
+      end
+
+      # @rbs () -> String?
+      def user_code_text
+        @user_code_text || token_code&.s_value
       end
 
       # References can be resolved per rule while token_code retains the source token.
@@ -66,7 +73,7 @@ module Lrama
         self.lhs == other.lhs &&
         self.lhs_tag == other.lhs_tag &&
         self.rhs == other.rhs &&
-        self.token_code == other.token_code &&
+        self.user_code_text == other.user_code_text &&
         self.position_in_original_rule_rhs == other.position_in_original_rule_rhs &&
         self.nullable == other.nullable &&
         self.precedence_sym == other.precedence_sym &&
@@ -111,7 +118,7 @@ module Lrama
 
       # @rbs () -> String
       def with_actions
-        "#{display_name} {#{token_code&.s_value}}"
+        "#{display_name} {#{user_code_text}}"
       end
 
       # opt_nl: ε     <-- empty_rule

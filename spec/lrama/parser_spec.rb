@@ -3835,7 +3835,7 @@ RSpec.describe Lrama::Parser do
         grammar.validate!
         rule = grammar.rules.last
 
-        expect(rule.token_code.s_value).to eq(" /* 日本 */ $$ = f( /* 展開 */ 42 , $3, @3, $:3); ")
+        expect(rule.user_code_text).to eq(" /* 日本 */ $$ = f( /* 展開 */ 42 , $3, @3, $:3); ")
         expect(rule.translated_code(grammar)).to eq(" /* 日本 */ (yyval.i) = f( /* 展開 */ 42 , (yyvsp[0].i), (yylsp[0]), (0 - 1)); ")
       end
 
@@ -3858,7 +3858,7 @@ RSpec.describe Lrama::Parser do
         grammar.prepare
         rule = grammar.rules.last
 
-        expect(rule.token_code.s_value).to eq(%q{ $$ = f( "\1" , $3, $4, $11, @2, @3, @11); })
+        expect(rule.user_code_text).to eq(%q{ $$ = f( "\1" , $3, $4, $11, @2, @3, @11); })
       end
     end
 

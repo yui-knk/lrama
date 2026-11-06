@@ -43,9 +43,12 @@ module Lrama
           builder.lhs_alias_name = @rule_builder.lhs_alias_name
           builder.line = @rule_builder.line
           builder.precedence_sym = @rule_builder.precedence_sym
-          user_code = replace_user_code(rhs, index)
-          builder.user_code = user_code
-          if user_code.equal?(@rule_builder.user_code)
+          builder.user_code = @rule_builder.user_code
+          code = replace_user_code(rhs, index)
+          builder.user_code_text = code
+          if rhs.user_code && code
+            builder.user_code_references = Lexer::ReferenceScanner.new(code).scan
+          else
             builder.user_code_references = @rule_builder.user_code_references.map(&:dup)
           end
           builder
@@ -69,14 +72,14 @@ module Lrama
           end
         end
 
-        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Integer index) -> Lrama::Lexer::Token::UserCode
+        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Integer index) -> String?
         def replace_user_code(rhs, index)
-          user_code = @rule_builder.user_code
-          return user_code if rhs.user_code.nil? || user_code.nil?
+          code = @rule_builder.user_code_text
+          return code if rhs.user_code.nil? || code.nil?
 
           inline_index = index + 1
           index_offset = rhs.symbols.count - 1
-          code = user_code.s_value.dup
+          code = code.dup
 
           @rule_builder.user_code_references.reverse_each do |ref|
             next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
@@ -90,7 +93,7 @@ module Lrama
               end
             code[ref.first_column...ref.last_column] = replacement
           end
-          Lrama::Lexer::Token::UserCode.new(s_value: code, location: user_code.location)
+          code.freeze
         end
       end
     end
