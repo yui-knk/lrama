@@ -8,6 +8,9 @@ module Lrama
     class Rule
       # @rbs!
       #
+      #   @references: Array[Grammar::Reference]?
+      #   @user_code_text: String?
+      #
       #   interface _DelegatedMethods
       #     def lhs: -> Grammar::Symbol
       #     def rhs: -> Array[Grammar::Symbol]
@@ -30,9 +33,11 @@ module Lrama
 
       # @rbs (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?,
       #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
+      #      ?references: Array[Grammar::Reference]?, ?user_code_text: String?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
       #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
       def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, token_code: nil,
+                     references: nil, user_code_text: nil,
                      position_in_original_rule_rhs: nil, nullable: nil, precedence_sym: nil, lineno: nil,
                      _lhs_location: nil, _rhs_locations: nil)
         @id = id
@@ -42,6 +47,8 @@ module Lrama
         @_rhs = _rhs
         @rhs = rhs
         @token_code = token_code
+        @references = references
+        @user_code_text = user_code_text
         @position_in_original_rule_rhs = position_in_original_rule_rhs
         @nullable = nullable
         @precedence_sym = precedence_sym
@@ -56,11 +63,21 @@ module Lrama
         self.lhs == other.lhs &&
         self.lhs_tag == other.lhs_tag &&
         self.rhs == other.rhs &&
-        self.token_code == other.token_code &&
+        self.user_code_text == other.user_code_text &&
         self.position_in_original_rule_rhs == other.position_in_original_rule_rhs &&
         self.nullable == other.nullable &&
         self.precedence_sym == other.precedence_sym &&
         self.lineno == other.lineno
+      end
+
+      # @rbs () -> Array[Grammar::Reference]
+      def references
+        @references || token_code&.references || []
+      end
+
+      # @rbs () -> String?
+      def user_code_text
+        @user_code_text || token_code&.s_value
       end
 
       # @rbs () -> String
@@ -101,7 +118,7 @@ module Lrama
 
       # @rbs () -> String
       def with_actions
-        "#{display_name} {#{token_code&.s_value}}"
+        "#{display_name} {#{user_code_text}}"
       end
 
       # opt_nl: ε     <-- empty_rule
@@ -131,9 +148,7 @@ module Lrama
 
       # @rbs () -> bool
       def contains_at_reference?
-        return false unless token_code
-
-        token_code.references.any? {|r| r.type == :at }
+        references.any? {|r| r.type == :at }
       end
 
       private

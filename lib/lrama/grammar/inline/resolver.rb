@@ -71,27 +71,35 @@ module Lrama
         # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Integer index) -> Node::RuleRhs::Action?
         def replace_action(rhs, index)
           action = @rule_builder.action
-          return action if rhs.action.nil? || action.nil?
+          return unless action
 
-          inline_index = index + 1
-          index_offset = rhs.symbols.count - 1
-          code = action.code.s_value.dup
+          code = action.text
+          references = action.references.map(&:dup)
 
-          action.code.references.reverse_each do |ref|
-            next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
+          if rhs.action
+            inline_index = index + 1
+            index_offset = rhs.symbols.count - 1
+            code = code.dup
 
-            reference = code[ref.first_column...ref.last_column]
-            replacement =
-              if ref.type == :dollar && ref.index == inline_index
-                rhs.action.code.s_value
-              else
-                reference.sub(/\d+\z/, (ref.index + index_offset).to_s)
-              end
-            code[ref.first_column...ref.last_column] = replacement
+            references.reverse_each do |ref|
+              next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
+
+              reference = code[ref.first_column...ref.last_column]
+              replacement =
+                if ref.type == :dollar && ref.index == inline_index
+                  rhs.action.text
+                else
+                  reference.sub(/\d+\z/, (ref.index + index_offset).to_s)
+                end
+              code[ref.first_column...ref.last_column] = replacement
+            end
+            code.freeze
+            references = Lexer::ReferenceScanner.new(code).scan
           end
-          resolved_code = Lrama::Lexer::Token::UserCode.new(s_value: code, location: action.code.location)
           Node::RuleRhs::Action.new(
-            code: resolved_code,
+            code: action.code,
+            text: code,
+            references: references,
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

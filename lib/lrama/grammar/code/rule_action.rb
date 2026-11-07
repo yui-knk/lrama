@@ -20,6 +20,16 @@ module Lrama
           @grammar = grammar
         end
 
+        # @rbs () -> String
+        def s_value
+          @rule.user_code_text || token_code.s_value
+        end
+
+        # @rbs () -> Array[Grammar::Reference]
+        def references
+          @rule.references
+        end
+
         private
 
         # * ($$) yyval

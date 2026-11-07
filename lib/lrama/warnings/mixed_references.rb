@@ -35,11 +35,11 @@ module Lrama
         grouped_usage = {} #: Hash[Lrama::Grammar::Rule, { positional: bool, named: bool }]
 
         grammar.rules.each do |rule|
-          next unless (token_code = rule.token_code)
+          next unless (code = rule.user_code_text)
 
           original_rule = rule.original_rule || rule
           usage = (grouped_usage[original_rule] ||= { positional: false, named: false })
-          classify_references(token_code.references, token_code.s_value, usage)
+          classify_references(rule.references, code, usage)
         end
 
         grouped_usage

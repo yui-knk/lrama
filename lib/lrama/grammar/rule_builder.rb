@@ -133,6 +133,7 @@ module Lrama
           _rhs: symbols,
           _lhs_location: lhs_location, _rhs_locations: locations,
           lhs_tag: lhs_tag, token_code: action&.code,
+          references: action&.references, user_code_text: action&.text,
           position_in_original_rule_rhs: @position_in_original_rule_rhs, precedence_sym: precedence_sym, lineno: line
         )
         @rules = [rule]
@@ -238,7 +239,7 @@ module Lrama
 
           token = node.code
 
-          token.references.each do |ref|
+          node.references.each do |ref|
             ref_name = ref.name
 
             if ref_name
@@ -290,7 +291,7 @@ module Lrama
         when Node::RuleRhs::Symbol, Node::RuleRhs::InstantiateRule
           [node.name, node.alias_name].compact.include?(name)
         when Node::RuleRhs::Action
-          [node.code.s_value, node.alias_name].compact.include?(name)
+          [node.text, node.alias_name].compact.include?(name)
         else
           false
         end

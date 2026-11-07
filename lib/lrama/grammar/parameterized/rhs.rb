@@ -20,7 +20,7 @@ module Lrama
         def resolve_action(bindings)
           return unless action
 
-          resolved_code = Lexer::Token::UserCode.new(s_value: action.code.s_value, location: action.code.location)
+          resolved_references = action.references.map(&:dup)
           var_to_arg = {} #: Hash[String, String]
           symbols.each do |sym|
             resolved_sym = bindings.resolve_symbol(sym)
@@ -30,7 +30,7 @@ module Lrama
           end
 
           var_to_arg.each do |var, arg|
-            resolved_code.references.each do |ref|
+            resolved_references.each do |ref|
               if ref.name == var
                 ref.name = arg
               end
@@ -38,7 +38,9 @@ module Lrama
           end
 
           Node::RuleRhs::Action.new(
-            code: resolved_code,
+            code: action.code,
+            text: action.text,
+            references: resolved_references,
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location
