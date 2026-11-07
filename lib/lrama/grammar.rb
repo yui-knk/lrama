@@ -721,7 +721,7 @@ module Lrama
           _lhs: @accept_symbol.id,
           _rhs: [Grammar::Symbol::Id.from_token(start), @eof_symbol.id],
           _rhs_locations: [start.location, nil],
-          token_code: nil,
+          action: nil,
           lineno: start.line
         )
       else
@@ -733,7 +733,7 @@ module Lrama
           _lhs: @accept_symbol.id,
           _rhs: [lhs, @eof_symbol.id],
           _rhs_locations: [rule_builder.lhs_location, nil],
-          token_code: nil,
+          action: nil,
           lineno: lineno
         )
       end

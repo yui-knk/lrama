@@ -239,9 +239,9 @@ module Lrama
     # b4_user_actions
     def user_actions
       action = @context.states.rules.map do |rule|
-        next unless rule.token_code
+        next unless rule.action
 
-        code = rule.token_code
+        code = rule.action.code
         spaces = " " * (code.column - 1)
 
         <<-STR

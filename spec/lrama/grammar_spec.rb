@@ -82,7 +82,7 @@ RSpec.describe Lrama::Grammar do
           _lhs: Lrama::Grammar::Symbol::Id.new(name: '+', kind: :ident),
           _rhs: [],
           rhs: [],
-          token_code: nil,
+          action: nil,
           lineno: 15
         )
         rule.lhs = lhs_term
@@ -104,21 +104,21 @@ RSpec.describe Lrama::Grammar do
           id: 1,
           _lhs: Lrama::Grammar::Symbol::Id.new(name: '+', kind: :ident),
           rhs: [],
-          token_code: nil,
+          action: nil,
           lineno: 15
         )
         rule2 = Lrama::Grammar::Rule.new(
           id: 2,
           _lhs: Lrama::Grammar::Symbol::Id.new(name: 'expr', kind: :ident),
           rhs: [],
-          token_code: nil,
+          action: nil,
           lineno: 20
         )
         rule3 = Lrama::Grammar::Rule.new(
           id: 3,
           _lhs: Lrama::Grammar::Symbol::Id.new(name: '-', kind: :ident),
           rhs: [],
-          token_code: nil,
+          action: nil,
           lineno: 25
         )
         rule1.lhs = lhs1

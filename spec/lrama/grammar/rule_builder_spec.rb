@@ -5,10 +5,6 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
     Lrama::Grammar::Node::RuleRhs::Symbol.new(token: token, location: token.location)
   end
 
-  def action_node(token)
-    Lrama::Grammar::Node::RuleRhs::Action.new(code: token, location: token.location)
-  end
-
   let(:rule_counter) { Lrama::Grammar::Counter.new(1) }
   let(:midrule_action_counter) { Lrama::Grammar::Counter.new(1) }
   let(:rule_builder) { Lrama::Grammar::RuleBuilder.new(rule_counter, midrule_action_counter, Lrama::Grammar::Parameterized::Resolver.new) }
@@ -95,6 +91,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
       let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
       let(:token_5) { Lrama::Lexer::Token::UserCode.new(s_value: "$class = $1 + $keyword_end; @class = @1 + @keyword_end;", location: location) }
+      let(:action) { action_node(token_5) }
 
       it "resolves index of references and fills its value with index" do
         # class : keyword_class tSTRING keyword_end { $class = $1 + $keyword_end; @class = @1 + @keyword_end; }
@@ -103,35 +100,35 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
         rule_builder.add_rhs(symbol_node(token_2))
         rule_builder.add_rhs(symbol_node(token_3))
         rule_builder.add_rhs(symbol_node(token_4))
-        rule_builder.add_rhs(action_node(token_5))
+        rule_builder.add_rhs(action)
         rule_builder.complete_input
 
         rule_builder.send(:preprocess_references)
 
-        expect(token_5.references.count).to eq 6
-        expect(token_5.references[0].type).to eq :dollar
-        expect(token_5.references[0].name).to eq '$'
-        expect(token_5.references[0].index).to eq nil
+        expect(action.references.count).to eq 6
+        expect(action.references[0].type).to eq :dollar
+        expect(action.references[0].name).to eq '$'
+        expect(action.references[0].index).to eq nil
 
-        expect(token_5.references[1].type).to eq :dollar
-        expect(token_5.references[1].name).to eq nil
-        expect(token_5.references[1].index).to eq 1
+        expect(action.references[1].type).to eq :dollar
+        expect(action.references[1].name).to eq nil
+        expect(action.references[1].index).to eq 1
 
-        expect(token_5.references[2].type).to eq :dollar
-        expect(token_5.references[2].name).to eq 'keyword_end'
-        expect(token_5.references[2].index).to eq 3
+        expect(action.references[2].type).to eq :dollar
+        expect(action.references[2].name).to eq 'keyword_end'
+        expect(action.references[2].index).to eq 3
 
-        expect(token_5.references[3].type).to eq :at
-        expect(token_5.references[3].name).to eq '$'
-        expect(token_5.references[3].index).to eq nil
+        expect(action.references[3].type).to eq :at
+        expect(action.references[3].name).to eq '$'
+        expect(action.references[3].index).to eq nil
 
-        expect(token_5.references[4].type).to eq :at
-        expect(token_5.references[4].name).to eq nil
-        expect(token_5.references[4].index).to eq 1
+        expect(action.references[4].type).to eq :at
+        expect(action.references[4].name).to eq nil
+        expect(action.references[4].index).to eq 1
 
-        expect(token_5.references[5].type).to eq :at
-        expect(token_5.references[5].name).to eq 'keyword_end'
-        expect(token_5.references[5].index).to eq 3
+        expect(action.references[5].type).to eq :at
+        expect(action.references[5].name).to eq 'keyword_end'
+        expect(action.references[5].index).to eq 3
       end
     end
 
@@ -141,6 +138,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location) }
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
       let(:token_4) { Lrama::Lexer::Token::UserCode.new(s_value: "$$ = $keyword_class + $2; @$ = @keyword_class + @2;", location: location) }
+      let(:action) { action_node(token_4) }
       let(:token_5) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
 
       it "raises error" do
@@ -149,36 +147,36 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
         rule_builder.lhs_location = token_1.location
         rule_builder.add_rhs(symbol_node(token_2))
         rule_builder.add_rhs(symbol_node(token_3))
-        rule_builder.add_rhs(action_node(token_4))
+        rule_builder.add_rhs(action)
         rule_builder.add_rhs(symbol_node(token_5))
         rule_builder.complete_input
 
         rule_builder.send(:preprocess_references)
 
-        expect(token_4.references.count).to eq 6
-        expect(token_4.references[0].type).to eq :dollar
-        expect(token_4.references[0].name).to eq '$'
-        expect(token_4.references[0].index).to eq nil
+        expect(action.references.count).to eq 6
+        expect(action.references[0].type).to eq :dollar
+        expect(action.references[0].name).to eq '$'
+        expect(action.references[0].index).to eq nil
 
-        expect(token_4.references[1].type).to eq :dollar
-        expect(token_4.references[1].name).to eq 'keyword_class'
-        expect(token_4.references[1].index).to eq 1
+        expect(action.references[1].type).to eq :dollar
+        expect(action.references[1].name).to eq 'keyword_class'
+        expect(action.references[1].index).to eq 1
 
-        expect(token_4.references[2].type).to eq :dollar
-        expect(token_4.references[2].name).to eq nil
-        expect(token_4.references[2].index).to eq 2
+        expect(action.references[2].type).to eq :dollar
+        expect(action.references[2].name).to eq nil
+        expect(action.references[2].index).to eq 2
 
-        expect(token_4.references[3].type).to eq :at
-        expect(token_4.references[3].name).to eq '$'
-        expect(token_4.references[3].index).to eq nil
+        expect(action.references[3].type).to eq :at
+        expect(action.references[3].name).to eq '$'
+        expect(action.references[3].index).to eq nil
 
-        expect(token_4.references[4].type).to eq :at
-        expect(token_4.references[4].name).to eq 'keyword_class'
-        expect(token_4.references[4].index).to eq 1
+        expect(action.references[4].type).to eq :at
+        expect(action.references[4].name).to eq 'keyword_class'
+        expect(action.references[4].index).to eq 1
 
-        expect(token_4.references[5].type).to eq :at
-        expect(token_4.references[5].name).to eq nil
-        expect(token_4.references[5].index).to eq 2
+        expect(action.references[5].type).to eq :at
+        expect(action.references[5].name).to eq nil
+        expect(action.references[5].index).to eq 2
       end
     end
 
@@ -446,10 +444,10 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
       expect(rules.count).to eq 3
       expect(midrule_1._lhs.name).to eq '@1'
-      expect(midrule_1.token_code.s_value).to eq '$1'
+      expect(midrule_1.action.text).to eq '$1'
       expect(midrule_1.original_rule).to eq rule
       expect(midrule_2._lhs.name).to eq '$@2'
-      expect(midrule_2.token_code.s_value).to eq '$2 + $3'
+      expect(midrule_2.action.text).to eq '$2 + $3'
       expect(midrule_2.original_rule).to eq rule
     end
   end

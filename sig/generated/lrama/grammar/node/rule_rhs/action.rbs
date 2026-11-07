@@ -5,24 +5,22 @@ module Lrama
     module Node
       module RuleRhs
         class Action < Node::Base
-          @text: String?
-
-          @references: Array[Grammar::Reference]?
-
+          # Keep the lexer token for source locations; expansion state belongs to the action.
           attr_reader code: Lexer::Token::UserCode
+
+          attr_reader text: String
+
+          attr_reader references: Array[Grammar::Reference]
 
           attr_reader alias_name: String?
 
           attr_reader tag: Lexer::Token::Tag?
 
-          # @rbs (code: Lexer::Token::UserCode, ?text: String?, ?references: Array[Grammar::Reference]?, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
-          def initialize: (code: Lexer::Token::UserCode, location: Lexer::Location, ?text: String?, ?references: Array[Grammar::Reference]?, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
+          attr_accessor referred: bool
 
-          # @rbs () -> String
-          def text: () -> String
-
-          # @rbs () -> Array[Grammar::Reference]
-          def references: () -> Array[Grammar::Reference]
+          # @rbs (code: Lexer::Token::UserCode, ?text: String, ?references: Array[Grammar::Reference],
+          #       ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
+          def initialize: (code: Lexer::Token::UserCode, location: Lexer::Location, ?text: String, ?references: Array[Grammar::Reference], ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
         end
       end
     end

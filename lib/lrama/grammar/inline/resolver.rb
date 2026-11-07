@@ -93,7 +93,6 @@ module Lrama
                 end
               code[ref.first_column...ref.last_column] = replacement
             end
-            code.freeze
             references = Lexer::ReferenceScanner.new(code).scan
           end
           Node::RuleRhs::Action.new(

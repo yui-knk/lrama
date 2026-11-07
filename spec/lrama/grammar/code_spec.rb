@@ -376,7 +376,7 @@ RSpec.describe Lrama::Grammar::Code do
           end
 
           it "does not infer the tag from a following symbol" do
-            rule = grammar.rules.find { |rule| rule.token_code }
+            rule = grammar.rules.find { |rule| rule.action }
             expect { rule.translated_code(grammar) }.to raise_error("Tag is not specified for '$0' in '#{rule.display_name}'")
           end
         end

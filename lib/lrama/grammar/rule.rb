@@ -8,9 +8,6 @@ module Lrama
     class Rule
       # @rbs!
       #
-      #   @references: Array[Grammar::Reference]?
-      #   @user_code_text: String?
-      #
       #   interface _DelegatedMethods
       #     def lhs: -> Grammar::Symbol
       #     def rhs: -> Array[Grammar::Symbol]
@@ -22,7 +19,7 @@ module Lrama
       attr_accessor :lhs_tag #: Lexer::Token::Tag?
       attr_accessor :_rhs #: Array[Grammar::Symbol::Id]
       attr_accessor :rhs #: Array[Grammar::Symbol]
-      attr_accessor :token_code #: Lexer::Token::UserCode?
+      attr_accessor :action #: Node::RuleRhs::Action?
       attr_accessor :position_in_original_rule_rhs #: Integer
       attr_accessor :nullable #: bool
       attr_accessor :precedence_sym #: Grammar::Symbol?
@@ -32,12 +29,10 @@ module Lrama
       attr_accessor :original_rule #: Rule
 
       # @rbs (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?,
-      #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?token_code: Lexer::Token::UserCode?,
-      #      ?references: Array[Grammar::Reference]?, ?user_code_text: String?,
+      #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?action: Node::RuleRhs::Action?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
       #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
-      def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, token_code: nil,
-                     references: nil, user_code_text: nil,
+      def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, action: nil,
                      position_in_original_rule_rhs: nil, nullable: nil, precedence_sym: nil, lineno: nil,
                      _lhs_location: nil, _rhs_locations: nil)
         @id = id
@@ -46,9 +41,7 @@ module Lrama
         @lhs_tag = lhs_tag
         @_rhs = _rhs
         @rhs = rhs
-        @token_code = token_code
-        @references = references
-        @user_code_text = user_code_text
+        @action = action
         @position_in_original_rule_rhs = position_in_original_rule_rhs
         @nullable = nullable
         @precedence_sym = precedence_sym
@@ -63,21 +56,11 @@ module Lrama
         self.lhs == other.lhs &&
         self.lhs_tag == other.lhs_tag &&
         self.rhs == other.rhs &&
-        self.user_code_text == other.user_code_text &&
+        self.action&.text == other.action&.text &&
         self.position_in_original_rule_rhs == other.position_in_original_rule_rhs &&
         self.nullable == other.nullable &&
         self.precedence_sym == other.precedence_sym &&
         self.lineno == other.lineno
-      end
-
-      # @rbs () -> Array[Grammar::Reference]
-      def references
-        @references || token_code&.references || []
-      end
-
-      # @rbs () -> String?
-      def user_code_text
-        @user_code_text || token_code&.s_value
       end
 
       # @rbs () -> String
@@ -118,7 +101,7 @@ module Lrama
 
       # @rbs () -> String
       def with_actions
-        "#{display_name} {#{user_code_text}}"
+        "#{display_name} {#{action&.text}}"
       end
 
       # opt_nl: ε     <-- empty_rule
@@ -141,14 +124,16 @@ module Lrama
 
       # @rbs (Grammar grammar) -> String?
       def translated_code(grammar)
-        return nil unless token_code
+        return nil unless action
 
-        Code::RuleAction.new(type: :rule_action, token_code: token_code, rule: self, grammar: grammar).translated_code
+        Code::RuleAction.new(action: action, rule: self, grammar: grammar).translated_code
       end
 
       # @rbs () -> bool
       def contains_at_reference?
-        references.any? {|r| r.type == :at }
+        return false unless action
+
+        action.references.any? {|r| r.type == :at }
       end
 
       private

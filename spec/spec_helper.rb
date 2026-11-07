@@ -43,6 +43,10 @@ end
 require "lrama"
 
 module RSpecHelper
+  def action_node(token)
+    Lrama::Grammar::Node::RuleRhs::Action.new(code: token, location: token.location)
+  end
+
   def symbol_id(name, kind: :ident)
     Lrama::Grammar::Symbol::Id.new(name: name, kind: kind)
   end

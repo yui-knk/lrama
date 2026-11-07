@@ -7,7 +7,6 @@ module Lrama
       class Base
         attr_reader :s_value #: String
         attr_reader :location #: Location
-        attr_accessor :referred #: bool
         attr_reader :errors #: Array[String]
 
         # @rbs (s_value: String, ?location: Location) -> void

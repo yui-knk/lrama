@@ -36,7 +36,7 @@ module Lrama
       def ==(other)
         self.class == other.class &&
         self.type == other.type &&
-        self.token_code == other.token_code
+        self.s_value == other.s_value
       end
 
       # $$, $n, @$, @n are translated to C code

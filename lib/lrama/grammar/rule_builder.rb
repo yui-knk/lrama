@@ -132,8 +132,7 @@ module Lrama
           _lhs: lhs,
           _rhs: symbols,
           _lhs_location: lhs_location, _rhs_locations: locations,
-          lhs_tag: lhs_tag, token_code: action&.code,
-          references: action&.references, user_code_text: action&.text,
+          lhs_tag: lhs_tag, action: action,
           position_in_original_rule_rhs: @position_in_original_rule_rhs, precedence_sym: precedence_sym, lineno: line
         )
         @rules = [rule]
@@ -192,7 +191,7 @@ module Lrama
             end
             replaced_rhs_locations << node.location
           when Node::RuleRhs::Action
-            prefix = node.code.referred ? "@" : "$@"
+            prefix = node.referred ? "@" : "$@"
             tag = node.tag || lhs_tag
             lhs_id = Grammar::Symbol::Id.new(name: prefix + @midrule_action_counter.increment.to_s, kind: :ident)
             replaced_rhs << lhs_id
@@ -300,7 +299,7 @@ module Lrama
       # @rbs (Node::RuleRhs::rhs node) -> void
       def mark_rhs_node_referred(node)
         if node.is_a?(Node::RuleRhs::Action)
-          node.code.referred = true
+          node.referred = true
         end
       end
     end
