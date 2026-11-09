@@ -5,12 +5,12 @@ module Lrama
     class ErrorToken
       attr_reader ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag]
 
-      attr_reader user_code: Grammar::UserCode
+      attr_reader code: Grammar::Code
 
       attr_reader lineno: Integer
 
-      # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> void
-      def initialize: (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> void
+      # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> void
+      def initialize: (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> void
 
       # @rbs (Lexer::Token::Tag tag) -> String
       def translated_code: (Lexer::Token::Tag tag) -> String

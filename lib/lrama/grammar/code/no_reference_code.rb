@@ -4,8 +4,13 @@
 module Lrama
   class Grammar
     class Code
-      class NoReferenceCode < Code
-        private
+      class NoReferenceCode
+        attr_reader :type #: ::Symbol
+
+        # @rbs (type: ::Symbol) -> void
+        def initialize(type:)
+          @type = type
+        end
 
         # * ($$) error
         # * (@$) error

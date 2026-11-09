@@ -1,150 +1,290 @@
 # frozen_string_literal: true
 
 RSpec.describe Lrama::Grammar::Code do
+  describe ".from_token" do
+    let(:text) { " $value; " }
+    let(:grammar_file) { Lrama::Lexer::GrammarFile.new("test.y", text) }
+    let(:location) { Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: text.length) }
+    let(:token) { Lrama::Lexer::Token::UserCode.new(s_value: text, location: location) }
+
+    it "preserves the source text and location for code generation and diagnostics" do
+      code = described_class.from_token(token)
+
+      expect(code.text).to eq(text)
+      expect(code.location).to equal(location)
+      expect(code.line).to eq(1)
+      expect(code.column).to eq(0)
+      expect(code.references.first.name).to eq("value")
+    end
+
+    it "keeps reference resolution state separate for each conversion" do
+      first = described_class.from_token(token)
+      first.references.first.name = "$"
+      first.references.first.index = 1
+
+      second = described_class.from_token(token)
+
+      expect(second.references.first.name).to eq("value")
+      expect(second.references.first.index).to be_nil
+      expect(token.s_value).to eq(text)
+    end
+  end
+
+  describe "#initialize" do
+    it "preserves references resolved during grammar expansion" do
+      original = described_class.new(text: " $value; ")
+      references = original.references.map(&:dup)
+      references.first.name = "argument"
+      references.first.number = 2
+      references.first.index = 2
+
+      expanded = described_class.new(text: original.text, references: references)
+
+      expect(expanded.references.first.name).to eq("argument")
+      expect(expanded.references.first.index).to eq(2)
+      expect(original.references.first.name).to eq("value")
+      expect(original.references.first.index).to be_nil
+    end
+  end
+
+  describe "#translated_code" do
+    it "translates the same code in different contexts without changing the source" do
+      code = described_class.new(text: "print($$);")
+      initial_action = described_class::InitialActionCode.new
+      printer = described_class::PrinterCode.new(type: :printer, tag: Lrama::Lexer::Token::Tag.new(s_value: "<val>"))
+
+      expect(code.translated_code(initial_action)).to eq("print(yylval);")
+      expect(code.translated_code(printer)).to eq("print(((*yyvaluep).val));")
+      expect(code.translated_code(initial_action)).to eq("print(yylval);")
+      expect(code.text).to eq("print($$);")
+      expect(code.references.first.name).to eq("$")
+    end
+  end
+
+  describe "#references" do
+    let(:grammar_file) { Lrama::Lexer::GrammarFile.new("test.y", "") }
+    let(:location) { Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: 2) }
+
+    it "returns references in user code" do
+      # $$
+      references = Lrama::Grammar::Code.new(text: " $$ ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "$", ex_tag: nil, first_column: 1, last_column: 3)
+      references = Lrama::Grammar::Code.new(text: " $<long>$ ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "$", ex_tag: Lrama::Lexer::Token::Tag.new(s_value: "<long>"), first_column: 1, last_column: 9)
+
+      # $1
+      references = Lrama::Grammar::Code.new(text: " $1 ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, number: 1, index: 1, ex_tag: nil, first_column: 1, last_column: 3)
+      references = Lrama::Grammar::Code.new(text: " $<long>1 ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, number: 1, index: 1, ex_tag: Lrama::Lexer::Token::Tag.new(s_value: "<long>"), first_column: 1, last_column: 9)
+      references = Lrama::Grammar::Code.new(text: " $<value.integer>1 ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, number: 1, index: 1, ex_tag: Lrama::Lexer::Token::Tag.new(s_value: "<value.integer>"), first_column: 1, last_column: 18)
+
+      # $foo
+      references = Lrama::Grammar::Code.new(text: " $foo ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "foo", ex_tag: nil, first_column: 1, last_column: 5)
+      references = Lrama::Grammar::Code.new(text: " $<long>foo ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "foo", ex_tag: Lrama::Lexer::Token::Tag.new(s_value: "<long>"), first_column: 1, last_column: 11)
+
+      # $[expr.right]
+      references = Lrama::Grammar::Code.new(text: " $[expr.right] ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "expr.right", ex_tag: nil, first_column: 1, last_column: 14)
+      references = Lrama::Grammar::Code.new(text: " $<long>[expr.right] ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :dollar, name: "expr.right", ex_tag: Lrama::Lexer::Token::Tag.new(s_value: "<long>"), first_column: 1, last_column: 20)
+
+      # @$
+      references = Lrama::Grammar::Code.new(text: " @$ ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :at, name: "$", ex_tag: nil, first_column: 1, last_column: 3)
+
+      # @1
+      references = Lrama::Grammar::Code.new(text: " @1 ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :at, number: 1, index: 1, ex_tag: nil, first_column: 1, last_column: 3)
+
+      # @foo
+      references = Lrama::Grammar::Code.new(text: " @foo ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :at, name: "foo", ex_tag: nil, first_column: 1, last_column: 5)
+
+      # @[expr.right]
+      references = Lrama::Grammar::Code.new(text: " @[expr.right] ", location: location).references
+      expect(references.count).to eq 1
+      expect(references[0]).to eq Lrama::Grammar::Reference.new(type: :at, name: "expr.right", ex_tag: nil, first_column: 1, last_column: 14)
+    end
+
+    ["\n", "\r\n"].each do |newline|
+      it "ignores references in a continued line comment with #{newline.inspect}" do
+        code = "$1; // comment\\#{newline}$9; @9; $:9;#{newline}$2;"
+        references = described_class.new(text: code, location: location).references
+
+        expect(references.map { |ref| [ref.type, ref.number] }).to eq([[:dollar, 1], [:dollar, 2]])
+        expect(references.last.first_column).to eq(code.index('$2'))
+      end
+    end
+
+    it "uses character offsets after multibyte comments and literals" do
+      lexemes = %w[$$ $<long>$ $1 $<long>1 $foo $[expr.right] @$ @1 @foo @[expr.right] $:$ $:1 $:foo $:[expr.right]]
+      code = "/* 日本 */\nputs(\"é🙂\"); #{lexemes.join('; ')};"
+
+      references = described_class.new(text: code, location: location).references
+
+      expect(references.map { |ref| code[ref.first_column...ref.last_column] }).to eq(lexemes)
+    end
+
+    it "ignores references in C literals and comments" do
+      code = <<~'C'
+        $1;
+        printf("total $2 and @2 \"done\"");
+        int character = '$3';
+        // note $3 and @3
+        $4; @4;
+        /* note $5 and @5 */
+      C
+
+      references = Lrama::Grammar::Code.new(text: code, location: location).references
+
+      expect(references.map { |ref| [ref.type, ref.index] }).to eq([[:dollar, 1], [:dollar, 4], [:at, 4]])
+    end
+  end
+
   let(:token_class) { Lrama::Lexer::Token }
-  let(:user_code_dollar_dollar) { Lrama::Grammar::UserCode.new(text: 'print($$);') }
-  let(:user_code_at_dollar) { Lrama::Grammar::UserCode.new(text: 'print(@$);') }
-  let(:user_code_index_dollar) { Lrama::Grammar::UserCode.new(text: 'print($:$);') }
-  let(:user_code_dollar_n) { Lrama::Grammar::UserCode.new(text: 'print($n);') }
-  let(:user_code_at_n) { Lrama::Grammar::UserCode.new(text: 'print(@n);') }
-  let(:user_code_index_n) { Lrama::Grammar::UserCode.new(text: 'print($:1);') }
+  let(:code_dollar_dollar) { Lrama::Grammar::Code.new(text: 'print($$);') }
+  let(:code_at_dollar) { Lrama::Grammar::Code.new(text: 'print(@$);') }
+  let(:code_index_dollar) { Lrama::Grammar::Code.new(text: 'print($:$);') }
+  let(:code_dollar_n) { Lrama::Grammar::Code.new(text: 'print($n);') }
+  let(:code_at_n) { Lrama::Grammar::Code.new(text: 'print(@n);') }
+  let(:code_index_n) { Lrama::Grammar::Code.new(text: 'print($:1);') }
 
   describe Lrama::Grammar::Code::InitialActionCode do
-    describe "#translated_code" do
+    let(:translator) { described_class.new }
+
+    describe "reference translation" do
       it "translates '$$' to 'yylval'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_dollar_dollar)
-        expect(code.translated_code).to eq("print(yylval);")
+        expect(code_dollar_dollar.translated_code(translator)).to eq("print(yylval);")
       end
 
       it "translates '@$' to 'yylloc'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_at_dollar)
-        expect(code.translated_code).to eq("print(yylloc);")
+        expect(code_at_dollar.translated_code(translator)).to eq("print(yylloc);")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_index_dollar)
-        expect { code.translated_code }.to raise_error("$:$ can not be used in initial_action.")
+        expect { code_index_dollar.translated_code(translator) }.to raise_error("$:$ can not be used in initial_action.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_dollar_n)
-        expect { code.translated_code }.to raise_error("$n can not be used in initial_action.")
+        expect { code_dollar_n.translated_code(translator) }.to raise_error("$n can not be used in initial_action.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_at_n)
-        expect { code.translated_code }.to raise_error("@n can not be used in initial_action.")
+        expect { code_at_n.translated_code(translator) }.to raise_error("@n can not be used in initial_action.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :initial_action, user_code: user_code_index_n)
-        expect { code.translated_code }.to raise_error("$:1 can not be used in initial_action.")
+        expect { code_index_n.translated_code(translator) }.to raise_error("$:1 can not be used in initial_action.")
       end
     end
   end
 
   describe Lrama::Grammar::Code::NoReferenceCode do
-    describe "#translated_code" do
+    let(:translator) { described_class.new(type: :union) }
+
+    describe "reference translation" do
       it "raises error for '$$'" do
-        code = described_class.new(type: :union, user_code: user_code_dollar_dollar)
-        expect { code.translated_code }.to raise_error("$$ can not be used in union.")
+        expect { code_dollar_dollar.translated_code(translator) }.to raise_error("$$ can not be used in union.")
       end
 
       it "raises error for '@$'" do
-        code = described_class.new(type: :union, user_code: user_code_at_dollar)
-        expect { code.translated_code }.to raise_error("@$ can not be used in union.")
+        expect { code_at_dollar.translated_code(translator) }.to raise_error("@$ can not be used in union.")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :union, user_code: user_code_index_dollar)
-        expect { code.translated_code }.to raise_error("$:$ can not be used in union.")
+        expect { code_index_dollar.translated_code(translator) }.to raise_error("$:$ can not be used in union.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :union, user_code: user_code_dollar_n)
-        expect { code.translated_code }.to raise_error("$n can not be used in union.")
+        expect { code_dollar_n.translated_code(translator) }.to raise_error("$n can not be used in union.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :union, user_code: user_code_at_n)
-        expect { code.translated_code }.to raise_error("@n can not be used in union.")
+        expect { code_at_n.translated_code(translator) }.to raise_error("@n can not be used in union.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :union, user_code: user_code_index_n)
-        expect { code.translated_code }.to raise_error("$:1 can not be used in union.")
+        expect { code_index_n.translated_code(translator) }.to raise_error("$:1 can not be used in union.")
       end
     end
   end
 
   describe Lrama::Grammar::Code::DestructorCode do
-    describe "#translated_code" do
+    let(:translator) { described_class.new(type: :destructor, tag: tag) }
+
+    describe "reference translation" do
       let(:tag) { token_class::Tag.new(s_value: '<val>') }
 
       it "translates '$$' to '((*yyvaluep).val)'" do
-        code = described_class.new(type: :destructor, user_code: user_code_dollar_dollar, tag: tag)
-        expect(code.translated_code).to eq("print(((*yyvaluep).val));")
+        expect(code_dollar_dollar.translated_code(translator)).to eq("print(((*yyvaluep).val));")
       end
 
       it "translates '@$' to '(*yylocationp)'" do
-        code = described_class.new(type: :destructor, user_code: user_code_at_dollar, tag: tag)
-        expect(code.translated_code).to eq("print((*yylocationp));")
+        expect(code_at_dollar.translated_code(translator)).to eq("print((*yylocationp));")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :destructor, user_code: user_code_index_dollar, tag: tag)
-        expect { code.translated_code }.to raise_error("$:$ can not be used in destructor.")
+        expect { code_index_dollar.translated_code(translator) }.to raise_error("$:$ can not be used in destructor.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :destructor, user_code: user_code_dollar_n, tag: tag)
-        expect { code.translated_code }.to raise_error("$n can not be used in destructor.")
+        expect { code_dollar_n.translated_code(translator) }.to raise_error("$n can not be used in destructor.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :destructor, user_code: user_code_at_n, tag: tag)
-        expect { code.translated_code }.to raise_error("@n can not be used in destructor.")
+        expect { code_at_n.translated_code(translator) }.to raise_error("@n can not be used in destructor.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :destructor, user_code: user_code_index_n, tag: tag)
-        expect { code.translated_code }.to raise_error("$:1 can not be used in destructor.")
+        expect { code_index_n.translated_code(translator) }.to raise_error("$:1 can not be used in destructor.")
       end
     end
   end
 
   describe Lrama::Grammar::Code::PrinterCode do
-    describe "#translated_code" do
+    let(:translator) { described_class.new(type: :printer, tag: tag) }
+
+    describe "reference translation" do
       let(:tag) { token_class::Tag.new(s_value: '<val>') }
 
       it "translates '$$' to '((*yyvaluep).val)'" do
-        code = described_class.new(type: :printer, user_code: user_code_dollar_dollar, tag: tag)
-        expect(code.translated_code).to eq("print(((*yyvaluep).val));")
+        expect(code_dollar_dollar.translated_code(translator)).to eq("print(((*yyvaluep).val));")
       end
 
       it "translates '@$' to '(*yylocationp)'" do
-        code = described_class.new(type: :printer, user_code: user_code_at_dollar, tag: tag)
-        expect(code.translated_code).to eq("print((*yylocationp));")
+        expect(code_at_dollar.translated_code(translator)).to eq("print((*yylocationp));")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :printer, user_code: user_code_index_dollar, tag: tag)
-        expect { code.translated_code }.to raise_error("$:$ can not be used in printer.")
+        expect { code_index_dollar.translated_code(translator) }.to raise_error("$:$ can not be used in printer.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :printer, user_code: user_code_dollar_n, tag: tag)
-        expect { code.translated_code }.to raise_error("$n can not be used in printer.")
+        expect { code_dollar_n.translated_code(translator) }.to raise_error("$n can not be used in printer.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :printer, user_code: user_code_at_n, tag: tag)
-        expect { code.translated_code }.to raise_error("@n can not be used in printer.")
+        expect { code_at_n.translated_code(translator) }.to raise_error("@n can not be used in printer.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :printer, user_code: user_code_index_n, tag: tag)
-        expect { code.translated_code }.to raise_error("$:1 can not be used in printer.")
+        expect { code_index_n.translated_code(translator) }.to raise_error("$:1 can not be used in printer.")
       end
     end
   end

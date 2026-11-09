@@ -51,7 +51,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
   describe "#complete_input" do
     let(:location) { Lrama::Lexer::Location.new(grammar_file: Lrama::Lexer::GrammarFile.new(path, ""), first_line: 1, first_column: 0, last_line: 1, last_column: 4) }
-    let(:token) { Lrama::Grammar::UserCode.new(text: "code", location: location) }
+    let(:token) { Lrama::Grammar::Code.new(text: "code", location: location) }
     let(:action) { action_node(token) }
     let(:sym_id) { Lrama::Grammar::Symbol::Id.new(name: "tPLUS", kind: :ident) }
     let(:sym) { Lrama::Grammar::Symbol.new(id: sym_id, term: true) }
@@ -90,7 +90,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location) }
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
       let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
-      let(:token_5) { Lrama::Grammar::UserCode.new(text: "$class = $1 + $keyword_end; @class = @1 + @keyword_end;", location: location) }
+      let(:token_5) { Lrama::Grammar::Code.new(text: "$class = $1 + $keyword_end; @class = @1 + @keyword_end;", location: location) }
       let(:action) { action_node(token_5) }
 
       it "resolves index of references and fills its value with index" do
@@ -137,7 +137,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_1) { Lrama::Lexer::Token::Ident.new(s_value: "class", location: location) }
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location) }
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
-      let(:token_4) { Lrama::Grammar::UserCode.new(text: "$$ = $keyword_class + $2; @$ = @keyword_class + @2;", location: location) }
+      let(:token_4) { Lrama::Grammar::Code.new(text: "$$ = $keyword_class + $2; @$ = @keyword_class + @2;", location: location) }
       let(:action) { action_node(token_4) }
       let(:token_5) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
 
@@ -193,7 +193,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location_2) }
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location_3) }
       let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location_4) }
-      let(:token_5) { Lrama::Grammar::UserCode.new(text: " $class = $10; ", location: location_5) }
+      let(:token_5) { Lrama::Grammar::Code.new(text: " $class = $10; ", location: location_5) }
 
       it "raises error" do
         rule_builder.lhs = Lrama::Grammar::Symbol::Id.from_token(token_1)
@@ -225,10 +225,10 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:location_6) { Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 51, last_line: 1, last_column: 65) }
       let(:token_1) { Lrama::Lexer::Token::Ident.new(s_value: "class", location: location_1) }
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location_2) }
-      let(:token_3) { Lrama::Grammar::UserCode.new(text: " $3; ", location: location_3) }
+      let(:token_3) { Lrama::Grammar::Code.new(text: " $3; ", location: location_3) }
       let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location_4) }
       let(:token_5) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location_5) }
-      let(:token_6) { Lrama::Grammar::UserCode.new(text: " $class = $1; ", location: location_6) }
+      let(:token_6) { Lrama::Grammar::Code.new(text: " $class = $1; ", location: location_6) }
 
       it "raises error" do
         rule_builder.lhs = Lrama::Grammar::Symbol::Id.from_token(token_1)
@@ -262,7 +262,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
       let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location_2) }
       let(:token_3) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location_3) }
       let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location_4) }
-      let(:token_5) { Lrama::Grammar::UserCode.new(text: " $classes = $1; ", location: location_5) }
+      let(:token_5) { Lrama::Grammar::Code.new(text: " $classes = $1; ", location: location_5) }
 
       it "raises error" do
         rule_builder.lhs = Lrama::Grammar::Symbol::Id.from_token(token_1)
@@ -418,11 +418,11 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
     let(:location) { Lrama::Lexer::Location.new(grammar_file: Lrama::Lexer::GrammarFile.new(path, ""), first_line: 1, first_column: 0, last_line: 1, last_column: 4) }
     let(:token_1) { Lrama::Lexer::Token::Ident.new(s_value: "class", location: location) }
     let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location) }
-    let(:token_3) { Lrama::Grammar::UserCode.new(text: "$1", location: location) }
+    let(:token_3) { Lrama::Grammar::Code.new(text: "$1", location: location) }
     let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
-    let(:token_5) { Lrama::Grammar::UserCode.new(text: "$2 + $3", location: location) }
+    let(:token_5) { Lrama::Grammar::Code.new(text: "$2 + $3", location: location) }
     let(:token_6) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
-    let(:token_7) { Lrama::Grammar::UserCode.new(text: "$class = $1 + $keyword_end", location: location) }
+    let(:token_7) { Lrama::Grammar::Code.new(text: "$class = $1 + $keyword_end", location: location) }
 
     it "builds rules from midrule actions" do
       # class : keyword_class { $1 } tSTRING { $2 + $3 } keyword_end { $class = $1 + $keyword_end }
@@ -456,11 +456,11 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
     let(:location) { Lrama::Lexer::Location.new(grammar_file: Lrama::Lexer::GrammarFile.new(path, ""), first_line: 1, first_column: 0, last_line: 1, last_column: 4) }
     let(:token_1) { Lrama::Lexer::Token::Ident.new(s_value: "class", location: location) }
     let(:token_2) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_class", location: location) }
-    let(:token_3) { Lrama::Grammar::UserCode.new(text: "$1", location: location) }
+    let(:token_3) { Lrama::Grammar::Code.new(text: "$1", location: location) }
     let(:token_4) { Lrama::Lexer::Token::Ident.new(s_value: "tSTRING", location: location) }
-    let(:token_5) { Lrama::Grammar::UserCode.new(text: "$2 + $3", location: location) }
+    let(:token_5) { Lrama::Grammar::Code.new(text: "$2 + $3", location: location) }
     let(:token_6) { Lrama::Lexer::Token::Ident.new(s_value: "keyword_end", location: location) }
-    let(:token_7) { Lrama::Grammar::UserCode.new(text: "$class = $1 + $keyword_end", location: location) }
+    let(:token_7) { Lrama::Grammar::Code.new(text: "$class = $1 + $keyword_end", location: location) }
 
     it "is a symbol ID list whose user codes are replaced with @n symbols" do
       # class : keyword_class { $1 } tSTRING { $2 + $3 } keyword_end { $class = $1 + $keyword_end }

@@ -5,11 +5,11 @@ module Lrama
     class Printer
       attr_accessor ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag]
 
-      attr_accessor user_code: Grammar::UserCode
+      attr_accessor code: Grammar::Code
 
       attr_accessor lineno: Integer
 
-      def initialize: (?ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], ?user_code: Grammar::UserCode, ?lineno: Integer) -> void
+      def initialize: (?ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], ?code: Grammar::Code, ?lineno: Integer) -> void
 
       # @rbs (Lexer::Token::Tag tag) -> String
       def translated_code: (Lexer::Token::Tag tag) -> String

@@ -4,10 +4,10 @@ module Lrama
   class Grammar
     module Node
       class LexParamDecl < Base
-        attr_reader params: Array[Grammar::UserCode]
+        attr_reader params: Array[Grammar::Code]
 
-        # @rbs (params: Array[Grammar::UserCode], location: Lexer::Location) -> void
-        def initialize: (params: Array[Grammar::UserCode], location: Lexer::Location) -> void
+        # @rbs (params: Array[Grammar::Code], location: Lexer::Location) -> void
+        def initialize: (params: Array[Grammar::Code], location: Lexer::Location) -> void
       end
     end
   end

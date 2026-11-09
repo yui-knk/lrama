@@ -3,36 +3,41 @@
 module Lrama
   class Grammar
     class Code
-      # delegated
-      def text: () -> String
+      interface _ReferenceTranslator
+        def reference_to_c: (Reference ref) -> String
+      end
 
-      def line: () -> Integer
+      attr_reader text: String
 
-      def column: () -> Integer
+      attr_reader location: Lexer::Location
 
-      def references: () -> Array[Lrama::Grammar::Reference]
+      # @rbs (text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      def initialize: (text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
 
-      extend Forwardable
+      # @rbs (Lexer::Token::UserCode token) -> Code
+      def self.from_token: (Lexer::Token::UserCode token) -> Code
 
-      attr_reader type: ::Symbol
-
-      attr_reader user_code: Grammar::UserCode
-
-      # @rbs (type: ::Symbol, user_code: Grammar::UserCode) -> void
-      def initialize: (type: ::Symbol, user_code: Grammar::UserCode) -> void
+      alias loc location
 
       # @rbs (Code other) -> bool
       def ==: (Code other) -> bool
 
-      # $$, $n, @$, @n are translated to C code
+      # @rbs () -> Integer
+      def line: () -> Integer
+
+      # @rbs () -> Integer
+      def column: () -> Integer
+
+      # @rbs () -> Array[Reference]
+      def references: () -> Array[Reference]
+
+      # @rbs (Reference ref, String message) -> bot
+      def invalid_ref: (Reference ref, String message) -> bot
+
+      # Translate references using the context supplied by the caller.
       #
-      # @rbs () -> String
-      def translated_code: () -> String
-
-      private
-
-      # @rbs (Lrama::Grammar::Reference ref) -> bot
-      def reference_to_c: (Lrama::Grammar::Reference ref) -> bot
+      # @rbs (_ReferenceTranslator translator) -> String
+      def translated_code: (_ReferenceTranslator translator) -> String
     end
   end
 end

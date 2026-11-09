@@ -21,7 +21,6 @@ require_relative "grammar/symbol"
 require_relative "grammar/symbols"
 require_relative "grammar/type"
 require_relative "grammar/union"
-require_relative "grammar/user_code"
 require_relative "lexer"
 
 module Lrama
@@ -88,7 +87,7 @@ module Lrama
     attr_accessor :error_tokens #: Array[ErrorToken]
     attr_reader :lex_params #: Array[String]
     attr_reader :parse_params #: Array[String]
-    attr_accessor :initial_action #: Grammar::Code::InitialActionCode
+    attr_accessor :initial_action #: Grammar::Code
     attr_accessor :after_shift #: Lexer::Token::Base
     attr_accessor :before_reduce #: Lexer::Token::Base
     attr_accessor :after_reduce #: Lexer::Token::Base
@@ -155,24 +154,24 @@ module Lrama
       RuleBuilder.new(rule_counter, midrule_action_counter, @parameterized_resolver)
     end
 
-    # @rbs (id: Lexer::Token::Base, code: Grammar::UserCode) -> Array[PercentCode]
+    # @rbs (id: Lexer::Token::Base, code: Grammar::Code) -> Array[PercentCode]
     def add_percent_code(id:, code:)
       @percent_codes << PercentCode.new(id.s_value, code.text)
     end
 
-    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> Array[Destructor]
-    def add_destructor(ident_or_tags:, user_code:, lineno:)
-      @destructors << Destructor.new(ident_or_tags: ident_or_tags, user_code: user_code, lineno: lineno)
+    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> Array[Destructor]
+    def add_destructor(ident_or_tags:, code:, lineno:)
+      @destructors << Destructor.new(ident_or_tags: ident_or_tags, code: code, lineno: lineno)
     end
 
-    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> Array[Printer]
-    def add_printer(ident_or_tags:, user_code:, lineno:)
-      @printers << Printer.new(ident_or_tags: ident_or_tags, user_code: user_code, lineno: lineno)
+    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> Array[Printer]
+    def add_printer(ident_or_tags:, code:, lineno:)
+      @printers << Printer.new(ident_or_tags: ident_or_tags, code: code, lineno: lineno)
     end
 
-    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> Array[ErrorToken]
-    def add_error_token(ident_or_tags:, user_code:, lineno:)
-      @error_tokens << ErrorToken.new(ident_or_tags: ident_or_tags, user_code: user_code, lineno: lineno)
+    # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> Array[ErrorToken]
+    def add_error_token(ident_or_tags:, code:, lineno:)
+      @error_tokens << ErrorToken.new(ident_or_tags: ident_or_tags, code: code, lineno: lineno)
     end
 
     # @rbs (id: Lexer::Token::Base, tag: Lexer::Token::Tag?) -> Array[Type]
@@ -220,7 +219,7 @@ module Lrama
       sym.precedence = precedence
     end
 
-    # @rbs (Grammar::Code::NoReferenceCode code, Integer lineno) -> Union
+    # @rbs (Grammar::Code code, Integer lineno) -> Union
     def set_union(code, lineno)
       @union = Union.new(code: code, lineno: lineno)
     end
@@ -371,39 +370,39 @@ module Lrama
           @required = true
         when Node::ParamDecl
           node.params.each do |param|
-            code = Grammar::Code::NoReferenceCode.new(type: :param, user_code: param).user_code.text
+            code = param.text
             lex_params << code
             parse_params << code
           end
         when Node::LexParamDecl
           node.params.each do |param|
-            lex_params << Grammar::Code::NoReferenceCode.new(type: :lex_param, user_code: param).user_code.text
+            lex_params << param.text
           end
         when Node::ParseParamDecl
           node.params.each do |param|
-            parse_params << Grammar::Code::NoReferenceCode.new(type: :parse_param, user_code: param).user_code.text
+            parse_params << param.text
           end
         when Node::UnionDecl
           self.set_union(
-            Grammar::Code::NoReferenceCode.new(type: :union, user_code: node.code),
+            node.code,
             node.loc.first_line
           )
         when Node::DestructorDecl
           self.add_destructor(
             ident_or_tags: node.ident_or_tags,
-            user_code: node.code,
+            code: node.code,
             lineno: node.location.first_line
           )
         when Node::PrinterDecl
           self.add_printer(
             ident_or_tags: node.ident_or_tags,
-            user_code: node.code,
+            code: node.code,
             lineno: node.location.first_line
           )
         when Node::ErrorTokenDecl
           self.add_error_token(
             ident_or_tags: node.ident_or_tags,
-            user_code: node.code,
+            code: node.code,
             lineno: node.location.first_line
           )
         when Node::StartDecl
@@ -411,7 +410,7 @@ module Lrama
         when Node::CodeDecl
           add_percent_code(id: node.id, code: node.code)
         when Node::InitialActionDecl
-          self.initial_action = Grammar::Code::InitialActionCode.new(type: :initial_action, user_code: node.code)
+          self.initial_action = node.code
         when Node::NoStdlibDecl
           self.no_stdlib = true
         when Node::LocationsDecl

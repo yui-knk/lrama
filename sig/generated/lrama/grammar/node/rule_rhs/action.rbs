@@ -11,7 +11,7 @@ module Lrama
 
           extend Forwardable
 
-          attr_reader code: Grammar::UserCode
+          attr_reader code: Grammar::Code
 
           attr_reader alias_name: String?
 
@@ -19,8 +19,8 @@ module Lrama
 
           attr_accessor referred: bool
 
-          # @rbs (code: Grammar::UserCode, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
-          def initialize: (code: Grammar::UserCode, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
+          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
+          def initialize: (code: Grammar::Code, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
         end
       end
     end

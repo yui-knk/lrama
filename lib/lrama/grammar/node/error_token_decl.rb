@@ -6,9 +6,9 @@ module Lrama
     module Node
       class ErrorTokenDecl < Base
         attr_reader :ident_or_tags #: Array[Lexer::Token::Ident | Lexer::Token::Tag]
-        attr_reader :code #: Grammar::UserCode
+        attr_reader :code #: Grammar::Code
 
-        # @rbs (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Grammar::UserCode, location: Lexer::Location) -> void
+        # @rbs (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Grammar::Code, location: Lexer::Location) -> void
         def initialize(ident_or_tags:, code:, location:)
           @ident_or_tags = ident_or_tags
           @code = code

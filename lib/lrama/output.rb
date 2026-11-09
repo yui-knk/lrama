@@ -162,7 +162,7 @@ module Lrama
       <<-STR
         #{comment}
 #line #{@grammar.initial_action.line} "#{@grammar_file_path}"
-        {#{@grammar.initial_action.translated_code}}
+        {#{@grammar.initial_action.translated_code(Grammar::Code::InitialActionCode.new)}}
       STR
     end
 

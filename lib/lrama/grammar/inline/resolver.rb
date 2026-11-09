@@ -96,7 +96,7 @@ module Lrama
             references = Grammar::ReferenceScanner.new(code).scan
           end
           Node::RuleRhs::Action.new(
-            code: Grammar::UserCode.new(text: code, location: action.code.location, references: references),
+            code: Grammar::Code.new(text: code, location: action.code.location, references: references),
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

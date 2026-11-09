@@ -236,7 +236,7 @@ module Lrama
         (rhs + [action]).compact.each.with_index(1) do |node, i|
           next unless node.is_a?(Node::RuleRhs::Action)
 
-          user_code = node.code
+          code = node.code
 
           node.references.each do |ref|
             ref_name = ref.name
@@ -250,11 +250,11 @@ module Lrama
                 end
 
                 if candidates.size >= 2
-                  user_code.invalid_ref(ref, "Referring symbol `#{ref_name}` is duplicated.")
+                  code.invalid_ref(ref, "Referring symbol `#{ref_name}` is duplicated.")
                 end
 
                 unless (referring_symbol = candidates.first)
-                  user_code.invalid_ref(ref, "Referring symbol `#{ref_name}` is not found.")
+                  code.invalid_ref(ref, "Referring symbol `#{ref_name}` is not found.")
                 end
 
                 if referring_symbol[1] == 0 # Refers to LHS
@@ -275,7 +275,7 @@ module Lrama
             if ref.index
               # TODO: Prohibit $0 even so Bison allows it?
               # See: https://www.gnu.org/software/bison/manual/html_node/Actions.html
-              user_code.invalid_ref(ref, "Can not refer following component. #{ref.index} >= #{i}.") if ref.index >= i
+              code.invalid_ref(ref, "Can not refer following component. #{ref.index} >= #{i}.") if ref.index >= i
               mark_rhs_node_referred(rhs[ref.index - 1])
             end
           end

@@ -3,12 +3,12 @@
 module Lrama
   class Grammar
     class Union
-      attr_reader code: Grammar::Code::NoReferenceCode
+      attr_reader code: Grammar::Code
 
       attr_reader lineno: Integer
 
-      # @rbs (code: Grammar::Code::NoReferenceCode, lineno: Integer) -> void
-      def initialize: (code: Grammar::Code::NoReferenceCode, lineno: Integer) -> void
+      # @rbs (code: Grammar::Code, lineno: Integer) -> void
+      def initialize: (code: Grammar::Code, lineno: Integer) -> void
 
       # @rbs () -> String
       def braces_less_code: () -> String

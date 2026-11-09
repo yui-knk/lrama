@@ -16,12 +16,12 @@ module Lrama
 
           def_delegators :code, :text, :references
 
-          attr_reader :code #: Grammar::UserCode
+          attr_reader :code #: Grammar::Code
           attr_reader :alias_name #: String?
           attr_reader :tag #: Lexer::Token::Tag?
           attr_accessor :referred #: bool
 
-          # @rbs (code: Grammar::UserCode, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
+          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
           def initialize(code:, alias_name: nil, tag: nil, location:)
             @code = code
             @alias_name = alias_name

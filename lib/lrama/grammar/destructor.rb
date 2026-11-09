@@ -5,19 +5,19 @@ module Lrama
   class Grammar
     class Destructor
       attr_reader :ident_or_tags #: Array[Lexer::Token::Ident|Lexer::Token::Tag]
-      attr_reader :user_code #: Grammar::UserCode
+      attr_reader :code #: Grammar::Code
       attr_reader :lineno #: Integer
 
-      # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], user_code: Grammar::UserCode, lineno: Integer) -> void
-      def initialize(ident_or_tags:, user_code:, lineno:)
+      # @rbs (ident_or_tags: Array[Lexer::Token::Ident|Lexer::Token::Tag], code: Grammar::Code, lineno: Integer) -> void
+      def initialize(ident_or_tags:, code:, lineno:)
         @ident_or_tags = ident_or_tags
-        @user_code = user_code
+        @code = code
         @lineno = lineno
       end
 
       # @rbs (Lexer::Token::Tag tag) -> String
       def translated_code(tag)
-        Code::DestructorCode.new(type: :destructor, user_code: user_code, tag: tag).translated_code
+        code.translated_code(Code::DestructorCode.new(type: :destructor, tag: tag))
       end
     end
   end

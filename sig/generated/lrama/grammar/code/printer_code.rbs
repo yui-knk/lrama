@@ -3,13 +3,13 @@
 module Lrama
   class Grammar
     class Code
-      class PrinterCode < Code
+      class PrinterCode
         @tag: Lexer::Token::Tag
 
-        # @rbs (type: ::Symbol, user_code: Grammar::UserCode, tag: Lexer::Token::Tag) -> void
-        def initialize: (type: ::Symbol, user_code: Grammar::UserCode, tag: Lexer::Token::Tag) -> void
+        attr_reader type: ::Symbol
 
-        private
+        # @rbs (type: ::Symbol, tag: Lexer::Token::Tag) -> void
+        def initialize: (type: ::Symbol, tag: Lexer::Token::Tag) -> void
 
         # * ($$) *yyvaluep
         # * (@$) *yylocationp

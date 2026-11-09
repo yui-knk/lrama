@@ -5,9 +5,9 @@ module Lrama
   class Grammar
     module Node
       class UnionDecl < Base
-        attr_reader :code #: Grammar::UserCode
+        attr_reader :code #: Grammar::Code
 
-        # @rbs (code: Grammar::UserCode, location: Lexer::Location) -> void
+        # @rbs (code: Grammar::Code, location: Lexer::Location) -> void
         def initialize(code:, location:)
           @code = code
           super(location: location)
