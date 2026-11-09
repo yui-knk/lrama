@@ -16,10 +16,21 @@ module Lrama
 
       attr_reader reference: Reference
 
+      attr_reader code: Code
+
       attr_reader target: ReferenceTarget::target
 
-      # @rbs (Reference reference, target: ReferenceTarget::target) -> void
-      def initialize: (Reference reference, target: ReferenceTarget::target) -> void
+      # @rbs (Reference reference, code: Code, target: ReferenceTarget::target) -> void
+      def initialize: (Reference reference, code: Code, target: ReferenceTarget::target) -> void
+
+      # @rbs (ReferenceTarget::target target) -> ResolvedReference
+      def retarget: (ReferenceTarget::target target) -> ResolvedReference
+
+      # @rbs () -> String
+      def text: () -> String
+
+      # @rbs (Array[RhsOccurrence] occurrences) -> String
+      def rendered_text: (Array[RhsOccurrence] occurrences) -> String
 
       # @rbs (Array[RhsOccurrence] occurrences) -> Integer?
       def position: (Array[RhsOccurrence] occurrences) -> Integer?

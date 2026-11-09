@@ -10,7 +10,7 @@ module Lrama
         #       see: https://github.com/soutaro/rbs-inline/pull/149
         #
         # @rbs!
-        #   @resolved_references: Array[ResolvedReference]
+        #   @action_fragments: Array[Code::TextFragment | ResolvedReference]
         #   @rhs_occurrences: Array[RhsOccurrence]
         #   @rule: Rule
         #   @grammar: Grammar
@@ -18,7 +18,7 @@ module Lrama
         # @rbs (action: BoundAction, rule: Rule, grammar: Grammar) -> void
         def initialize(action:, rule:, grammar:)
           super(type: :rule_action, text: action.text, location: action.code.location)
-          @resolved_references = action.resolved_references
+          @action_fragments = action.fragments
           @rhs_occurrences = action.rhs_occurrences
           @rule = rule
           @grammar = grammar
@@ -26,9 +26,9 @@ module Lrama
 
         private
 
-        # @rbs () -> Array[ResolvedReference]
-        def translation_references
-          @resolved_references
+        # @rbs () -> Array[Code::TextFragment | ResolvedReference]
+        def translation_fragments
+          @action_fragments
         end
 
         # * ($$) yyval

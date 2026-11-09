@@ -12,14 +12,15 @@ module Lrama
 
         private
 
-        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Node::RuleRhs::value node, Integer index, Lrama::Grammar::Parameterized::Rule rule) -> Lrama::Grammar::RuleBuilder
-        def build_rule: (Lrama::Grammar::Parameterized::Rhs rhs, Node::RuleRhs::value node, Integer index, Lrama::Grammar::Parameterized::Rule rule) -> Lrama::Grammar::RuleBuilder
+        # @rbs (Parameterized::Rhs rhs, Node::RuleRhs::value node, Integer index, Parameterized::Rule rule) -> RuleBuilder
+        def build_rule: (Parameterized::Rhs rhs, Node::RuleRhs::value node, Integer index, Parameterized::Rule rule) -> RuleBuilder
 
-        # @rbs (Lrama::Grammar::RuleBuilder builder, Lrama::Grammar::Parameterized::Rhs rhs, Integer index, Node::RuleRhs::value node, Lrama::Grammar::Parameterized::Rule rule) -> void
-        def resolve_rhs: (Lrama::Grammar::RuleBuilder builder, Lrama::Grammar::Parameterized::Rhs rhs, Integer index, Node::RuleRhs::value node, Lrama::Grammar::Parameterized::Rule rule) -> void
+        # @rbs (Node::RuleRhs::Action action, ReferenceResolver resolver, Integer position, Integer index, Array[RhsOccurrence] expansion, BoundAction? inline_bound) -> Node::RuleRhs::Action
+        def expand_action: (Node::RuleRhs::Action action, ReferenceResolver resolver, Integer position, Integer index, Array[RhsOccurrence] expansion, BoundAction? inline_bound) -> Node::RuleRhs::Action
 
-        # @rbs (Lrama::Grammar::Parameterized::Rhs rhs, Integer index) -> Node::RuleRhs::Action?
-        def replace_action: (Lrama::Grammar::Parameterized::Rhs rhs, Integer index) -> Node::RuleRhs::Action?
+        # References outside an inline RHS are relative to its insertion point.
+        # @rbs (BoundAction action, Integer index, Array[RhsOccurrence] expansion) -> Array[Code::TextFragment | ResolvedReference]
+        def inline_fragments: (BoundAction action, Integer index, Array[RhsOccurrence] expansion) -> Array[Code::TextFragment | ResolvedReference]
       end
     end
   end

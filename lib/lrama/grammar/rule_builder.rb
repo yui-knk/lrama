@@ -58,12 +58,12 @@ module Lrama
         @midrule_action_rules = []
       end
 
-      # @rbs (Node::RuleRhs::rhs rhs) -> void
-      def add_rhs(rhs)
+      # @rbs (Node::RuleRhs::rhs rhs, ?occurrence: RhsOccurrence) -> void
+      def add_rhs(rhs, occurrence: RhsOccurrence.new(rhs))
         @line ||= rhs.location.first_line
 
         @rhs << rhs
-        @rhs_occurrences << RhsOccurrence.new(rhs)
+        @rhs_occurrences << occurrence
         @trailing_precedence = false
       end
 

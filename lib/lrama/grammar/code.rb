@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require_relative "reference_scanner"
+require_relative "code/fragment"
 require_relative "code/destructor_code"
 require_relative "code/initial_action_code"
 require_relative "code/no_reference_code"
@@ -49,6 +50,21 @@ module Lrama
         @references ||= ReferenceScanner.new(text).scan.each(&:freeze).freeze
       end
 
+      # @rbs () -> Array[TextFragment | ReferenceFragment]
+      def fragments
+        @fragments ||= begin
+          parts = [] #: Array[TextFragment | ReferenceFragment]
+          cursor = 0
+          references.each do |ref|
+            parts << TextFragment.new(self, cursor, ref.first_column) if cursor < ref.first_column
+            parts << ReferenceFragment.new(self, ref)
+            cursor = ref.last_column
+          end
+          parts << TextFragment.new(self, cursor, text.length) if cursor < text.length
+          parts.freeze
+        end
+      end
+
       # @rbs (Reference | ResolvedReference ref, String message) -> bot
       def invalid_ref(ref, message)
         location = self.location.partial_location(ref.first_column, ref.last_column)
@@ -59,25 +75,23 @@ module Lrama
       #
       # @rbs () -> String
       def translated_code
-        t_code = text.dup
-
-        translation_references.reverse_each do |ref|
-          first_column = ref.first_column
-          last_column = ref.last_column
-
-          str = reference_to_c(ref)
-
-          t_code[first_column...last_column] = str
-        end
-
-        return t_code
+        translation_fragments.map do |fragment|
+          case fragment
+          when TextFragment
+            fragment.text
+          when ReferenceFragment
+            reference_to_c(fragment.reference)
+          when ResolvedReference
+            reference_to_c(fragment)
+          end
+        end.join
       end
 
       private
 
-      # @rbs () -> Array[Reference | ResolvedReference]
-      def translation_references
-        references
+      # @rbs () -> Array[Code::fragment]
+      def translation_fragments
+        fragments
       end
 
       # @rbs (Reference | ResolvedReference ref) -> bot

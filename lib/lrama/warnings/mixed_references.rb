@@ -39,18 +39,18 @@ module Lrama
 
           original_rule = rule.original_rule || rule
           usage = (grouped_usage[original_rule] ||= { positional: false, named: false })
-          classify_references(action.references, action.text, usage)
+          classify_references(action.references, usage)
         end
 
         grouped_usage
       end
 
-      # @rbs (Array[Lrama::Grammar::Reference] references, String source, { positional: bool, named: bool } usage) -> void
-      def classify_references(references, source, usage)
+      # @rbs (Array[Lrama::Grammar::Reference] references, { positional: bool, named: bool } usage) -> void
+      def classify_references(references, usage)
         references.each do |ref|
           if positional_reference?(ref)
             usage[:positional] = true
-          elsif named_reference?(ref, source)
+          elsif named_reference?(ref)
             usage[:named] = true
           end
         end
@@ -64,37 +64,16 @@ module Lrama
         ref.name.nil?
       end
 
-      # @rbs (Lrama::Grammar::Reference ref, String source) -> bool
-      def named_reference?(ref, source)
+      # @rbs (Lrama::Grammar::Reference ref) -> bool
+      def named_reference?(ref)
         return false unless reference_type_supported?(ref)
 
-        return true if !ref.name.nil? && ref.name != "$"
-
-        lhs_alias_reference?(ref, source)
+        !ref.name.nil? && ref.name != "$"
       end
 
       # @rbs (Lrama::Grammar::Reference ref) -> bool
       def reference_type_supported?(ref)
         ref.type == :dollar || ref.type == :at || ref.type == :index
-      end
-
-      # @rbs (Lrama::Grammar::Reference ref, String source) -> bool
-      def lhs_alias_reference?(ref, source)
-        return false unless ref.name == "$"
-
-        lexeme = source[ref.first_column...ref.last_column]
-        return false if lexeme.nil?
-
-        # Keep ignoring special LHS references ($$, $<tag>$), same as reference_to_c.
-        return false if special_lhs_reference_lexeme?(lexeme)
-
-        # Treat remaining `$...` forms as named LHS aliases.
-        true
-      end
-
-      # @rbs (String lexeme) -> bool
-      def special_lhs_reference_lexeme?(lexeme)
-        lexeme == "$$" || lexeme == "@$" || lexeme == "$:$" || (lexeme.start_with?("$<") && lexeme.end_with?("$"))
       end
     end
   end

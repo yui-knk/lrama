@@ -3923,6 +3923,104 @@ RSpec.describe Lrama::Parser do
 
         expect(rule.action.text).to eq(%q{ $$ = f( "\1" , $3, $4, $11, @2, @3, @11); })
       end
+
+      it "preserves parameter bindings when an action contains an inline expansion" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "inline_parameters.y").parse
+          %token A
+          %rule %inline op: '+' '=' { 42 };
+          %rule item(X): X op { $$ = $X + $2; };
+          %%
+          start: item(A);
+        GRAMMAR
+        grammar.prepare
+        rule = grammar.rules.find { |rule| rule.lhs.name == "item_A" }
+
+        expect(rule.translated_code(grammar)).to eq(" (yyval) = (yyvsp[-2]) +  42 ; ")
+        expect(rule.action.references.map(&:name)).to eq(["$", "X"])
+      end
+
+      it "expands named inline references and preserves their definition locations" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "inline_origins.y").parse
+          %token A
+          %rule %inline pair(X): X[left] X[right] { $left + $right };
+          %%
+          start: pair(A)[value] { $$ = $value; };
+        GRAMMAR
+        source = grammar.parameterized_rules.find { |rule| rule.name == "pair" }.rhs.first.action.code
+        grammar.prepare
+        rule = grammar.rules.last
+        refs = rule.action.resolved_references.drop(1)
+
+        expect(rule.translated_code(grammar)).to eq(" (yyval) =  (yyvsp[-1]) + (yyvsp[0]) ; ")
+        expect(refs.map(&:code)).to all(equal(source))
+        expect(refs.map { |ref| ref.code.text[ref.first_column...ref.last_column] }).to eq(["$left", "$right"])
+        expect(refs.map { |ref| ref.target.node.alias_name }).to eq(["left", "right"])
+      end
+
+      it "keeps reference targets through nested inline expansions" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "nested_inline.y").parse
+          %token A B C
+          %rule %inline single(X): X { $X };
+          %rule %inline pair(X): single(X) X[right] { $1 + $right };
+          %%
+          start: A pair(B)[value] C { $$ = $value + $1 + $3; };
+        GRAMMAR
+        grammar.prepare
+        rule = grammar.rules.last
+
+        expect(rule.translated_code(grammar)).to eq(" (yyval) =   (yyvsp[-2])  + (yyvsp[-1])  + (yyvsp[-3]) + (yyvsp[0]); ")
+      end
+
+      it "adjusts positional references in midrule actions during inline expansion" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "inline_midrule.y").parse
+          %token A B C
+          %rule %inline prefix: A B;
+          %%
+          start: prefix C { $$ = $2; } C;
+        GRAMMAR
+        grammar.prepare
+        midrule = grammar.rules.find { |rule| rule.position_in_original_rule_rhs }
+
+        expect(midrule.translated_code(grammar)).to eq(" (yyval) = (yyvsp[0]); ")
+        expect(midrule.action.resolved_references.last.position(midrule.action.rhs_occurrences)).to eq(3)
+      end
+
+      it "resolves external inline references relative to the insertion point" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "inline_stack.y").parse
+          %token A B C
+          %rule %inline value: B { $0 + $1 + @2.first_line };
+          %%
+          start: A value C { $$ = $2; };
+        GRAMMAR
+        grammar.prepare
+        rule = grammar.rules.last
+
+        expect(rule.translated_code(grammar)).to eq(" (yyval) =  (yyvsp[-2]) + (yyvsp[-1]) + (yylsp[0]).first_line ; ")
+      end
+
+      it "keeps location and index references at the boundary of an empty inline rule" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "empty_inline.y").parse
+          %token A B
+          %rule %inline empty: %empty;
+          %%
+          start: A empty B { consume(@2, $:2, $3); };
+        GRAMMAR
+        grammar.prepare
+        rule = grammar.rules.last
+
+        expect(rule.translated_code(grammar)).to eq(" consume((yylsp[-1]), (-1 - 1), (yyvsp[0])); ")
+      end
+
+      it "reports invalid inline references at their definition" do
+        grammar = Lrama::Parser.new(<<~'GRAMMAR', "invalid_inline.y").parse
+          %token A
+          %rule %inline value: A { $missing };
+          %%
+          start: value { $$ = $1; };
+        GRAMMAR
+
+        expect { grammar.prepare }.to raise_error(/invalid_inline.y:2:25: Referring symbol `missing` is not found/)
+      end
     end
 
     it "; for rules is optional" do

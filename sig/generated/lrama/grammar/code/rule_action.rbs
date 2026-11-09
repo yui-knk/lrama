@@ -4,7 +4,7 @@ module Lrama
   class Grammar
     class Code
       class RuleAction < Code
-        @resolved_references: Array[ResolvedReference]
+        @action_fragments: Array[Code::TextFragment | ResolvedReference]
 
         @rhs_occurrences: Array[RhsOccurrence]
 
@@ -17,8 +17,8 @@ module Lrama
 
         private
 
-        # @rbs () -> Array[ResolvedReference]
-        def translation_references: () -> Array[ResolvedReference]
+        # @rbs () -> Array[Code::TextFragment | ResolvedReference]
+        def translation_fragments: () -> Array[Code::TextFragment | ResolvedReference]
 
         # * ($$) yyval
         # * (@$) yyloc

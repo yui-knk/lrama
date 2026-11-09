@@ -29,6 +29,9 @@ module Lrama
       # @rbs () -> Array[Reference]
       def references: () -> Array[Reference]
 
+      # @rbs () -> Array[TextFragment | ReferenceFragment]
+      def fragments: () -> Array[TextFragment | ReferenceFragment]
+
       # @rbs (Reference | ResolvedReference ref, String message) -> bot
       def invalid_ref: (Reference | ResolvedReference ref, String message) -> bot
 
@@ -39,8 +42,8 @@ module Lrama
 
       private
 
-      # @rbs () -> Array[Reference | ResolvedReference]
-      def translation_references: () -> Array[Reference | ResolvedReference]
+      # @rbs () -> Array[Code::fragment]
+      def translation_fragments: () -> Array[Code::fragment]
 
       # @rbs (Reference | ResolvedReference ref) -> bot
       def reference_to_c: (Reference | ResolvedReference ref) -> bot

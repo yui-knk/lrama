@@ -1,0 +1,34 @@
+# Generated from lib/lrama/grammar/code/fragment.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class Code
+      type fragment = TextFragment | ReferenceFragment | ResolvedReference
+
+      class TextFragment
+        attr_reader code: Code
+
+        attr_reader first_column: Integer
+
+        attr_reader last_column: Integer
+
+        attr_reader text: String
+
+        # @rbs (Code code, Integer first_column, Integer last_column) -> void
+        def initialize: (Code code, Integer first_column, Integer last_column) -> void
+      end
+
+      class ReferenceFragment
+        attr_reader code: Code
+
+        attr_reader reference: Reference
+
+        # @rbs (Code code, Reference reference) -> void
+        def initialize: (Code code, Reference reference) -> void
+
+        # @rbs () -> String
+        def text: () -> String
+      end
+    end
+  end
+end

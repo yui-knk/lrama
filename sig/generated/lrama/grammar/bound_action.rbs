@@ -6,10 +6,6 @@ module Lrama
     class BoundAction
       def code: () -> Code
 
-      def text: () -> String
-
-      def references: () -> Array[Reference]
-
       def alias_name: () -> String?
 
       def tag: () -> Lexer::Token::Tag?
@@ -20,12 +16,18 @@ module Lrama
 
       attr_reader source: Node::RuleRhs::Action
 
+      attr_reader text: String
+
+      attr_reader references: Array[Reference]
+
+      attr_reader fragments: Array[Code::TextFragment | ResolvedReference]
+
       attr_reader resolved_references: Array[ResolvedReference]
 
       attr_reader rhs_occurrences: Array[RhsOccurrence]
 
-      # @rbs (source: Node::RuleRhs::Action, resolved_references: Array[ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
-      def initialize: (source: Node::RuleRhs::Action, resolved_references: Array[ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
+      # @rbs (source: Node::RuleRhs::Action, fragments: Array[Code::TextFragment | ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
+      def initialize: (source: Node::RuleRhs::Action, fragments: Array[Code::TextFragment | ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
     end
   end
 end

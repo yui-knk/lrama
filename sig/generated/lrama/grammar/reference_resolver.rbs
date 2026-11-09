@@ -11,6 +11,9 @@ module Lrama
 
       private
 
+      # @rbs (ResolvedReference ref, Integer position) -> void
+      def validate: (ResolvedReference ref, Integer position) -> void
+
       # @rbs (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
       def named?: (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
     end
