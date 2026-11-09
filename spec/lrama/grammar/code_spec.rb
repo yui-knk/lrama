@@ -53,7 +53,7 @@ RSpec.describe Lrama::Grammar::Code do
 
   describe "#translated_code" do
     it "translates references through a subclass without changing the source" do
-      code = described_class::InitialActionCode.new(type: :initial_action, text: "print($$);")
+      code = described_class::InitialActionCode.new(type: :initial_action, code: code_dollar_dollar)
 
       expect(code.translated_code).to eq("print(yylval);")
       expect(code.translated_code).to eq("print(yylval);")
@@ -169,32 +169,32 @@ RSpec.describe Lrama::Grammar::Code do
   describe Lrama::Grammar::Code::InitialActionCode do
     describe "#translated_code" do
       it "translates '$$' to 'yylval'" do
-        code = described_class.new(type: :initial_action, text: code_dollar_dollar.text)
+        code = described_class.new(type: :initial_action, code: code_dollar_dollar)
         expect(code.translated_code).to eq("print(yylval);")
       end
 
       it "translates '@$' to 'yylloc'" do
-        code = described_class.new(type: :initial_action, text: code_at_dollar.text)
+        code = described_class.new(type: :initial_action, code: code_at_dollar)
         expect(code.translated_code).to eq("print(yylloc);")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :initial_action, text: code_index_dollar.text)
+        code = described_class.new(type: :initial_action, code: code_index_dollar)
         expect { code.translated_code }.to raise_error("$:$ can not be used in initial_action.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :initial_action, text: code_dollar_n.text)
+        code = described_class.new(type: :initial_action, code: code_dollar_n)
         expect { code.translated_code }.to raise_error("$n can not be used in initial_action.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :initial_action, text: code_at_n.text)
+        code = described_class.new(type: :initial_action, code: code_at_n)
         expect { code.translated_code }.to raise_error("@n can not be used in initial_action.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :initial_action, text: code_index_n.text)
+        code = described_class.new(type: :initial_action, code: code_index_n)
         expect { code.translated_code }.to raise_error("$:1 can not be used in initial_action.")
       end
     end

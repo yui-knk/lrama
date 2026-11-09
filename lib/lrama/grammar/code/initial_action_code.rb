@@ -5,6 +5,11 @@ module Lrama
   class Grammar
     class Code
       class InitialActionCode < Code
+        # @rbs (type: ::Symbol, code: Grammar::Code) -> void
+        def initialize(type:, code:)
+          super(type: type, text: code.text, location: code.location, references: code.references)
+        end
+
         private
 
         # * ($$) yylval

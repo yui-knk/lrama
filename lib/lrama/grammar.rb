@@ -410,9 +410,7 @@ module Lrama
         when Node::CodeDecl
           add_percent_code(id: node.id, code: node.code)
         when Node::InitialActionDecl
-          self.initial_action = Grammar::Code::InitialActionCode.new(
-            type: :initial_action, text: node.code.text, location: node.code.location, references: node.code.references
-          )
+          self.initial_action = Grammar::Code::InitialActionCode.new(type: :initial_action, code: node.code)
         when Node::NoStdlibDecl
           self.no_stdlib = true
         when Node::LocationsDecl
