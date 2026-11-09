@@ -4,7 +4,7 @@
 module Lrama
   class Grammar
     class Code
-      class DestructorCode
+      class DestructorCode < Code
         # TODO: rbs-inline 0.11.0 doesn't support instance variables.
         #       Move these type declarations above instance variable definitions, once it's supported.
         #       see: https://github.com/soutaro/rbs-inline/pull/149
@@ -14,11 +14,14 @@ module Lrama
 
         attr_reader :type #: ::Symbol
 
-        # @rbs (type: ::Symbol, tag: Lexer::Token::Tag) -> void
-        def initialize(type:, tag:)
+        # @rbs (type: ::Symbol, code: Grammar::Code, tag: Lexer::Token::Tag) -> void
+        def initialize(type:, code:, tag:)
+          super(text: code.text, location: code.location, references: code.references)
           @type = type
           @tag = tag
         end
+
+        private
 
         # * ($$) *yyvaluep
         # * (@$) *yylocationp

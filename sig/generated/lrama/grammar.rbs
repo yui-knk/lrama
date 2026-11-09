@@ -108,7 +108,7 @@ module Lrama
 
     attr_reader parse_params: Array[String]
 
-    attr_accessor initial_action: Grammar::Code
+    attr_accessor initial_action: Grammar::Code::InitialActionCode
 
     attr_accessor after_shift: Lexer::Token::Base
 

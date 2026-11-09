@@ -11,11 +11,6 @@ require_relative "code/rule_action"
 module Lrama
   class Grammar
     class Code
-      # @rbs!
-      #   interface _ReferenceTranslator
-      #     def reference_to_c: (Reference ref) -> String
-      #   end
-
       attr_reader :text #: String
       attr_reader :location #: Lexer::Location
 
@@ -59,22 +54,29 @@ module Lrama
         raise location.generate_error_message(message)
       end
 
-      # Translate references using the context supplied by the caller.
+      # $$, $n, @$, @n are translated to C code.
       #
-      # @rbs (_ReferenceTranslator translator) -> String
-      def translated_code(translator)
+      # @rbs () -> String
+      def translated_code
         t_code = text.dup
 
         references.reverse_each do |ref|
           first_column = ref.first_column
           last_column = ref.last_column
 
-          str = translator.reference_to_c(ref)
+          str = reference_to_c(ref)
 
           t_code[first_column...last_column] = str
         end
 
         return t_code
+      end
+
+      private
+
+      # @rbs (Reference ref) -> bot
+      def reference_to_c(ref)
+        raise NotImplementedError.new("#reference_to_c is not implemented")
       end
     end
   end

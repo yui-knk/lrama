@@ -87,7 +87,7 @@ module Lrama
     attr_accessor :error_tokens #: Array[ErrorToken]
     attr_reader :lex_params #: Array[String]
     attr_reader :parse_params #: Array[String]
-    attr_accessor :initial_action #: Grammar::Code
+    attr_accessor :initial_action #: Grammar::Code::InitialActionCode
     attr_accessor :after_shift #: Lexer::Token::Base
     attr_accessor :before_reduce #: Lexer::Token::Base
     attr_accessor :after_reduce #: Lexer::Token::Base
@@ -410,7 +410,9 @@ module Lrama
         when Node::CodeDecl
           add_percent_code(id: node.id, code: node.code)
         when Node::InitialActionDecl
-          self.initial_action = node.code
+          self.initial_action = Grammar::Code::InitialActionCode.new(
+            text: node.code.text, location: node.code.location, references: node.code.references
+          )
         when Node::NoStdlibDecl
           self.no_stdlib = true
         when Node::LocationsDecl

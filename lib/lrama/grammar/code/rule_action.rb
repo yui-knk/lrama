@@ -4,7 +4,7 @@
 module Lrama
   class Grammar
     class Code
-      class RuleAction
+      class RuleAction < Code
         # TODO: rbs-inline 0.11.0 doesn't support instance variables.
         #       Move these type declarations above instance variable definitions, once it's supported.
         #       see: https://github.com/soutaro/rbs-inline/pull/149
@@ -13,11 +13,14 @@ module Lrama
         #   @rule: Rule
         #   @grammar: Grammar
 
-        # @rbs (rule: Rule, grammar: Grammar) -> void
-        def initialize(rule:, grammar:)
+        # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
+        def initialize(action:, rule:, grammar:)
+          super(text: action.text, location: action.code.location, references: action.references)
           @rule = rule
           @grammar = grammar
         end
+
+        private
 
         # * ($$) yyval
         # * (@$) yyloc
@@ -87,8 +90,6 @@ module Lrama
             raise "Unexpected. #{self}, #{ref}"
           end
         end
-
-        private
 
         # @rbs () -> Integer
         def position_in_rhs

@@ -17,7 +17,7 @@ module Lrama
 
       # @rbs (Lexer::Token::Tag tag) -> String
       def translated_code(tag)
-        code.translated_code(Code::DestructorCode.new(type: :destructor, tag: tag))
+        Code::DestructorCode.new(type: :destructor, code: code, tag: tag).translated_code
       end
     end
   end

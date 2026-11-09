@@ -4,7 +4,9 @@
 module Lrama
   class Grammar
     class Code
-      class InitialActionCode
+      class InitialActionCode < Code
+        private
+
         # * ($$) yylval
         # * (@$) yylloc
         # * ($:$) error

@@ -3,10 +3,6 @@
 module Lrama
   class Grammar
     class Code
-      interface _ReferenceTranslator
-        def reference_to_c: (Reference ref) -> String
-      end
-
       attr_reader text: String
 
       attr_reader location: Lexer::Location
@@ -34,10 +30,15 @@ module Lrama
       # @rbs (Reference ref, String message) -> bot
       def invalid_ref: (Reference ref, String message) -> bot
 
-      # Translate references using the context supplied by the caller.
+      # $$, $n, @$, @n are translated to C code.
       #
-      # @rbs (_ReferenceTranslator translator) -> String
-      def translated_code: (_ReferenceTranslator translator) -> String
+      # @rbs () -> String
+      def translated_code: () -> String
+
+      private
+
+      # @rbs (Reference ref) -> bot
+      def reference_to_c: (Reference ref) -> bot
     end
   end
 end

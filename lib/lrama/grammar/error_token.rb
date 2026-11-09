@@ -17,7 +17,7 @@ module Lrama
 
       # @rbs (Lexer::Token::Tag tag) -> String
       def translated_code(tag)
-        code.translated_code(Code::PrinterCode.new(type: :error_token, tag: tag))
+        Code::PrinterCode.new(type: :error_token, code: code, tag: tag).translated_code
       end
     end
   end

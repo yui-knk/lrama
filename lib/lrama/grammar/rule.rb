@@ -126,7 +126,7 @@ module Lrama
       def translated_code(grammar)
         return nil unless action
 
-        action.code.translated_code(Code::RuleAction.new(rule: self, grammar: grammar))
+        Code::RuleAction.new(action: action, rule: self, grammar: grammar).translated_code
       end
 
       # @rbs () -> bool

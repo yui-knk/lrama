@@ -321,7 +321,7 @@ RSpec.describe Lrama::Parser do
       ])
       expect(grammar.lex_params).to eq(["struct lex_params *p"])
       expect(grammar.parse_params).to eq(["struct parse_params *p"])
-      expect(grammar.initial_action).to eq(Lrama::Grammar::Code.new(text: "\n    initial_action_func(@$);\n"))
+      expect(grammar.initial_action).to eq(Lrama::Grammar::Code::InitialActionCode.new(text: "\n    initial_action_func(@$);\n"))
       expect(grammar.symbols.sort_by(&:number)).to match_symbols([
         Sym.new(id: Sym::Id.new(name: "EOI", kind: :ident),            alias_name: "\"EOI\"",                  number:  0, tag: nil,                                   term: true, token_id:   0, nullable: false, precedence: nil,                                            printer: nil),
         Sym.new(id: Sym::Id.new(name: "YYerror", kind: :ident),        alias_name: "error",                    number:  1, tag: nil,                                   term: true, token_id: 256, nullable: false, precedence: nil,                                            printer: nil),
