@@ -4,10 +4,10 @@
 module Lrama
   class Grammar
     class Union
-      attr_reader :code #: Grammar::Code
+      attr_reader :code #: Grammar::Code::NoReferenceCode
       attr_reader :lineno #: Integer
 
-      # @rbs (code: Grammar::Code, lineno: Integer) -> void
+      # @rbs (code: Grammar::Code::NoReferenceCode, lineno: Integer) -> void
       def initialize(code:, lineno:)
         @code = code
         @lineno = lineno

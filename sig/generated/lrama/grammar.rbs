@@ -182,8 +182,8 @@ module Lrama
     # @rbs (Grammar::Symbol sym, Precedence precedence) -> (Precedence | bot)
     def set_precedence: (Grammar::Symbol sym, Precedence precedence) -> (Precedence | bot)
 
-    # @rbs (Grammar::Code code, Integer lineno) -> Union
-    def set_union: (Grammar::Code code, Integer lineno) -> Union
+    # @rbs (Grammar::Code::NoReferenceCode code, Integer lineno) -> Union
+    def set_union: (Grammar::Code::NoReferenceCode code, Integer lineno) -> Union
 
     # @rbs (RuleBuilder builder) -> Array[RuleBuilder]
     def add_rule_builder: (RuleBuilder builder) -> Array[RuleBuilder]

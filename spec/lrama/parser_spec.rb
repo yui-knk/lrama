@@ -259,6 +259,16 @@ RSpec.describe Lrama::Parser do
       expect(grammar.parse_params).to eq(["struct context *ctx"])
     end
 
+    it "rejects references when translating union code" do
+      grammar = Lrama::Parser.new(<<~'GRAMMAR', "union.y").parse
+        %union { $$; }
+        %%
+        start: ;
+      GRAMMAR
+
+      expect { grammar.union.code.translated_code }.to raise_error("$$ can not be used in union.")
+    end
+
     it "no_union" do
       path = "common/no_union.y"
       y = File.read(fixture_path(path))

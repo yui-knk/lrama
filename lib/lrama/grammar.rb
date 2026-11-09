@@ -219,7 +219,7 @@ module Lrama
       sym.precedence = precedence
     end
 
-    # @rbs (Grammar::Code code, Integer lineno) -> Union
+    # @rbs (Grammar::Code::NoReferenceCode code, Integer lineno) -> Union
     def set_union(code, lineno)
       @union = Union.new(code: code, lineno: lineno)
     end
@@ -370,21 +370,21 @@ module Lrama
           @required = true
         when Node::ParamDecl
           node.params.each do |param|
-            code = param.text
+            code = Grammar::Code::NoReferenceCode.new(type: :param, code: param).text
             lex_params << code
             parse_params << code
           end
         when Node::LexParamDecl
           node.params.each do |param|
-            lex_params << param.text
+            lex_params << Grammar::Code::NoReferenceCode.new(type: :lex_param, code: param).text
           end
         when Node::ParseParamDecl
           node.params.each do |param|
-            parse_params << param.text
+            parse_params << Grammar::Code::NoReferenceCode.new(type: :parse_param, code: param).text
           end
         when Node::UnionDecl
           self.set_union(
-            node.code,
+            Grammar::Code::NoReferenceCode.new(type: :union, code: node.code),
             node.loc.first_line
           )
         when Node::DestructorDecl
