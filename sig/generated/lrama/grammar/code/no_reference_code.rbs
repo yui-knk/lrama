@@ -4,8 +4,6 @@ module Lrama
   class Grammar
     class Code
       class NoReferenceCode < Code
-        attr_reader type: ::Symbol
-
         # @rbs (type: ::Symbol, code: Grammar::Code) -> void
         def initialize: (type: ::Symbol, code: Grammar::Code) -> void
 

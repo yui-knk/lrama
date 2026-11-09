@@ -15,7 +15,7 @@ module Lrama
 
         # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
         def initialize(action:, rule:, grammar:)
-          super(text: action.text, location: action.code.location, references: action.references)
+          super(type: :rule_action, text: action.text, location: action.code.location, references: action.references)
           @rule = rule
           @grammar = grammar
         end

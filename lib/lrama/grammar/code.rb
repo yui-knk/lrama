@@ -11,11 +11,13 @@ require_relative "code/rule_action"
 module Lrama
   class Grammar
     class Code
+      attr_reader :type #: ::Symbol?
       attr_reader :text #: String
       attr_reader :location #: Lexer::Location
 
-      # @rbs (text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
-      def initialize(text:, location: nil, references: nil)
+      # @rbs (text: String, ?type: ::Symbol?, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      def initialize(text:, type: nil, location: nil, references: nil)
+        @type = type
         @text = text.freeze
         @location = location
         @references = references
@@ -30,7 +32,7 @@ module Lrama
 
       # @rbs (Code other) -> bool
       def ==(other)
-        self.class == other.class && self.text == other.text
+        self.class == other.class && self.type == other.type && self.text == other.text
       end
 
       # @rbs () -> Integer
