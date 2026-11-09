@@ -215,7 +215,7 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
       term = resolver.add_term(id: symbol_id("term"))
       grammar_file = Lrama::Lexer::GrammarFile.new("foo/basic.y", "")
       location = Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: 4)
-      code = Lrama::Grammar::Code.new(text: "code 1", location: location)
+      code = Lrama::Grammar::Code.new(type: :param, text: "code 1", location: location)
       destructor = Lrama::Grammar::Destructor.new(
         ident_or_tags: [Lrama::Lexer::Token::Ident.new(s_value: "term")],
         code: code,
@@ -234,12 +234,12 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
         untyped = resolver.add_term(id: symbol_id("untyped"))
         symbol_destructor = Lrama::Grammar::Destructor.new(
           ident_or_tags: [term, nterm].map { |sym| Lrama::Lexer::Token::Ident.new(s_value: sym.name) },
-          code: Lrama::Grammar::Code.new(text: ""),
+          code: Lrama::Grammar::Code.new(type: :param, text: ""),
           lineno: 1
         )
         tag_destructor = Lrama::Grammar::Destructor.new(
           ident_or_tags: [tag],
-          code: Lrama::Grammar::Code.new(text: "free($$);"),
+          code: Lrama::Grammar::Code.new(type: :param, text: "free($$);"),
           lineno: 2
         )
         destructors = [symbol_destructor, tag_destructor]
@@ -272,7 +272,7 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
       token = Lrama::Lexer::Token::Ident.new(s_value: "term")
       grammar_file = Lrama::Lexer::GrammarFile.new("foo/basic.y", "")
       location = Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: 4)
-      code = Lrama::Grammar::Code.new(text: "code 1", location: location)
+      code = Lrama::Grammar::Code.new(type: :param, text: "code 1", location: location)
 
       resolver.fill_error_token([Lrama::Grammar::ErrorToken.new(ident_or_tags: [token], code: code, lineno: 1)])
       expect(term.error_token.ident_or_tags).to eq([token])

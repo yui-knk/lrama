@@ -38,7 +38,7 @@ module Lrama
           end
 
           Node::RuleRhs::Action.new(
-            code: Grammar::Code.new(text: action.text, location: action.code.location, references: resolved_references),
+            code: Grammar::Code.new(type: action.code.type, text: action.text, location: action.code.location, references: resolved_references),
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

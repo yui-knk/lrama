@@ -27,7 +27,7 @@ rule
         }
       "%}"
         {
-          result = Grammar::Node::PrologueDecl.new(code: Grammar::Code.from_token(val[2]), location: merge_locations(val[0].loc, val[4].loc))
+          result = Grammar::Node::PrologueDecl.new(code: Grammar::Code.from_token(val[2], type: :prologue), location: merge_locations(val[0].loc, val[4].loc))
         }
     | "%require" STRING
         {
@@ -406,7 +406,7 @@ rule
         }
       "}"
         {
-          result = Grammar::Code.from_token(val[2])
+          result = Grammar::Code.from_token(val[2], type: :param)
         }
 
   token_declarations_for_precedence:
@@ -601,7 +601,7 @@ rule
         }
       "}"
         {
-          result = Grammar::Code.from_token(val[2])
+          result = Grammar::Code.from_token(val[2], type: :rule_action)
         }
 
   named_ref: '[' IDENTIFIER ']' { result = val[1].s_value }
@@ -614,7 +614,7 @@ rule
       C_DECLARATION
         {
           end_c_declaration
-          result = Grammar::Node::EpilogueDecl.new(code: Grammar::Code.from_token(val[2]), location: merge_locations(val[0].loc, val[2].loc))
+          result = Grammar::Node::EpilogueDecl.new(code: Grammar::Code.from_token(val[2], type: :epilogue), location: merge_locations(val[0].loc, val[2].loc))
         }
 
   variable: id

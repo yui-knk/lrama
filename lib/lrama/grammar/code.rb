@@ -11,21 +11,21 @@ require_relative "code/rule_action"
 module Lrama
   class Grammar
     class Code
-      attr_reader :type #: ::Symbol?
+      attr_reader :type #: ::Symbol
       attr_reader :text #: String
       attr_reader :location #: Lexer::Location
 
-      # @rbs (text: String, ?type: ::Symbol?, ?location: Lexer::Location, ?references: Array[Reference]) -> void
-      def initialize(text:, type: nil, location: nil, references: nil)
+      # @rbs (type: ::Symbol, text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      def initialize(type:, text:, location: nil, references: nil)
         @type = type
         @text = text.freeze
         @location = location
         @references = references
       end
 
-      # @rbs (Lexer::Token::UserCode token) -> Code
-      def self.from_token(token)
-        new(text: token.s_value, location: token.location)
+      # @rbs (Lexer::Token::UserCode token, type: ::Symbol) -> Code
+      def self.from_token(token, type:)
+        new(type: type, text: token.s_value, location: token.location)
       end
 
       alias :loc :location

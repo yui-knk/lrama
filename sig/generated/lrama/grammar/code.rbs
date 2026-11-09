@@ -3,17 +3,17 @@
 module Lrama
   class Grammar
     class Code
-      attr_reader type: ::Symbol?
+      attr_reader type: ::Symbol
 
       attr_reader text: String
 
       attr_reader location: Lexer::Location
 
-      # @rbs (text: String, ?type: ::Symbol?, ?location: Lexer::Location, ?references: Array[Reference]) -> void
-      def initialize: (text: String, ?type: ::Symbol?, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      # @rbs (type: ::Symbol, text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      def initialize: (type: ::Symbol, text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
 
-      # @rbs (Lexer::Token::UserCode token) -> Code
-      def self.from_token: (Lexer::Token::UserCode token) -> Code
+      # @rbs (Lexer::Token::UserCode token, type: ::Symbol) -> Code
+      def self.from_token: (Lexer::Token::UserCode token, type: ::Symbol) -> Code
 
       alias loc location
 
