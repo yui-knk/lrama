@@ -18,27 +18,31 @@ module Lrama
       def_delegators :reference, :type, :ex_tag, :first_column, :last_column
 
       attr_reader :reference #: Reference
-      attr_reader :name #: String?
-      attr_reader :number #: Integer?
-      attr_reader :index #: Integer?
+      attr_reader :target #: ReferenceTarget::target
 
-      # @rbs (Reference reference, ?name: String?, ?number: Integer?, ?index: Integer?) -> void
-      def initialize(reference, name: reference.name, number: reference.number, index: reference.index)
+      # @rbs (Reference reference, target: ReferenceTarget::target) -> void
+      def initialize(reference, target:)
         @reference = reference
-        @name = name
-        @number = number
-        @index = index
+        @target = target
         freeze
       end
 
-      # @rbs (?name: String?, ?number: Integer?, ?index: Integer?) -> ResolvedReference
-      def with(name: self.name, number: self.number, index: self.index)
-        ResolvedReference.new(reference, name: name, number: number, index: index)
+      # @rbs (Array[RhsOccurrence] occurrences) -> Integer?
+      def position(occurrences)
+        case target
+        when ReferenceTarget::Lhs
+          nil
+        when ReferenceTarget::Stack
+          target.number
+        when RhsOccurrence
+          index = occurrences.index { |occurrence| occurrence.equal?(target) }
+          index ? index + 1 : raise("Reference target is not in this RHS")
+        end
       end
 
-      # @rbs () -> (String | Integer)?
+      # @rbs () -> (String | Integer)
       def value
-        name || number
+        target.is_a?(ReferenceTarget::Lhs) ? "$" : reference.value
       end
     end
   end

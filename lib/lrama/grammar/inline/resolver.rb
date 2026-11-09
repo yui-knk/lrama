@@ -74,7 +74,7 @@ module Lrama
           return unless action
 
           code = action.code
-          resolved_references = action.resolved_references || action.references.map { |ref| ResolvedReference.new(ref) }
+          resolved_references = action.resolved_references || action.references
 
           if rhs.action
             inline_index = index + 1
@@ -82,23 +82,23 @@ module Lrama
             text = code.text.dup
 
             resolved_references.reverse_each do |ref|
-              next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
+              position = ref.is_a?(ResolvedReference) ? ref.position(action.rhs_occurrences || []) : ref.number
+              next if position.nil? || position < inline_index
 
               reference = text[ref.first_column...ref.last_column]
               replacement =
-                if ref.type == :dollar && ref.index == inline_index
+                if ref.type == :dollar && position == inline_index
                   rhs.action.text
                 else
-                  reference.sub(/\d+\z/, (ref.index + index_offset).to_s)
+                  reference.sub(/\d+\z/, (position + index_offset).to_s)
                 end
               text[ref.first_column...ref.last_column] = replacement
             end
             code = Grammar::Code.new(type: code.type, text: text, location: code.location)
-            resolved_references = nil
           end
           Node::RuleRhs::Action.new(
             code: code,
-            resolved_references: resolved_references,
+            reference_bindings: action.reference_bindings,
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

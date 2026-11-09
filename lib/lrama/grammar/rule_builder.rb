@@ -29,6 +29,7 @@ module Lrama
       attr_reader :parameterized_resolver #: Grammar::Parameterized::Resolver
       attr_reader :lhs_tag #: Lexer::Token::Tag?
       attr_reader :rhs #: Array[Node::RuleRhs::rhs]
+      attr_reader :rhs_occurrences #: Array[RhsOccurrence]
       attr_reader :action #: Node::RuleRhs::Action?
       attr_reader :precedence_sym #: Grammar::Symbol?
 
@@ -46,6 +47,7 @@ module Lrama
         @lhs_alias_name = nil
         @lhs_tag = lhs_tag
         @rhs = []
+        @rhs_occurrences = []
         @action = nil
         @precedence_sym = nil
         @line = nil
@@ -61,6 +63,7 @@ module Lrama
         @line ||= rhs.location.first_line
 
         @rhs << rhs
+        @rhs_occurrences << RhsOccurrence.new(rhs)
         @trailing_precedence = false
       end
 
@@ -75,6 +78,7 @@ module Lrama
         if (action = final_action)
           @action = action
           @rhs.pop
+          @rhs_occurrences.pop
         end
 
         freeze_rhs
@@ -106,6 +110,7 @@ module Lrama
       # @rbs () -> void
       def freeze_rhs
         @rhs.freeze
+        @rhs_occurrences.freeze
       end
 
       # @rbs () -> Node::RuleRhs::Action?
@@ -232,55 +237,37 @@ module Lrama
 
       # @rbs () -> void
       def numberize_references
-        # Bison n'th component is 1-origin
         (rhs + [action]).compact.each.with_index(1) do |node, i|
           next unless node.is_a?(Node::RuleRhs::Action)
 
-          code = node.code
-
-          references = node.resolved_references || node.references.map { |ref| ResolvedReference.new(ref) }
-          node.resolved_references = references.map do |ref|
-            ref_name = ref.name
-
-            if ref_name
-              if ref_name == '$'
-                ref = ref.with(name: '$')
+          references = node.references.map do |ref|
+            name = ref.name
+            name = node.reference_bindings.fetch(name, name) if name
+            target =
+              if name == "$"
+                ReferenceTarget::Lhs.new
+              elsif name
+                candidates = ([lhs] + rhs).each_with_index.select { |element, _| rhs_node_referred_by?(element, name) }
+                node.code.invalid_ref(ref, "Referring symbol `#{name}` is duplicated.") if candidates.size >= 2
+                candidate = candidates.first || node.code.invalid_ref(ref, "Referring symbol `#{name}` is not found.")
+                candidate[1] == 0 ? ReferenceTarget::Lhs.new : rhs_occurrences[candidate[1] - 1]
               else
-                candidates = ([lhs] + rhs).each_with_index.select do |node, _i|
-                  rhs_node_referred_by?(node, ref_name)
-                end
-
-                if candidates.size >= 2
-                  code.invalid_ref(ref, "Referring symbol `#{ref_name}` is duplicated.")
-                end
-
-                unless (referring_symbol = candidates.first)
-                  code.invalid_ref(ref, "Referring symbol `#{ref_name}` is not found.")
-                end
-
-                if referring_symbol[1] == 0 # Refers to LHS
-                  ref = ref.with(name: '$')
+                number = ref.number
+                if number > 0 && (occurrence = rhs_occurrences[number - 1])
+                  occurrence
                 else
-                  ref = ref.with(number: referring_symbol[1])
+                  ReferenceTarget::Stack.new(number)
                 end
               end
+            resolved = ResolvedReference.new(ref, target: target)
+            position = resolved.position(rhs_occurrences)
+            if ref.type != :at && position
+              node.code.invalid_ref(ref, "Can not refer following component. #{position} >= #{i}.") if position >= i
+              mark_rhs_node_referred(rhs[position - 1]) if position > 0
             end
-
-            if ref.number
-              ref = ref.with(index: ref.number)
-            end
-
-            # TODO: Need to check index of @ too?
-            next ref if ref.type == :at
-
-            if ref.index
-              # TODO: Prohibit $0 even so Bison allows it?
-              # See: https://www.gnu.org/software/bison/manual/html_node/Actions.html
-              code.invalid_ref(ref, "Can not refer following component. #{ref.index} >= #{i}.") if ref.index >= i
-              mark_rhs_node_referred(rhs[ref.index - 1])
-            end
-            ref
+            resolved
           end
+          node.resolve_references(references, rhs_occurrences)
         end
       end
 

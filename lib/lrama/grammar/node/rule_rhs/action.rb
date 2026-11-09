@@ -21,20 +21,25 @@ module Lrama
           attr_reader :tag #: Lexer::Token::Tag?
           attr_accessor :referred #: bool
           attr_reader :resolved_references #: Array[ResolvedReference]?
+          attr_reader :rhs_occurrences #: Array[RhsOccurrence]?
+          attr_reader :reference_bindings #: Hash[String, String]
 
-          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?resolved_references: Array[ResolvedReference]?, location: Lexer::Location) -> void
-          def initialize(code:, alias_name: nil, tag: nil, resolved_references: nil, location:)
+          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?reference_bindings: Hash[String, String], location: Lexer::Location) -> void
+          def initialize(code:, alias_name: nil, tag: nil, reference_bindings: {}, location:)
             @code = code
             @alias_name = alias_name
             @tag = tag
-            @resolved_references = resolved_references&.freeze
+            @resolved_references = nil
+            @rhs_occurrences = nil
+            @reference_bindings = reference_bindings.freeze
             @referred = false
             super(location: location)
           end
 
-          # @rbs (Array[ResolvedReference] references) -> Array[ResolvedReference]
-          def resolved_references=(references)
+          # @rbs (Array[ResolvedReference] references, Array[RhsOccurrence] occurrences) -> void
+          def resolve_references(references, occurrences)
             @resolved_references = references.freeze
+            @rhs_occurrences = occurrences.freeze
           end
         end
       end

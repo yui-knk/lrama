@@ -21,11 +21,15 @@ module Lrama
 
           attr_reader resolved_references: Array[ResolvedReference]?
 
-          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?resolved_references: Array[ResolvedReference]?, location: Lexer::Location) -> void
-          def initialize: (code: Grammar::Code, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?resolved_references: Array[ResolvedReference]?) -> void
+          attr_reader rhs_occurrences: Array[RhsOccurrence]?
 
-          # @rbs (Array[ResolvedReference] references) -> Array[ResolvedReference]
-          def resolved_references=: (Array[ResolvedReference] references) -> Array[ResolvedReference]
+          attr_reader reference_bindings: Hash[String, String]
+
+          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?reference_bindings: Hash[String, String], location: Lexer::Location) -> void
+          def initialize: (code: Grammar::Code, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?reference_bindings: Hash[String, String]) -> void
+
+          # @rbs (Array[ResolvedReference] references, Array[RhsOccurrence] occurrences) -> void
+          def resolve_references: (Array[ResolvedReference] references, Array[RhsOccurrence] occurrences) -> void
         end
       end
     end

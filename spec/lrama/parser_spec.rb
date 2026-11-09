@@ -285,8 +285,8 @@ RSpec.describe Lrama::Parser do
       expect(template.resolved_references).to be_nil
       expect(first.action.references.map(&:name)).to eq(["$", "X"])
       expect(second.action.references.map(&:name)).to eq(["$", "X"])
-      expect(first.action.resolved_references.map(&:name)).to eq(["$", "A"])
-      expect(second.action.resolved_references.map(&:name)).to eq(["$", "B"])
+      expect(first.action.resolved_references.map { |ref| ref.target.is_a?(Lrama::Grammar::ReferenceTarget::Lhs) ? "$" : ref.target.node.name }).to eq(["$", "A"])
+      expect(second.action.resolved_references.map { |ref| ref.target.is_a?(Lrama::Grammar::ReferenceTarget::Lhs) ? "$" : ref.target.node.name }).to eq(["$", "B"])
       expect(first.translated_code(grammar)).to eq(" (yyval) = (yyvsp[0]); ")
       expect(second.translated_code(grammar)).to eq(" (yyval) = (yyvsp[0]); ")
     end
@@ -302,11 +302,24 @@ RSpec.describe Lrama::Parser do
       grammar.prepare
 
       midrules = grammar.rules.select { |rule| rule.position_in_original_rule_rhs }
-      expect(midrules.map { |rule| rule.action.resolved_references.last.index }).to eq([2, 3])
+      expect(midrules.map { |rule| rule.action.resolved_references.last.position(rule.action.rhs_occurrences) }).to eq([2, 3])
       expect(midrules.map { |rule| rule.translated_code(grammar) }).to eq([
         " (yyval) = (yyvsp[0]); ", " (yyval) = (yyvsp[0]); ",
       ])
       expect(source.references.map { |ref| [ref.name, ref.index] }).to eq([["$", nil], ["item", nil]])
+    end
+
+    it "distinguishes two occurrences of the same symbol" do
+      grammar = Lrama::Parser.new("%token A\n%%\nstart: A[left] A[right] { $$ = $left + $right; };\n", "occurrences.y").parse
+      grammar.prepare
+      rule = grammar.rules.last
+      left, right = rule.action.resolved_references.drop(1).map(&:target)
+
+      expect(rule.rhs[0]).to equal(rule.rhs[1])
+      expect(left).not_to equal(right)
+      expect(left.node.alias_name).to eq("left")
+      expect(right.node.alias_name).to eq("right")
+      expect(rule.translated_code(grammar)).to eq(" (yyval) = (yyvsp[-1]) + (yyvsp[0]); ")
     end
 
     it "no_union" do

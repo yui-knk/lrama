@@ -1,0 +1,22 @@
+# Generated from lib/lrama/grammar/reference_target.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    module ReferenceTarget
+      type target = Lhs | Grammar::RhsOccurrence | Stack
+
+      class Lhs
+        # @rbs () -> void
+        def initialize: () -> void
+      end
+
+      # A rule-relative position outside the RHS, such as $0 or an unchecked @n.
+      class Stack
+        attr_reader number: Integer
+
+        # @rbs (Integer number) -> void
+        def initialize: (Integer number) -> void
+      end
+    end
+  end
+end

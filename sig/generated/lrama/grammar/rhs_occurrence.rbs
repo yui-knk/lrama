@@ -1,0 +1,13 @@
+# Generated from lib/lrama/grammar/rhs_occurrence.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    # Identifies one appearance of an RHS element, even when symbols repeat.
+    class RhsOccurrence
+      attr_reader node: Node::RuleRhs::rhs
+
+      # @rbs (Node::RuleRhs::rhs node) -> void
+      def initialize: (Node::RuleRhs::rhs node) -> void
+    end
+  end
+end

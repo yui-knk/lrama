@@ -110,30 +110,12 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
           ['class', nil], [nil, 1], ['keyword_end', nil],
         ])
 
-        expect(action.resolved_references.count).to eq 6
-        expect(action.resolved_references[0].type).to eq :dollar
-        expect(action.resolved_references[0].name).to eq '$'
-        expect(action.resolved_references[0].index).to eq nil
-
-        expect(action.resolved_references[1].type).to eq :dollar
-        expect(action.resolved_references[1].name).to eq nil
-        expect(action.resolved_references[1].index).to eq 1
-
-        expect(action.resolved_references[2].type).to eq :dollar
-        expect(action.resolved_references[2].name).to eq 'keyword_end'
-        expect(action.resolved_references[2].index).to eq 3
-
-        expect(action.resolved_references[3].type).to eq :at
-        expect(action.resolved_references[3].name).to eq '$'
-        expect(action.resolved_references[3].index).to eq nil
-
-        expect(action.resolved_references[4].type).to eq :at
-        expect(action.resolved_references[4].name).to eq nil
-        expect(action.resolved_references[4].index).to eq 1
-
-        expect(action.resolved_references[5].type).to eq :at
-        expect(action.resolved_references[5].name).to eq 'keyword_end'
-        expect(action.resolved_references[5].index).to eq 3
+        resolved = action.resolved_references
+        expect(resolved.map(&:type)).to eq([:dollar, :dollar, :dollar, :at, :at, :at])
+        expect(resolved.map { |ref| ref.position(rule_builder.rhs_occurrences) }).to eq([nil, 1, 3, nil, 1, 3])
+        expect(resolved[0].target).to be_a(Lrama::Grammar::ReferenceTarget::Lhs)
+        expect(resolved[1].target).to equal(rule_builder.rhs_occurrences[0])
+        expect(resolved[4].target).to equal(resolved[1].target)
       end
     end
 
@@ -158,30 +140,12 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
         rule_builder.send(:preprocess_references)
 
-        expect(action.resolved_references.count).to eq 6
-        expect(action.resolved_references[0].type).to eq :dollar
-        expect(action.resolved_references[0].name).to eq '$'
-        expect(action.resolved_references[0].index).to eq nil
-
-        expect(action.resolved_references[1].type).to eq :dollar
-        expect(action.resolved_references[1].name).to eq 'keyword_class'
-        expect(action.resolved_references[1].index).to eq 1
-
-        expect(action.resolved_references[2].type).to eq :dollar
-        expect(action.resolved_references[2].name).to eq nil
-        expect(action.resolved_references[2].index).to eq 2
-
-        expect(action.resolved_references[3].type).to eq :at
-        expect(action.resolved_references[3].name).to eq '$'
-        expect(action.resolved_references[3].index).to eq nil
-
-        expect(action.resolved_references[4].type).to eq :at
-        expect(action.resolved_references[4].name).to eq 'keyword_class'
-        expect(action.resolved_references[4].index).to eq 1
-
-        expect(action.resolved_references[5].type).to eq :at
-        expect(action.resolved_references[5].name).to eq nil
-        expect(action.resolved_references[5].index).to eq 2
+        resolved = action.resolved_references
+        expect(resolved.map(&:type)).to eq([:dollar, :dollar, :dollar, :at, :at, :at])
+        expect(resolved.map { |ref| ref.position(rule_builder.rhs_occurrences) }).to eq([nil, 1, 2, nil, 1, 2])
+        expect(resolved[0].target).to be_a(Lrama::Grammar::ReferenceTarget::Lhs)
+        expect(resolved[1].target).to equal(rule_builder.rhs_occurrences[0])
+        expect(resolved[4].target).to equal(resolved[1].target)
       end
     end
 

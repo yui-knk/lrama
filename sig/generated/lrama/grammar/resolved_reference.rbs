@@ -16,20 +16,16 @@ module Lrama
 
       attr_reader reference: Reference
 
-      attr_reader name: String?
+      attr_reader target: ReferenceTarget::target
 
-      attr_reader number: Integer?
+      # @rbs (Reference reference, target: ReferenceTarget::target) -> void
+      def initialize: (Reference reference, target: ReferenceTarget::target) -> void
 
-      attr_reader index: Integer?
+      # @rbs (Array[RhsOccurrence] occurrences) -> Integer?
+      def position: (Array[RhsOccurrence] occurrences) -> Integer?
 
-      # @rbs (Reference reference, ?name: String?, ?number: Integer?, ?index: Integer?) -> void
-      def initialize: (Reference reference, ?name: String?, ?number: Integer?, ?index: Integer?) -> void
-
-      # @rbs (?name: String?, ?number: Integer?, ?index: Integer?) -> ResolvedReference
-      def with: (?name: String?, ?number: Integer?, ?index: Integer?) -> ResolvedReference
-
-      # @rbs () -> (String | Integer)?
-      def value: () -> (String | Integer)?
+      # @rbs () -> (String | Integer)
+      def value: () -> (String | Integer)
     end
   end
 end

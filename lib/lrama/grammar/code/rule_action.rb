@@ -11,6 +11,7 @@ module Lrama
         #
         # @rbs!
         #   @resolved_references: Array[ResolvedReference]
+        #   @rhs_occurrences: Array[RhsOccurrence]
         #   @rule: Rule
         #   @grammar: Grammar
 
@@ -18,6 +19,7 @@ module Lrama
         def initialize(action:, rule:, grammar:)
           super(type: :rule_action, text: action.text, location: action.code.location)
           @resolved_references = action.resolved_references || raise("Action references have not been resolved")
+          @rhs_occurrences = action.rhs_occurrences || raise("Action RHS has not been resolved")
           @rule = rule
           @grammar = grammar
         end
@@ -60,7 +62,7 @@ module Lrama
         # @rbs (ResolvedReference ref) -> String
         def reference_to_c(ref)
           case
-          when ref.type == :dollar && ref.name == "$" # $$
+          when ref.type == :dollar && ref.target.is_a?(ReferenceTarget::Lhs) # $$
             tag = ref.ex_tag || lhs.tag
             if tag
               # @type var tag: Lexer::Token::Tag
@@ -71,9 +73,9 @@ module Lrama
             else
               raise_tag_not_found_error(ref)
             end
-          when ref.type == :at && ref.name == "$" # @$
+          when ref.type == :at && ref.target.is_a?(ReferenceTarget::Lhs) # @$
             "(yyloc)"
-          when ref.type == :index && ref.name == "$" # $:$
+          when ref.type == :index && ref.target.is_a?(ReferenceTarget::Lhs) # $:$
             raise "$:$ is not supported"
           when ref.type == :dollar # $n
             index = reference_index(ref)
@@ -101,7 +103,7 @@ module Lrama
 
         # @rbs (ResolvedReference ref) -> Integer
         def reference_index(ref)
-          ref.index || raise("Reference '#{ref.value}' has not been resolved")
+          ref.position(@rhs_occurrences) || raise("Reference '#{ref.value}' has not been resolved")
         end
 
         # @rbs () -> Integer

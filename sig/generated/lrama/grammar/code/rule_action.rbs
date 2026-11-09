@@ -6,6 +6,8 @@ module Lrama
       class RuleAction < Code
         @resolved_references: Array[ResolvedReference]
 
+        @rhs_occurrences: Array[RhsOccurrence]
+
         @rule: Rule
 
         @grammar: Grammar

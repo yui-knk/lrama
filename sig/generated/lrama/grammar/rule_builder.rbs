@@ -41,6 +41,8 @@ module Lrama
 
       attr_reader rhs: Array[Node::RuleRhs::rhs]
 
+      attr_reader rhs_occurrences: Array[RhsOccurrence]
+
       attr_reader action: Node::RuleRhs::Action?
 
       attr_reader precedence_sym: Grammar::Symbol?
