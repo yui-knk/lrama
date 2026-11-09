@@ -19,7 +19,7 @@ module Lrama
       attr_accessor :lhs_tag #: Lexer::Token::Tag?
       attr_accessor :_rhs #: Array[Grammar::Symbol::Id]
       attr_accessor :rhs #: Array[Grammar::Symbol]
-      attr_accessor :action #: Node::RuleRhs::Action?
+      attr_accessor :action #: BoundAction?
       attr_accessor :position_in_original_rule_rhs #: Integer
       attr_accessor :nullable #: bool
       attr_accessor :precedence_sym #: Grammar::Symbol?
@@ -29,7 +29,7 @@ module Lrama
       attr_accessor :original_rule #: Rule
 
       # @rbs (?id: Integer?, ?_lhs: Grammar::Symbol::Id?, ?lhs: Grammar::Symbol?, ?lhs_tag: Lexer::Token::Tag?,
-      #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?action: Node::RuleRhs::Action?,
+      #      ?_rhs: Array[Grammar::Symbol::Id]?, ?rhs: Array[Grammar::Symbol]?, ?action: BoundAction?,
       #      ?position_in_original_rule_rhs: Integer?, ?nullable: bool?, ?precedence_sym: Grammar::Symbol?,
       #      ?lineno: Integer?, ?_lhs_location: Lexer::Location?, ?_rhs_locations: Array[Lexer::Location?]?) -> void
       def initialize(id: nil, _lhs: nil, lhs: nil, lhs_tag: nil, _rhs: nil, rhs: nil, action: nil,

@@ -110,7 +110,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
           ['class', nil], [nil, 1], ['keyword_end', nil],
         ])
 
-        resolved = action.resolved_references
+        resolved = rule_builder.bound_action(action).resolved_references
         expect(resolved.map(&:type)).to eq([:dollar, :dollar, :dollar, :at, :at, :at])
         expect(resolved.map { |ref| ref.position(rule_builder.rhs_occurrences) }).to eq([nil, 1, 3, nil, 1, 3])
         expect(resolved[0].target).to be_a(Lrama::Grammar::ReferenceTarget::Lhs)
@@ -140,7 +140,7 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
         rule_builder.send(:preprocess_references)
 
-        resolved = action.resolved_references
+        resolved = rule_builder.bound_action(action).resolved_references
         expect(resolved.map(&:type)).to eq([:dollar, :dollar, :dollar, :at, :at, :at])
         expect(resolved.map { |ref| ref.position(rule_builder.rhs_occurrences) }).to eq([nil, 1, 2, nil, 1, 2])
         expect(resolved[0].target).to be_a(Lrama::Grammar::ReferenceTarget::Lhs)

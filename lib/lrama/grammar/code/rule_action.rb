@@ -15,11 +15,11 @@ module Lrama
         #   @rule: Rule
         #   @grammar: Grammar
 
-        # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
+        # @rbs (action: BoundAction, rule: Rule, grammar: Grammar) -> void
         def initialize(action:, rule:, grammar:)
           super(type: :rule_action, text: action.text, location: action.code.location)
-          @resolved_references = action.resolved_references || raise("Action references have not been resolved")
-          @rhs_occurrences = action.rhs_occurrences || raise("Action RHS has not been resolved")
+          @resolved_references = action.resolved_references
+          @rhs_occurrences = action.rhs_occurrences
           @rule = rule
           @grammar = grammar
         end

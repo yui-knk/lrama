@@ -63,7 +63,7 @@ module Lrama
                 end
               end
             else
-              builder.add_rhs(rhs_node.is_a?(Node::RuleRhs::Action) ? rhs_node.dup : rhs_node)
+              builder.add_rhs(rhs_node)
             end
           end
         end
@@ -74,7 +74,7 @@ module Lrama
           return unless action
 
           code = action.code
-          resolved_references = action.resolved_references || action.references
+          resolved_references = action.references
 
           if rhs.action
             inline_index = index + 1
@@ -82,7 +82,7 @@ module Lrama
             text = code.text.dup
 
             resolved_references.reverse_each do |ref|
-              position = ref.is_a?(ResolvedReference) ? ref.position(action.rhs_occurrences || []) : ref.number
+              position = ref.number
               next if position.nil? || position < inline_index
 
               reference = text[ref.first_column...ref.last_column]

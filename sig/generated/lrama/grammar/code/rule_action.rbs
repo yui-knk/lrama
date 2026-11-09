@@ -12,8 +12,8 @@ module Lrama
 
         @grammar: Grammar
 
-        # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
-        def initialize: (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
+        # @rbs (action: BoundAction, rule: Rule, grammar: Grammar) -> void
+        def initialize: (action: BoundAction, rule: Rule, grammar: Grammar) -> void
 
         private
 

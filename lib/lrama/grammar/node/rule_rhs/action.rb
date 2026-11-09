@@ -19,9 +19,6 @@ module Lrama
           attr_reader :code #: Grammar::Code
           attr_reader :alias_name #: String?
           attr_reader :tag #: Lexer::Token::Tag?
-          attr_accessor :referred #: bool
-          attr_reader :resolved_references #: Array[ResolvedReference]?
-          attr_reader :rhs_occurrences #: Array[RhsOccurrence]?
           attr_reader :reference_bindings #: Hash[String, String]
 
           # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?reference_bindings: Hash[String, String], location: Lexer::Location) -> void
@@ -29,18 +26,11 @@ module Lrama
             @code = code
             @alias_name = alias_name
             @tag = tag
-            @resolved_references = nil
-            @rhs_occurrences = nil
             @reference_bindings = reference_bindings.freeze
-            @referred = false
             super(location: location)
+            freeze
           end
 
-          # @rbs (Array[ResolvedReference] references, Array[RhsOccurrence] occurrences) -> void
-          def resolve_references(references, occurrences)
-            @resolved_references = references.freeze
-            @rhs_occurrences = occurrences.freeze
-          end
         end
       end
     end

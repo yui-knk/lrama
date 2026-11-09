@@ -10,11 +10,11 @@ module Lrama
       #
       # @rbs!
       #   @position_in_original_rule_rhs: Integer?
-      #   @skip_preprocess_references: bool
       #   @trailing_precedence: bool
       #   @rules: Array[Rule]
       #   @rule_builders_for_parameterized: Array[RuleBuilder]
-      #   @rule_builders_for_derived_rules: Array[RuleBuilder]
+      #   @bound_actions: Hash[Node::RuleRhs::Action, BoundAction]
+      #   @referenced_occurrences: Hash[RhsOccurrence, bool]
       #   @parameterized_rules: Array[Rule]
       #   @midrule_action_rules: Array[Rule]
       #   @replaced_rhs: Array[Grammar::Symbol::Id]?
@@ -33,13 +33,12 @@ module Lrama
       attr_reader :action #: Node::RuleRhs::Action?
       attr_reader :precedence_sym #: Grammar::Symbol?
 
-      # @rbs (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?, ?skip_preprocess_references: bool) -> void
-      def initialize(rule_counter, midrule_action_counter, parameterized_resolver, position_in_original_rule_rhs = nil, lhs_tag: nil, skip_preprocess_references: false)
+      # @rbs (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?) -> void
+      def initialize(rule_counter, midrule_action_counter, parameterized_resolver, position_in_original_rule_rhs = nil, lhs_tag: nil)
         @rule_counter = rule_counter
         @midrule_action_counter = midrule_action_counter
         @parameterized_resolver = parameterized_resolver
         @position_in_original_rule_rhs = position_in_original_rule_rhs
-        @skip_preprocess_references = skip_preprocess_references
         @trailing_precedence = false
 
         @lhs = nil
@@ -53,7 +52,8 @@ module Lrama
         @line = nil
         @rules = []
         @rule_builders_for_parameterized = []
-        @rule_builders_for_derived_rules = []
+        @bound_actions = {}
+        @referenced_occurrences = {}
         @parameterized_rules = []
         @midrule_action_rules = []
       end
@@ -86,7 +86,7 @@ module Lrama
 
       # @rbs () -> void
       def setup_rules
-        preprocess_references unless @skip_preprocess_references
+        preprocess_references
         process_rhs
         resolve_inline_rules
         build_rules
@@ -95,6 +95,11 @@ module Lrama
       # @rbs () -> Array[Grammar::Rule]
       def rules
         @parameterized_rules + @midrule_action_rules + @rules
+      end
+
+      # @rbs (?Node::RuleRhs::Action? syntax) -> BoundAction?
+      def bound_action(syntax = action)
+        syntax && @bound_actions.fetch(syntax)
       end
 
       # @rbs () -> bool
@@ -137,14 +142,11 @@ module Lrama
           _lhs: lhs,
           _rhs: symbols,
           _lhs_location: lhs_location, _rhs_locations: locations,
-          lhs_tag: lhs_tag, action: action,
+          lhs_tag: lhs_tag, action: bound_action,
           position_in_original_rule_rhs: @position_in_original_rule_rhs, precedence_sym: precedence_sym, lineno: line
         )
         @rules = [rule]
         @parameterized_rules = @rule_builders_for_parameterized.map do |rule_builder|
-          rule_builder.rules
-        end.flatten
-        @midrule_action_rules = @rule_builders_for_derived_rules.map do |rule_builder|
           rule_builder.rules
         end.flatten
         @midrule_action_rules.each do |r|
@@ -196,19 +198,17 @@ module Lrama
             end
             replaced_rhs_locations << node.location
           when Node::RuleRhs::Action
-            prefix = node.referred ? "@" : "$@"
+            prefix = @referenced_occurrences[rhs_occurrences[i]] ? "@" : "$@"
             tag = node.tag || lhs_tag
             lhs_id = Grammar::Symbol::Id.new(name: prefix + @midrule_action_counter.increment.to_s, kind: :ident)
             replaced_rhs << lhs_id
             replaced_rhs_locations << nil
 
-            rule_builder = RuleBuilder.new(@rule_counter, @midrule_action_counter, @parameterized_resolver, i, lhs_tag: tag, skip_preprocess_references: true)
-            rule_builder.lhs = lhs_id
-            rule_builder.add_rhs(node)
-            rule_builder.complete_input
-            rule_builder.setup_rules
-
-            @rule_builders_for_derived_rules << rule_builder
+            @midrule_action_rules << Rule.new(
+              id: @rule_counter.increment, _lhs: lhs_id, _rhs: [], _rhs_locations: [],
+              lhs_tag: tag, action: @bound_actions.fetch(node),
+              position_in_original_rule_rhs: i, lineno: node.location.first_line
+            )
           when Node::RuleRhs::Empty
             # Noop
           else
@@ -237,58 +237,16 @@ module Lrama
 
       # @rbs () -> void
       def numberize_references
+        resolver = ReferenceResolver.new(lhs: lhs, lhs_alias_name: lhs_alias_name, rhs_occurrences: rhs_occurrences)
         (rhs + [action]).compact.each.with_index(1) do |node, i|
           next unless node.is_a?(Node::RuleRhs::Action)
 
-          references = node.references.map do |ref|
-            name = ref.name
-            name = node.reference_bindings.fetch(name, name) if name
-            target =
-              if name == "$"
-                ReferenceTarget::Lhs.new
-              elsif name
-                candidates = ([lhs] + rhs).each_with_index.select { |element, _| rhs_node_referred_by?(element, name) }
-                node.code.invalid_ref(ref, "Referring symbol `#{name}` is duplicated.") if candidates.size >= 2
-                candidate = candidates.first || node.code.invalid_ref(ref, "Referring symbol `#{name}` is not found.")
-                candidate[1] == 0 ? ReferenceTarget::Lhs.new : rhs_occurrences[candidate[1] - 1]
-              else
-                number = ref.number
-                if number > 0 && (occurrence = rhs_occurrences[number - 1])
-                  occurrence
-                else
-                  ReferenceTarget::Stack.new(number)
-                end
-              end
-            resolved = ResolvedReference.new(ref, target: target)
-            position = resolved.position(rhs_occurrences)
-            if ref.type != :at && position
-              node.code.invalid_ref(ref, "Can not refer following component. #{position} >= #{i}.") if position >= i
-              mark_rhs_node_referred(rhs[position - 1]) if position > 0
-            end
-            resolved
+          bound = resolver.resolve(node, position: i)
+          @bound_actions[node] = bound
+          bound.resolved_references.each do |ref|
+            target = ref.target
+            @referenced_occurrences[target] = true if ref.type != :at && target.is_a?(RhsOccurrence)
           end
-          node.resolve_references(references, rhs_occurrences)
-        end
-      end
-
-      # @rbs (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
-      def rhs_node_referred_by?(node, name)
-        case node
-        when Grammar::Symbol::Id
-          [node.name, lhs_alias_name].compact.include?(name)
-        when Node::RuleRhs::Symbol, Node::RuleRhs::InstantiateRule
-          [node.name, node.alias_name].compact.include?(name)
-        when Node::RuleRhs::Action
-          [node.text, node.alias_name].compact.include?(name)
-        else
-          false
-        end
-      end
-
-      # @rbs (Node::RuleRhs::rhs node) -> void
-      def mark_rhs_node_referred(node)
-        if node.is_a?(Node::RuleRhs::Action)
-          node.referred = true
         end
       end
     end

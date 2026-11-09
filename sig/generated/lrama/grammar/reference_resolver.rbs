@@ -1,0 +1,18 @@
+# Generated from lib/lrama/grammar/reference_resolver.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    class ReferenceResolver
+      # @rbs (lhs: Grammar::Symbol::Id?, lhs_alias_name: String?, rhs_occurrences: Array[RhsOccurrence]) -> void
+      def initialize: (lhs: Grammar::Symbol::Id?, lhs_alias_name: String?, rhs_occurrences: Array[RhsOccurrence]) -> void
+
+      # @rbs (Node::RuleRhs::Action action, position: Integer) -> BoundAction
+      def resolve: (Node::RuleRhs::Action action, position: Integer) -> BoundAction
+
+      private
+
+      # @rbs (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
+      def named?: (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
+    end
+  end
+end

@@ -282,7 +282,7 @@ RSpec.describe Lrama::Parser do
       first = grammar.rules.find { |rule| rule.lhs.name == "pick_A" }
       second = grammar.rules.find { |rule| rule.lhs.name == "pick_B" }
       expect(template.references.map(&:name)).to eq(["$", "X"])
-      expect(template.resolved_references).to be_nil
+      expect(template).not_to respond_to(:resolved_references)
       expect(first.action.references.map(&:name)).to eq(["$", "X"])
       expect(second.action.references.map(&:name)).to eq(["$", "X"])
       expect(first.action.resolved_references.map { |ref| ref.target.is_a?(Lrama::Grammar::ReferenceTarget::Lhs) ? "$" : ref.target.node.name }).to eq(["$", "A"])

@@ -1,0 +1,31 @@
+# Generated from lib/lrama/grammar/bound_action.rb with RBS::Inline
+
+module Lrama
+  class Grammar
+    # The completed result of resolving a syntax action in one rule scope.
+    class BoundAction
+      def code: () -> Code
+
+      def text: () -> String
+
+      def references: () -> Array[Reference]
+
+      def alias_name: () -> String?
+
+      def tag: () -> Lexer::Token::Tag?
+
+      def location: () -> Lexer::Location
+
+      extend Forwardable
+
+      attr_reader source: Node::RuleRhs::Action
+
+      attr_reader resolved_references: Array[ResolvedReference]
+
+      attr_reader rhs_occurrences: Array[RhsOccurrence]
+
+      # @rbs (source: Node::RuleRhs::Action, resolved_references: Array[ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
+      def initialize: (source: Node::RuleRhs::Action, resolved_references: Array[ResolvedReference], rhs_occurrences: Array[RhsOccurrence]) -> void
+    end
+  end
+end

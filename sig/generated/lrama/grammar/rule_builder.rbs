@@ -5,15 +5,15 @@ module Lrama
     class RuleBuilder
       @position_in_original_rule_rhs: Integer?
 
-      @skip_preprocess_references: bool
-
       @trailing_precedence: bool
 
       @rules: Array[Rule]
 
       @rule_builders_for_parameterized: Array[RuleBuilder]
 
-      @rule_builders_for_derived_rules: Array[RuleBuilder]
+      @bound_actions: Hash[Node::RuleRhs::Action, BoundAction]
+
+      @referenced_occurrences: Hash[RhsOccurrence, bool]
 
       @parameterized_rules: Array[Rule]
 
@@ -47,8 +47,8 @@ module Lrama
 
       attr_reader precedence_sym: Grammar::Symbol?
 
-      # @rbs (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?, ?skip_preprocess_references: bool) -> void
-      def initialize: (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?, ?skip_preprocess_references: bool) -> void
+      # @rbs (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?) -> void
+      def initialize: (Counter rule_counter, Counter midrule_action_counter, Grammar::Parameterized::Resolver parameterized_resolver, ?Integer position_in_original_rule_rhs, ?lhs_tag: Lexer::Token::Tag?) -> void
 
       # @rbs (Node::RuleRhs::rhs rhs) -> void
       def add_rhs: (Node::RuleRhs::rhs rhs) -> void
@@ -64,6 +64,9 @@ module Lrama
 
       # @rbs () -> Array[Grammar::Rule]
       def rules: () -> Array[Grammar::Rule]
+
+      # @rbs (?Node::RuleRhs::Action? syntax) -> BoundAction?
+      def bound_action: (?Node::RuleRhs::Action? syntax) -> BoundAction?
 
       # @rbs () -> bool
       def has_inline_rules?: () -> bool
@@ -92,12 +95,6 @@ module Lrama
 
       # @rbs () -> void
       def numberize_references: () -> void
-
-      # @rbs (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
-      def rhs_node_referred_by?: (Grammar::Symbol::Id? | Node::RuleRhs::rhs node, String name) -> bool
-
-      # @rbs (Node::RuleRhs::rhs node) -> void
-      def mark_rhs_node_referred: (Node::RuleRhs::rhs node) -> void
     end
   end
 end
