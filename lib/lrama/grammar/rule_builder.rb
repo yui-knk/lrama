@@ -238,12 +238,13 @@ module Lrama
 
           code = node.code
 
-          node.references.each do |ref|
+          references = node.resolved_references || node.references.map { |ref| ResolvedReference.new(ref) }
+          node.resolved_references = references.map do |ref|
             ref_name = ref.name
 
             if ref_name
               if ref_name == '$'
-                ref.name = '$'
+                ref = ref.with(name: '$')
               else
                 candidates = ([lhs] + rhs).each_with_index.select do |node, _i|
                   rhs_node_referred_by?(node, ref_name)
@@ -258,19 +259,19 @@ module Lrama
                 end
 
                 if referring_symbol[1] == 0 # Refers to LHS
-                  ref.name = '$'
+                  ref = ref.with(name: '$')
                 else
-                  ref.number = referring_symbol[1]
+                  ref = ref.with(number: referring_symbol[1])
                 end
               end
             end
 
             if ref.number
-              ref.index = ref.number
+              ref = ref.with(index: ref.number)
             end
 
             # TODO: Need to check index of @ too?
-            next if ref.type == :at
+            next ref if ref.type == :at
 
             if ref.index
               # TODO: Prohibit $0 even so Bison allows it?
@@ -278,6 +279,7 @@ module Lrama
               code.invalid_ref(ref, "Can not refer following component. #{ref.index} >= #{i}.") if ref.index >= i
               mark_rhs_node_referred(rhs[ref.index - 1])
             end
+            ref
           end
         end
       end

@@ -17,10 +17,10 @@ RSpec.describe Lrama::Grammar::Code do
       expect(code.references.first.name).to eq("value")
     end
 
-    it "keeps reference resolution state separate for each conversion" do
+    it "keeps source references immutable" do
       first = described_class.from_token(token, type: :rule_action)
-      first.references.first.name = "$"
-      first.references.first.index = 1
+      expect { first.references.first.name = "$" }.to raise_error(FrozenError)
+      expect { first.references.clear }.to raise_error(FrozenError)
 
       second = described_class.from_token(token, type: :rule_action)
 
@@ -35,20 +35,6 @@ RSpec.describe Lrama::Grammar::Code do
       expect { described_class.new(text: "code") }.to raise_error(ArgumentError, /missing keyword: :type/)
     end
 
-    it "preserves references resolved during grammar expansion" do
-      original = described_class.new(type: :rule_action, text: " $value; ")
-      references = original.references.map(&:dup)
-      references.first.name = "argument"
-      references.first.number = 2
-      references.first.index = 2
-
-      expanded = described_class.new(type: :rule_action, text: original.text, references: references)
-
-      expect(expanded.references.first.name).to eq("argument")
-      expect(expanded.references.first.index).to eq(2)
-      expect(original.references.first.name).to eq("value")
-      expect(original.references.first.index).to be_nil
-    end
   end
 
   describe "#translated_code" do

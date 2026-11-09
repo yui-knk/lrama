@@ -20,7 +20,7 @@ module Lrama
         def resolve_action(bindings)
           return unless action
 
-          resolved_references = action.references.map(&:dup)
+          resolved_references = action.resolved_references || action.references.map { |ref| ResolvedReference.new(ref) }
           var_to_arg = {} #: Hash[String, String]
           symbols.each do |sym|
             resolved_sym = bindings.resolve_symbol(sym)
@@ -30,15 +30,14 @@ module Lrama
           end
 
           var_to_arg.each do |var, arg|
-            resolved_references.each do |ref|
-              if ref.name == var
-                ref.name = arg
-              end
+            resolved_references = resolved_references.map do |ref|
+              ref.name == var ? ref.with(name: arg) : ref
             end
           end
 
           Node::RuleRhs::Action.new(
-            code: Grammar::Code.new(type: action.code.type, text: action.text, location: action.code.location, references: resolved_references),
+            code: action.code,
+            resolved_references: resolved_references,
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

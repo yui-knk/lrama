@@ -4,6 +4,8 @@ module Lrama
   class Grammar
     class Code
       class RuleAction < Code
+        @resolved_references: Array[ResolvedReference]
+
         @rule: Rule
 
         @grammar: Grammar
@@ -12,6 +14,9 @@ module Lrama
         def initialize: (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
 
         private
+
+        # @rbs () -> Array[ResolvedReference]
+        def translation_references: () -> Array[ResolvedReference]
 
         # * ($$) yyval
         # * (@$) yyloc
@@ -41,8 +46,11 @@ module Lrama
         # "Index for yyvsp"                        0
         # "$:n"                                  $:1
         #
-        # @rbs (Reference ref) -> String
-        def reference_to_c: (Reference ref) -> String
+        # @rbs (ResolvedReference ref) -> String
+        def reference_to_c: (ResolvedReference ref) -> String
+
+        # @rbs (ResolvedReference ref) -> Integer
+        def reference_index: (ResolvedReference ref) -> Integer
 
         # @rbs () -> Integer
         def position_in_rhs: () -> Integer
@@ -60,8 +68,8 @@ module Lrama
         # @rbs () -> bool
         def union_not_defined?: () -> bool
 
-        # @rbs (Reference ref) -> bot
-        def raise_tag_not_found_error: (Reference ref) -> bot
+        # @rbs (ResolvedReference ref) -> bot
+        def raise_tag_not_found_error: (ResolvedReference ref) -> bot
       end
     end
   end

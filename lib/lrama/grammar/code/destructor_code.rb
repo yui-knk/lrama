@@ -14,7 +14,7 @@ module Lrama
 
         # @rbs (type: ::Symbol, code: Grammar::Code, tag: Lexer::Token::Tag) -> void
         def initialize(type:, code:, tag:)
-          super(type: type, text: code.text, location: code.location, references: code.references)
+          super(type: type, text: code.text, location: code.location)
           @tag = tag
         end
 

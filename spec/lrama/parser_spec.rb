@@ -269,6 +269,46 @@ RSpec.describe Lrama::Parser do
       expect { grammar.union.code.translated_code }.to raise_error("$$ can not be used in union.")
     end
 
+    it "resolves parameterized references without changing the template source" do
+      grammar = Lrama::Parser.new(<<~'GRAMMAR', "bindings.y").parse
+        %token A B
+        %rule pick(X): X { $$ = $X; };
+        %%
+        start: pick(A) pick(B);
+      GRAMMAR
+      template = grammar.parameterized_rules.find { |rule| rule.name == "pick" }.rhs.first.action
+      grammar.prepare
+
+      first = grammar.rules.find { |rule| rule.lhs.name == "pick_A" }
+      second = grammar.rules.find { |rule| rule.lhs.name == "pick_B" }
+      expect(template.references.map(&:name)).to eq(["$", "X"])
+      expect(template.resolved_references).to be_nil
+      expect(first.action.references.map(&:name)).to eq(["$", "X"])
+      expect(second.action.references.map(&:name)).to eq(["$", "X"])
+      expect(first.action.resolved_references.map(&:name)).to eq(["$", "A"])
+      expect(second.action.resolved_references.map(&:name)).to eq(["$", "B"])
+      expect(first.translated_code(grammar)).to eq(" (yyval) = (yyvsp[0]); ")
+      expect(second.translated_code(grammar)).to eq(" (yyval) = (yyvsp[0]); ")
+    end
+
+    it "keeps midrule bindings separate across inline alternatives" do
+      grammar = Lrama::Parser.new(<<~'GRAMMAR', "inline_bindings.y").parse
+        %token A B C D
+        %rule %inline prefix: A | A B;
+        %%
+        start: prefix C[item] { $$ = $item; } D;
+      GRAMMAR
+      source = grammar.rule_builders.first.rhs.find { |node| node.is_a?(Lrama::Grammar::Node::RuleRhs::Action) }.code
+      grammar.prepare
+
+      midrules = grammar.rules.select { |rule| rule.position_in_original_rule_rhs }
+      expect(midrules.map { |rule| rule.action.resolved_references.last.index }).to eq([2, 3])
+      expect(midrules.map { |rule| rule.translated_code(grammar) }).to eq([
+        " (yyval) = (yyvsp[0]); ", " (yyval) = (yyvsp[0]); ",
+      ])
+      expect(source.references.map { |ref| [ref.name, ref.index] }).to eq([["$", nil], ["item", nil]])
+    end
+
     it "no_union" do
       path = "common/no_union.y"
       y = File.read(fixture_path(path))

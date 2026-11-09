@@ -63,7 +63,7 @@ module Lrama
                 end
               end
             else
-              builder.add_rhs(rhs_node)
+              builder.add_rhs(rhs_node.is_a?(Node::RuleRhs::Action) ? rhs_node.dup : rhs_node)
             end
           end
         end
@@ -73,30 +73,32 @@ module Lrama
           action = @rule_builder.action
           return unless action
 
-          code = action.text
-          references = action.references.map(&:dup)
+          code = action.code
+          resolved_references = action.resolved_references || action.references.map { |ref| ResolvedReference.new(ref) }
 
           if rhs.action
             inline_index = index + 1
             index_offset = rhs.symbols.count - 1
-            code = code.dup
+            text = code.text.dup
 
-            references.reverse_each do |ref|
+            resolved_references.reverse_each do |ref|
               next if ref.index.nil? || ref.index < inline_index # The index is nil for $$.
 
-              reference = code[ref.first_column...ref.last_column]
+              reference = text[ref.first_column...ref.last_column]
               replacement =
                 if ref.type == :dollar && ref.index == inline_index
                   rhs.action.text
                 else
                   reference.sub(/\d+\z/, (ref.index + index_offset).to_s)
                 end
-              code[ref.first_column...ref.last_column] = replacement
+              text[ref.first_column...ref.last_column] = replacement
             end
-            references = Grammar::ReferenceScanner.new(code).scan
+            code = Grammar::Code.new(type: code.type, text: text, location: code.location)
+            resolved_references = nil
           end
           Node::RuleRhs::Action.new(
-            code: Grammar::Code.new(type: action.code.type, text: code, location: action.code.location, references: references),
+            code: code,
+            resolved_references: resolved_references,
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

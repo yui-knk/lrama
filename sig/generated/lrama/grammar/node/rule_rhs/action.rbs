@@ -19,8 +19,13 @@ module Lrama
 
           attr_accessor referred: bool
 
-          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, location: Lexer::Location) -> void
-          def initialize: (code: Grammar::Code, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?) -> void
+          attr_reader resolved_references: Array[ResolvedReference]?
+
+          # @rbs (code: Grammar::Code, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?resolved_references: Array[ResolvedReference]?, location: Lexer::Location) -> void
+          def initialize: (code: Grammar::Code, location: Lexer::Location, ?alias_name: String?, ?tag: Lexer::Token::Tag?, ?resolved_references: Array[ResolvedReference]?) -> void
+
+          # @rbs (Array[ResolvedReference] references) -> Array[ResolvedReference]
+          def resolved_references=: (Array[ResolvedReference] references) -> Array[ResolvedReference]
         end
       end
     end

@@ -105,30 +105,35 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
         rule_builder.send(:preprocess_references)
 
-        expect(action.references.count).to eq 6
-        expect(action.references[0].type).to eq :dollar
-        expect(action.references[0].name).to eq '$'
-        expect(action.references[0].index).to eq nil
+        expect(action.code.references.map { |ref| [ref.name, ref.index] }).to eq([
+          ['class', nil], [nil, 1], ['keyword_end', nil],
+          ['class', nil], [nil, 1], ['keyword_end', nil],
+        ])
 
-        expect(action.references[1].type).to eq :dollar
-        expect(action.references[1].name).to eq nil
-        expect(action.references[1].index).to eq 1
+        expect(action.resolved_references.count).to eq 6
+        expect(action.resolved_references[0].type).to eq :dollar
+        expect(action.resolved_references[0].name).to eq '$'
+        expect(action.resolved_references[0].index).to eq nil
 
-        expect(action.references[2].type).to eq :dollar
-        expect(action.references[2].name).to eq 'keyword_end'
-        expect(action.references[2].index).to eq 3
+        expect(action.resolved_references[1].type).to eq :dollar
+        expect(action.resolved_references[1].name).to eq nil
+        expect(action.resolved_references[1].index).to eq 1
 
-        expect(action.references[3].type).to eq :at
-        expect(action.references[3].name).to eq '$'
-        expect(action.references[3].index).to eq nil
+        expect(action.resolved_references[2].type).to eq :dollar
+        expect(action.resolved_references[2].name).to eq 'keyword_end'
+        expect(action.resolved_references[2].index).to eq 3
 
-        expect(action.references[4].type).to eq :at
-        expect(action.references[4].name).to eq nil
-        expect(action.references[4].index).to eq 1
+        expect(action.resolved_references[3].type).to eq :at
+        expect(action.resolved_references[3].name).to eq '$'
+        expect(action.resolved_references[3].index).to eq nil
 
-        expect(action.references[5].type).to eq :at
-        expect(action.references[5].name).to eq 'keyword_end'
-        expect(action.references[5].index).to eq 3
+        expect(action.resolved_references[4].type).to eq :at
+        expect(action.resolved_references[4].name).to eq nil
+        expect(action.resolved_references[4].index).to eq 1
+
+        expect(action.resolved_references[5].type).to eq :at
+        expect(action.resolved_references[5].name).to eq 'keyword_end'
+        expect(action.resolved_references[5].index).to eq 3
       end
     end
 
@@ -153,30 +158,30 @@ RSpec.describe Lrama::Grammar::RuleBuilder do
 
         rule_builder.send(:preprocess_references)
 
-        expect(action.references.count).to eq 6
-        expect(action.references[0].type).to eq :dollar
-        expect(action.references[0].name).to eq '$'
-        expect(action.references[0].index).to eq nil
+        expect(action.resolved_references.count).to eq 6
+        expect(action.resolved_references[0].type).to eq :dollar
+        expect(action.resolved_references[0].name).to eq '$'
+        expect(action.resolved_references[0].index).to eq nil
 
-        expect(action.references[1].type).to eq :dollar
-        expect(action.references[1].name).to eq 'keyword_class'
-        expect(action.references[1].index).to eq 1
+        expect(action.resolved_references[1].type).to eq :dollar
+        expect(action.resolved_references[1].name).to eq 'keyword_class'
+        expect(action.resolved_references[1].index).to eq 1
 
-        expect(action.references[2].type).to eq :dollar
-        expect(action.references[2].name).to eq nil
-        expect(action.references[2].index).to eq 2
+        expect(action.resolved_references[2].type).to eq :dollar
+        expect(action.resolved_references[2].name).to eq nil
+        expect(action.resolved_references[2].index).to eq 2
 
-        expect(action.references[3].type).to eq :at
-        expect(action.references[3].name).to eq '$'
-        expect(action.references[3].index).to eq nil
+        expect(action.resolved_references[3].type).to eq :at
+        expect(action.resolved_references[3].name).to eq '$'
+        expect(action.resolved_references[3].index).to eq nil
 
-        expect(action.references[4].type).to eq :at
-        expect(action.references[4].name).to eq 'keyword_class'
-        expect(action.references[4].index).to eq 1
+        expect(action.resolved_references[4].type).to eq :at
+        expect(action.resolved_references[4].name).to eq 'keyword_class'
+        expect(action.resolved_references[4].index).to eq 1
 
-        expect(action.references[5].type).to eq :at
-        expect(action.references[5].name).to eq nil
-        expect(action.references[5].index).to eq 2
+        expect(action.resolved_references[5].type).to eq :at
+        expect(action.resolved_references[5].name).to eq nil
+        expect(action.resolved_references[5].index).to eq 2
       end
     end
 

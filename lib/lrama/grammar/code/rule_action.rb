@@ -10,17 +10,24 @@ module Lrama
         #       see: https://github.com/soutaro/rbs-inline/pull/149
         #
         # @rbs!
+        #   @resolved_references: Array[ResolvedReference]
         #   @rule: Rule
         #   @grammar: Grammar
 
         # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
         def initialize(action:, rule:, grammar:)
-          super(type: :rule_action, text: action.text, location: action.code.location, references: action.references)
+          super(type: :rule_action, text: action.text, location: action.code.location)
+          @resolved_references = action.resolved_references || raise("Action references have not been resolved")
           @rule = rule
           @grammar = grammar
         end
 
         private
+
+        # @rbs () -> Array[ResolvedReference]
+        def translation_references
+          @resolved_references
+        end
 
         # * ($$) yyval
         # * (@$) yyloc
@@ -50,7 +57,7 @@ module Lrama
         # "Index for yyvsp"                        0
         # "$:n"                                  $:1
         #
-        # @rbs (Reference ref) -> String
+        # @rbs (ResolvedReference ref) -> String
         def reference_to_c(ref)
           case
           when ref.type == :dollar && ref.name == "$" # $$
@@ -69,8 +76,9 @@ module Lrama
           when ref.type == :index && ref.name == "$" # $:$
             raise "$:$ is not supported"
           when ref.type == :dollar # $n
-            i = -position_in_rhs + ref.index
-            tag = ref.ex_tag || (ref.index > 0 ? rhs[ref.index - 1].tag : nil)
+            index = reference_index(ref)
+            i = -position_in_rhs + index
+            tag = ref.ex_tag || (index > 0 ? rhs[index - 1].tag : nil)
             if tag
               # @type var tag: Lexer::Token::Tag
               "(yyvsp[#{i}].#{tag.member})"
@@ -81,14 +89,19 @@ module Lrama
               raise_tag_not_found_error(ref)
             end
           when ref.type == :at # @n
-            i = -position_in_rhs + ref.index
+            i = -position_in_rhs + reference_index(ref)
             "(yylsp[#{i}])"
           when ref.type == :index # $:n
-            i = -position_in_rhs + ref.index
+            i = -position_in_rhs + reference_index(ref)
             "(#{i} - 1)"
           else
             raise "Unexpected. #{self}, #{ref}"
           end
+        end
+
+        # @rbs (ResolvedReference ref) -> Integer
+        def reference_index(ref)
+          ref.index || raise("Reference '#{ref.value}' has not been resolved")
         end
 
         # @rbs () -> Integer
@@ -118,7 +131,7 @@ module Lrama
           @grammar.union.nil?
         end
 
-        # @rbs (Reference ref) -> bot
+        # @rbs (ResolvedReference ref) -> bot
         def raise_tag_not_found_error(ref)
           raise "Tag is not specified for '$#{ref.value}' in '#{@rule.display_name}'"
         end

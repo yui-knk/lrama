@@ -7,7 +7,7 @@ module Lrama
       class NoReferenceCode < Code
         # @rbs (type: ::Symbol, code: Grammar::Code) -> void
         def initialize(type:, code:)
-          super(type: type, text: code.text, location: code.location, references: code.references)
+          super(type: type, text: code.text, location: code.location)
         end
 
         private

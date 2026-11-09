@@ -9,8 +9,8 @@ module Lrama
 
       attr_reader location: Lexer::Location
 
-      # @rbs (type: ::Symbol, text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
-      def initialize: (type: ::Symbol, text: String, ?location: Lexer::Location, ?references: Array[Reference]) -> void
+      # @rbs (type: ::Symbol, text: String, ?location: Lexer::Location) -> void
+      def initialize: (type: ::Symbol, text: String, ?location: Lexer::Location) -> void
 
       # @rbs (Lexer::Token::UserCode token, type: ::Symbol) -> Code
       def self.from_token: (Lexer::Token::UserCode token, type: ::Symbol) -> Code
@@ -29,8 +29,8 @@ module Lrama
       # @rbs () -> Array[Reference]
       def references: () -> Array[Reference]
 
-      # @rbs (Reference ref, String message) -> bot
-      def invalid_ref: (Reference ref, String message) -> bot
+      # @rbs (Reference | ResolvedReference ref, String message) -> bot
+      def invalid_ref: (Reference | ResolvedReference ref, String message) -> bot
 
       # $$, $n, @$, @n are translated to C code.
       #
@@ -39,8 +39,11 @@ module Lrama
 
       private
 
-      # @rbs (Reference ref) -> bot
-      def reference_to_c: (Reference ref) -> bot
+      # @rbs () -> Array[Reference | ResolvedReference]
+      def translation_references: () -> Array[Reference | ResolvedReference]
+
+      # @rbs (Reference | ResolvedReference ref) -> bot
+      def reference_to_c: (Reference | ResolvedReference ref) -> bot
     end
   end
 end
