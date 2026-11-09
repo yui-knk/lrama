@@ -2,42 +2,42 @@
 
 RSpec.describe Lrama::Grammar::Code do
   let(:token_class) { Lrama::Lexer::Token }
-  let(:user_code_dollar_dollar) { token_class::UserCode.new(s_value: 'print($$);') }
-  let(:user_code_at_dollar) { token_class::UserCode.new(s_value: 'print(@$);') }
-  let(:user_code_index_dollar) { token_class::UserCode.new(s_value: 'print($:$);') }
-  let(:user_code_dollar_n) { token_class::UserCode.new(s_value: 'print($n);') }
-  let(:user_code_at_n) { token_class::UserCode.new(s_value: 'print(@n);') }
-  let(:user_code_index_n) { token_class::UserCode.new(s_value: 'print($:1);') }
+  let(:user_code_dollar_dollar) { Lrama::Grammar::UserCode.new(text: 'print($$);') }
+  let(:user_code_at_dollar) { Lrama::Grammar::UserCode.new(text: 'print(@$);') }
+  let(:user_code_index_dollar) { Lrama::Grammar::UserCode.new(text: 'print($:$);') }
+  let(:user_code_dollar_n) { Lrama::Grammar::UserCode.new(text: 'print($n);') }
+  let(:user_code_at_n) { Lrama::Grammar::UserCode.new(text: 'print(@n);') }
+  let(:user_code_index_n) { Lrama::Grammar::UserCode.new(text: 'print($:1);') }
 
   describe Lrama::Grammar::Code::InitialActionCode do
     describe "#translated_code" do
       it "translates '$$' to 'yylval'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_dollar_dollar)
+        code = described_class.new(type: :initial_action, user_code: user_code_dollar_dollar)
         expect(code.translated_code).to eq("print(yylval);")
       end
 
       it "translates '@$' to 'yylloc'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_at_dollar)
+        code = described_class.new(type: :initial_action, user_code: user_code_at_dollar)
         expect(code.translated_code).to eq("print(yylloc);")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_index_dollar)
+        code = described_class.new(type: :initial_action, user_code: user_code_index_dollar)
         expect { code.translated_code }.to raise_error("$:$ can not be used in initial_action.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_dollar_n)
+        code = described_class.new(type: :initial_action, user_code: user_code_dollar_n)
         expect { code.translated_code }.to raise_error("$n can not be used in initial_action.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_at_n)
+        code = described_class.new(type: :initial_action, user_code: user_code_at_n)
         expect { code.translated_code }.to raise_error("@n can not be used in initial_action.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :initial_action, token_code: user_code_index_n)
+        code = described_class.new(type: :initial_action, user_code: user_code_index_n)
         expect { code.translated_code }.to raise_error("$:1 can not be used in initial_action.")
       end
     end
@@ -46,32 +46,32 @@ RSpec.describe Lrama::Grammar::Code do
   describe Lrama::Grammar::Code::NoReferenceCode do
     describe "#translated_code" do
       it "raises error for '$$'" do
-        code = described_class.new(type: :union, token_code: user_code_dollar_dollar)
+        code = described_class.new(type: :union, user_code: user_code_dollar_dollar)
         expect { code.translated_code }.to raise_error("$$ can not be used in union.")
       end
 
       it "raises error for '@$'" do
-        code = described_class.new(type: :union, token_code: user_code_at_dollar)
+        code = described_class.new(type: :union, user_code: user_code_at_dollar)
         expect { code.translated_code }.to raise_error("@$ can not be used in union.")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :union, token_code: user_code_index_dollar)
+        code = described_class.new(type: :union, user_code: user_code_index_dollar)
         expect { code.translated_code }.to raise_error("$:$ can not be used in union.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :union, token_code: user_code_dollar_n)
+        code = described_class.new(type: :union, user_code: user_code_dollar_n)
         expect { code.translated_code }.to raise_error("$n can not be used in union.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :union, token_code: user_code_at_n)
+        code = described_class.new(type: :union, user_code: user_code_at_n)
         expect { code.translated_code }.to raise_error("@n can not be used in union.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :union, token_code: user_code_index_n)
+        code = described_class.new(type: :union, user_code: user_code_index_n)
         expect { code.translated_code }.to raise_error("$:1 can not be used in union.")
       end
     end
@@ -82,32 +82,32 @@ RSpec.describe Lrama::Grammar::Code do
       let(:tag) { token_class::Tag.new(s_value: '<val>') }
 
       it "translates '$$' to '((*yyvaluep).val)'" do
-        code = described_class.new(type: :destructor, token_code: user_code_dollar_dollar, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_dollar_dollar, tag: tag)
         expect(code.translated_code).to eq("print(((*yyvaluep).val));")
       end
 
       it "translates '@$' to '(*yylocationp)'" do
-        code = described_class.new(type: :destructor, token_code: user_code_at_dollar, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_at_dollar, tag: tag)
         expect(code.translated_code).to eq("print((*yylocationp));")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :destructor, token_code: user_code_index_dollar, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_index_dollar, tag: tag)
         expect { code.translated_code }.to raise_error("$:$ can not be used in destructor.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :destructor, token_code: user_code_dollar_n, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_dollar_n, tag: tag)
         expect { code.translated_code }.to raise_error("$n can not be used in destructor.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :destructor, token_code: user_code_at_n, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_at_n, tag: tag)
         expect { code.translated_code }.to raise_error("@n can not be used in destructor.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :destructor, token_code: user_code_index_n, tag: tag)
+        code = described_class.new(type: :destructor, user_code: user_code_index_n, tag: tag)
         expect { code.translated_code }.to raise_error("$:1 can not be used in destructor.")
       end
     end
@@ -118,32 +118,32 @@ RSpec.describe Lrama::Grammar::Code do
       let(:tag) { token_class::Tag.new(s_value: '<val>') }
 
       it "translates '$$' to '((*yyvaluep).val)'" do
-        code = described_class.new(type: :printer, token_code: user_code_dollar_dollar, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_dollar_dollar, tag: tag)
         expect(code.translated_code).to eq("print(((*yyvaluep).val));")
       end
 
       it "translates '@$' to '(*yylocationp)'" do
-        code = described_class.new(type: :printer, token_code: user_code_at_dollar, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_at_dollar, tag: tag)
         expect(code.translated_code).to eq("print((*yylocationp));")
       end
 
       it "raises error for '$:$'" do
-        code = described_class.new(type: :printer, token_code: user_code_index_dollar, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_index_dollar, tag: tag)
         expect { code.translated_code }.to raise_error("$:$ can not be used in printer.")
       end
 
       it "raises error for '$n'" do
-        code = described_class.new(type: :printer, token_code: user_code_dollar_n, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_dollar_n, tag: tag)
         expect { code.translated_code }.to raise_error("$n can not be used in printer.")
       end
 
       it "raises error for '@n'" do
-        code = described_class.new(type: :printer, token_code: user_code_at_n, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_at_n, tag: tag)
         expect { code.translated_code }.to raise_error("@n can not be used in printer.")
       end
 
       it "raises error for '$:n'" do
-        code = described_class.new(type: :printer, token_code: user_code_index_n, tag: tag)
+        code = described_class.new(type: :printer, user_code: user_code_index_n, tag: tag)
         expect { code.translated_code }.to raise_error("$:1 can not be used in printer.")
       end
     end

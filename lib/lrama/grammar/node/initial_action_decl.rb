@@ -5,9 +5,9 @@ module Lrama
   class Grammar
     module Node
       class InitialActionDecl < Base
-        attr_reader :code #: Lexer::Token::UserCode
+        attr_reader :code #: Grammar::UserCode
 
-        # @rbs (code: Lexer::Token::UserCode, location: Lexer::Location) -> void
+        # @rbs (code: Grammar::UserCode, location: Lexer::Location) -> void
         def initialize(code:, location:)
           @code = code
           super(location: location)

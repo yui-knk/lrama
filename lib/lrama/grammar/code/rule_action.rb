@@ -10,26 +10,14 @@ module Lrama
         #       see: https://github.com/soutaro/rbs-inline/pull/149
         #
         # @rbs!
-        #   @action: Node::RuleRhs::Action
         #   @rule: Rule
         #   @grammar: Grammar
 
         # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
         def initialize(action:, rule:, grammar:)
-          super(type: :rule_action, token_code: action.code)
-          @action = action
+          super(type: :rule_action, user_code: action.code)
           @rule = rule
           @grammar = grammar
-        end
-
-        # @rbs () -> String
-        def s_value
-          @action.text
-        end
-
-        # @rbs () -> Array[Grammar::Reference]
-        def references
-          @action.references
         end
 
         private

@@ -6,10 +6,10 @@ module Lrama
       class PrinterDecl < Base
         attr_reader ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag]
 
-        attr_reader code: Lexer::Token::UserCode
+        attr_reader code: Grammar::UserCode
 
-        # @rbs (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Lexer::Token::UserCode, location: Lexer::Location) -> void
-        def initialize: (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Lexer::Token::UserCode, location: Lexer::Location) -> void
+        # @rbs (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Grammar::UserCode, location: Lexer::Location) -> void
+        def initialize: (ident_or_tags: Array[Lexer::Token::Ident | Lexer::Token::Tag], code: Grammar::UserCode, location: Lexer::Location) -> void
       end
     end
   end

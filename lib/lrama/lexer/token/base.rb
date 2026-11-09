@@ -51,12 +51,6 @@ module Lrama
           location.last_column
         end
 
-        # @rbs (Lrama::Grammar::Reference ref, String message) -> bot
-        def invalid_ref(ref, message)
-          location = self.location.partial_location(ref.first_column, ref.last_column)
-          raise location.generate_error_message(message)
-        end
-
         # @rbs () -> bool
         def validate
           true

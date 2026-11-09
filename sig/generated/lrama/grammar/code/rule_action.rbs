@@ -4,20 +4,12 @@ module Lrama
   class Grammar
     class Code
       class RuleAction < Code
-        @action: Node::RuleRhs::Action
-
         @rule: Rule
 
         @grammar: Grammar
 
         # @rbs (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
         def initialize: (action: Node::RuleRhs::Action, rule: Rule, grammar: Grammar) -> void
-
-        # @rbs () -> String
-        def s_value: () -> String
-
-        # @rbs () -> Array[Grammar::Reference]
-        def references: () -> Array[Grammar::Reference]
 
         private
 

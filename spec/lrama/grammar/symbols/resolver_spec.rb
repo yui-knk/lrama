@@ -215,10 +215,10 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
       term = resolver.add_term(id: symbol_id("term"))
       grammar_file = Lrama::Lexer::GrammarFile.new("foo/basic.y", "")
       location = Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: 4)
-      token_code = Lrama::Lexer::Token::UserCode.new(s_value: "code 1", location: location)
+      user_code = Lrama::Grammar::UserCode.new(text: "code 1", location: location)
       destructor = Lrama::Grammar::Destructor.new(
         ident_or_tags: [Lrama::Lexer::Token::Ident.new(s_value: "term")],
-        token_code: token_code,
+        user_code: user_code,
         lineno: 1
       )
       resolver.fill_destructor([destructor])
@@ -234,12 +234,12 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
         untyped = resolver.add_term(id: symbol_id("untyped"))
         symbol_destructor = Lrama::Grammar::Destructor.new(
           ident_or_tags: [term, nterm].map { |sym| Lrama::Lexer::Token::Ident.new(s_value: sym.name) },
-          token_code: Lrama::Lexer::Token::UserCode.new(s_value: ""),
+          user_code: Lrama::Grammar::UserCode.new(text: ""),
           lineno: 1
         )
         tag_destructor = Lrama::Grammar::Destructor.new(
           ident_or_tags: [tag],
-          token_code: Lrama::Lexer::Token::UserCode.new(s_value: "free($$);"),
+          user_code: Lrama::Grammar::UserCode.new(text: "free($$);"),
           lineno: 2
         )
         destructors = [symbol_destructor, tag_destructor]
@@ -272,9 +272,9 @@ RSpec.describe Lrama::Grammar::Symbols::Resolver do
       token = Lrama::Lexer::Token::Ident.new(s_value: "term")
       grammar_file = Lrama::Lexer::GrammarFile.new("foo/basic.y", "")
       location = Lrama::Lexer::Location.new(grammar_file: grammar_file, first_line: 1, first_column: 0, last_line: 1, last_column: 4)
-      token_code = Lrama::Lexer::Token::UserCode.new(s_value: "code 1", location: location)
+      user_code = Lrama::Grammar::UserCode.new(text: "code 1", location: location)
 
-      resolver.fill_error_token([Lrama::Grammar::ErrorToken.new(ident_or_tags: [token], token_code: token_code, lineno: 1)])
+      resolver.fill_error_token([Lrama::Grammar::ErrorToken.new(ident_or_tags: [token], user_code: user_code, lineno: 1)])
       expect(term.error_token.ident_or_tags).to eq([token])
     end
   end

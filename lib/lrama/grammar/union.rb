@@ -16,7 +16,7 @@ module Lrama
       # @rbs () -> String
       def braces_less_code
         # Braces is already removed by lexer
-        code.s_value
+        code.text
       end
     end
   end

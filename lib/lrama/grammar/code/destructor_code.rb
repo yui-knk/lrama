@@ -12,9 +12,9 @@ module Lrama
         # @rbs!
         #   @tag: Lexer::Token::Tag
 
-        # @rbs (type: ::Symbol, token_code: Lexer::Token::UserCode, tag: Lexer::Token::Tag) -> void
-        def initialize(type:, token_code:, tag:)
-          super(type: type, token_code: token_code)
+        # @rbs (type: ::Symbol, user_code: Grammar::UserCode, tag: Lexer::Token::Tag) -> void
+        def initialize(type:, user_code:, tag:)
+          super(type: type, user_code: user_code)
           @tag = tag
         end
 

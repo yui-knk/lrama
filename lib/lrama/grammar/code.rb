@@ -14,36 +14,36 @@ module Lrama
       # @rbs!
       #
       #  # delegated
-      #  def s_value: -> String
+      #  def text: -> String
       #  def line: -> Integer
       #  def column: -> Integer
       #  def references: -> Array[Lrama::Grammar::Reference]
 
       extend Forwardable
 
-      def_delegators "token_code", :s_value, :line, :column, :references
+      def_delegators "user_code", :text, :line, :column, :references
 
       attr_reader :type #: ::Symbol
-      attr_reader :token_code #: Lexer::Token::UserCode
+      attr_reader :user_code #: Grammar::UserCode
 
-      # @rbs (type: ::Symbol, token_code: Lexer::Token::UserCode) -> void
-      def initialize(type:, token_code:)
+      # @rbs (type: ::Symbol, user_code: Grammar::UserCode) -> void
+      def initialize(type:, user_code:)
         @type = type
-        @token_code = token_code
+        @user_code = user_code
       end
 
       # @rbs (Code other) -> bool
       def ==(other)
         self.class == other.class &&
         self.type == other.type &&
-        self.s_value == other.s_value
+        self.text == other.text
       end
 
       # $$, $n, @$, @n are translated to C code
       #
       # @rbs () -> String
       def translated_code
-        t_code = s_value.dup
+        t_code = text.dup
 
         references.reverse_each do |ref|
           first_column = ref.first_column

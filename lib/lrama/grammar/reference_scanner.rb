@@ -4,7 +4,7 @@
 require "strscan"
 
 module Lrama
-  class Lexer
+  class Grammar
     class ReferenceScanner
       # @rbs (String code) -> void
       def initialize(code)

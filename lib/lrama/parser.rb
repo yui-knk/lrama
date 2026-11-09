@@ -1374,7 +1374,7 @@ module_eval(<<'.,.,', 'parser.y', 25)
 
 module_eval(<<'.,.,', 'parser.y', 29)
   def _reduce_12(val, _values, result)
-              result = Grammar::Node::PrologueDecl.new(code: val[2], location: merge_locations(val[0].loc, val[4].loc))
+              result = Grammar::Node::PrologueDecl.new(code: Grammar::UserCode.from_token(val[2]), location: merge_locations(val[0].loc, val[4].loc))
 
     result
   end
@@ -2037,7 +2037,7 @@ module_eval(<<'.,.,', 'parser.y', 404)
 
 module_eval(<<'.,.,', 'parser.y', 408)
   def _reduce_91(val, _values, result)
-              result = val[2]
+              result = Grammar::UserCode.from_token(val[2])
 
     result
   end
@@ -2356,7 +2356,7 @@ module_eval(<<'.,.,', 'parser.y', 599)
 
 module_eval(<<'.,.,', 'parser.y', 603)
   def _reduce_126(val, _values, result)
-              result = val[2]
+              result = Grammar::UserCode.from_token(val[2])
 
     result
   end
@@ -2380,7 +2380,7 @@ module_eval(<<'.,.,', 'parser.y', 611)
 module_eval(<<'.,.,', 'parser.y', 615)
   def _reduce_129(val, _values, result)
               end_c_declaration
-          result = Grammar::Node::EpilogueDecl.new(code: val[2], location: merge_locations(val[0].loc, val[2].loc))
+          result = Grammar::Node::EpilogueDecl.new(code: Grammar::UserCode.from_token(val[2]), location: merge_locations(val[0].loc, val[2].loc))
 
     result
   end

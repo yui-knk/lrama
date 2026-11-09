@@ -4,7 +4,7 @@ module Lrama
   class Grammar
     class Code
       # delegated
-      def s_value: () -> String
+      def text: () -> String
 
       def line: () -> Integer
 
@@ -16,10 +16,10 @@ module Lrama
 
       attr_reader type: ::Symbol
 
-      attr_reader token_code: Lexer::Token::UserCode
+      attr_reader user_code: Grammar::UserCode
 
-      # @rbs (type: ::Symbol, token_code: Lexer::Token::UserCode) -> void
-      def initialize: (type: ::Symbol, token_code: Lexer::Token::UserCode) -> void
+      # @rbs (type: ::Symbol, user_code: Grammar::UserCode) -> void
+      def initialize: (type: ::Symbol, user_code: Grammar::UserCode) -> void
 
       # @rbs (Code other) -> bool
       def ==: (Code other) -> bool

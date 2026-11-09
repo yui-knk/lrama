@@ -93,12 +93,10 @@ module Lrama
                 end
               code[ref.first_column...ref.last_column] = replacement
             end
-            references = Lexer::ReferenceScanner.new(code).scan
+            references = Grammar::ReferenceScanner.new(code).scan
           end
           Node::RuleRhs::Action.new(
-            code: action.code,
-            text: code,
-            references: references,
+            code: Grammar::UserCode.new(text: code, location: action.code.location, references: references),
             alias_name: action.alias_name,
             tag: action.tag,
             location: action.location

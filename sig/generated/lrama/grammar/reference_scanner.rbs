@@ -1,7 +1,7 @@
-# Generated from lib/lrama/lexer/reference_scanner.rb with RBS::Inline
+# Generated from lib/lrama/grammar/reference_scanner.rb with RBS::Inline
 
 module Lrama
-  class Lexer
+  class Grammar
     class ReferenceScanner
       # @rbs (String code) -> void
       def initialize: (String code) -> void
